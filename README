@@ -1,0 +1,28 @@
+NOTE
+This directory structure follows some simple rules, to allow for generic build
+processes and simplify reuse of this project. 
+
+For build automation the project structure should be parsed and validated
+
+
+STRUCTURE
+-- src/ 
+	Contains all header (*.h/*.hpp) and source files
+-- build/
+	The target directory for the build process, temporary content
+-- resources/
+	General resources such as images that are needed by the program
+-- etc/
+	Configuration files for running the program
+-- external/
+	When including software that needs a non standard installation process, or one that can be
+	easily embedded include the external software directly here
+   |-- include
+	header files
+   |-- libs
+	precompiled libraries 
+-- doc/
+	should contain the existing doxygen file: doxygen.conf
+   |-- manual/
+	Should contain manual.tex 
+	Manual for the software 	

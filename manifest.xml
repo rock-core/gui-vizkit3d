@@ -1,11 +1,11 @@
 <package>
-    <description brief="visualisation library">
+    <description brief="Rock Visualization Library">
 	Provides a Qt based framework for visualisation of rock data items.
 	Visualisation plugins for specific data items are within the respective packages.
     </description>
     <author>Jakob Schwendner/jakob.schwendner@dfki.de</author>
     <copyright>
-        DFKI/robotik@dfki.de
+	DFKI/robotik@dfki.de
     </copyright>
     <depend package="base/types" />
     <depend package="external/yaml-cpp" />
