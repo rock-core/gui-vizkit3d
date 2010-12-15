@@ -6,6 +6,9 @@ set(SOURCES
     PickHandler.cpp
     QOSGWidget.cpp
     QVizkitWidget.cpp
+    WaypointVisualization.cpp
+    MotionCommandVisualization.cpp
+    TrajectoryVisualisation.cpp
     )
 
 set(QT_HEADERS 
@@ -20,6 +23,9 @@ set(HEADERS
     VizPlugin.hpp
     CoordinateFrame.hpp
     GridNode.hpp
+    MotionCommandVisualization.hpp
+    TrajectoryVisualisation.hpp
+    WaypointVisualization.hpp
     )
 
 # Add your .ui files ot the following line (and uncomment it)
