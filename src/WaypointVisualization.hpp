@@ -2,7 +2,7 @@
 #define WAYPOINTVISUALIZATION_H
 
 #include <vizkit/VizPlugin.hpp>
-#include <WaypointNavigation.hpp>
+#include <base/waypoint.h>
 #include <osg/PositionAttitudeTransform>
 #include <osg/Geometry>
 
