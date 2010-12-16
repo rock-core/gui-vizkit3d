@@ -9,7 +9,7 @@
 namespace vizkit 
 {
     
-class WaypointVisualization: public VizPlugin<base::Waypoint>
+class WaypointVisualization: public VizPluginAdapter<base::Waypoint>
 {
     public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW

@@ -84,11 +84,11 @@ void QVizkitWidget::createSceneGraph()
 
 void QVizkitWidget::addDataHandler(VizPluginBase *viz)
 {
-    root->addChild( viz->getNode() );
+    root->addChild( viz->getMainNode() );
 }
 
 void QVizkitWidget::removeDataHandler(VizPluginBase *viz)
 {
-    root->removeChild( viz->getNode() );
+    root->removeChild( viz->getMainNode() );
 }
 

@@ -33,7 +33,7 @@ WaypointVisualization::WaypointVisualization()
     waypointPosition->addChild(geode.release());
     
     ownNode = waypointPosition;
-    ownNode->setUpdateCallback(this);
+    setMainNode( ownNode );
     
     updated = false;
 }

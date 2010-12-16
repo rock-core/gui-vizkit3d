@@ -30,8 +30,7 @@ TrajectoryVisualisation::TrajectoryVisualisation()
     geode->addDrawable( geom.get() );
     
     ownNode = geode.release();
-    
-    ownNode->setUpdateCallback(this);
+    setMainNode( ownNode );
 }
 
 

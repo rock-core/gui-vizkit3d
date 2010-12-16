@@ -8,7 +8,7 @@
 namespace vizkit 
 {
 
-class MotionCommandVisualization : public VizPlugin<std::pair<double, double> >
+class MotionCommandVisualization : public VizPluginAdapter<std::pair<double, double> >
 {
     public:
 	MotionCommandVisualization();	

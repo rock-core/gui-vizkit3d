@@ -69,7 +69,7 @@ MotionCommandVisualization::MotionCommandVisualization()
     group->addChild(geode.release());
     
     ownNode = group.release();
-    ownNode->setUpdateCallback(this);
+    setMainNode( ownNode );
 }
 
 

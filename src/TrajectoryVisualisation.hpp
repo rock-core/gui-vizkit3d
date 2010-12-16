@@ -8,7 +8,7 @@
 namespace vizkit 
 {
 
-class TrajectoryVisualisation: public VizPlugin<Eigen::Vector3d>
+class TrajectoryVisualisation: public VizPluginAdapter<Eigen::Vector3d>
 {
     public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
