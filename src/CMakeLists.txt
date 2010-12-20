@@ -26,6 +26,7 @@ set(HEADERS
     MotionCommandVisualization.hpp
     TrajectoryVisualization.hpp
     WaypointVisualization.hpp
+    QThreadedWidget.hpp
     )
 
 # Add your .ui files ot the following line (and uncomment it)
