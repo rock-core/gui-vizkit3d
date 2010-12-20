@@ -25,7 +25,7 @@ add_subdirectory(src)
 
 # Add testing facility based on the boost unittest framework
 # (requires boost header files) 
-#add_subdirectory(test/unittests)
+add_subdirectory(test)
 
 # Performing some setup step after all variables are know, e.g. such as needed for pkg-config
 include(PostSetup)
