@@ -1,11 +1,15 @@
-#include "TrajectoryVisualisation.hpp"
+#include "TrajectoryVisualization.hpp"
 #include <osg/Geometry>
 #include <osg/Geode>
 
 namespace vizkit 
 {
 
-TrajectoryVisualisation::TrajectoryVisualisation()
+TrajectoryVisualization::TrajectoryVisualization()
+{
+}
+
+osg::ref_ptr<osg::Node> TrajectoryVisualization::createMainNode()
 {
     doClear = false;
     color2 = new osg::Vec4Array;
@@ -17,24 +21,15 @@ TrajectoryVisualisation::TrajectoryVisualisation()
     // Draw a four-vertex quad from the stored data.
     geom->addPrimitiveSet(drawArrays.get());
 
-//     //deactivate normals, so that collors get displayed correct
-//     osg::Vec3Array* normals = new osg::Vec3Array;
-//     normals->push_back(osg::Vec3(0.0f,-1.0f,0.0f));
-//     geom->setNormalArray(normals);
-//     geom->setNormalBinding(osg::Geometry::BIND_OVERALL);
-    //geom->setNormalBinding(osg::Geometry::BIND_OFF);
-	
     // Add the Geometry (Drawable) to a Geode and
     //   return the Geode.
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
     geode->addDrawable( geom.get() );
     
-    ownNode = geode.release();
-    setMainNode( ownNode );
+    return geode;
 }
 
-
-void TrajectoryVisualisation::setColor(double r, double g, double b, double a)
+void TrajectoryVisualization::setColor(double r, double g, double b, double a)
 {
     // set colors
     color2->clear();
@@ -43,12 +38,12 @@ void TrajectoryVisualisation::setColor(double r, double g, double b, double a)
     geom->setColorBinding( osg::Geometry::BIND_OVERALL );
 }
 
-void TrajectoryVisualisation::clear()
+void TrajectoryVisualization::clear()
 {
     doClear = true;
 }
 
-void TrajectoryVisualisation::operatorIntern ( osg::Node* node, osg::NodeVisitor* nv )
+void TrajectoryVisualization::updateMainNode( osg::Node* node )
 {   
     std::vector<Eigen::Vector3d>::const_iterator it = points.begin();
     
@@ -71,7 +66,7 @@ void TrajectoryVisualisation::operatorIntern ( osg::Node* node, osg::NodeVisitor
 }
 
 
-void TrajectoryVisualisation::updateDataIntern ( const Eigen::Vector3d& data )
+void TrajectoryVisualization::updateDataIntern( const Eigen::Vector3d& data )
 {
     if(doClear)
     {

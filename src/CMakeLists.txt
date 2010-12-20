@@ -8,7 +8,7 @@ set(SOURCES
     QVizkitWidget.cpp
     WaypointVisualization.cpp
     MotionCommandVisualization.cpp
-    TrajectoryVisualisation.cpp
+    TrajectoryVisualization.cpp
     )
 
 set(QT_HEADERS 
@@ -24,7 +24,7 @@ set(HEADERS
     CoordinateFrame.hpp
     GridNode.hpp
     MotionCommandVisualization.hpp
-    TrajectoryVisualisation.hpp
+    TrajectoryVisualization.hpp
     WaypointVisualization.hpp
     )
 

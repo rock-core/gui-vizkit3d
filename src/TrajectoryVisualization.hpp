@@ -8,17 +8,17 @@
 namespace vizkit 
 {
 
-class TrajectoryVisualisation: public VizPluginAdapter<Eigen::Vector3d>
+class TrajectoryVisualization: public VizPlugin<Eigen::Vector3d>
 {
     public:
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-	TrajectoryVisualisation();    
+	TrajectoryVisualization();    
 	void setColor(double r, double g, double b, double a);
 	void clear();
 	
     protected:
-	virtual void operatorIntern ( osg::Node* node, osg::NodeVisitor* nv );
-	virtual void updateDataIntern( const Eigen::Vector3d& data );
+	virtual osg::ref_ptr<osg::Node> createMainNode();
+	virtual void updateMainNode( osg::Node* node );
+	void updateDataIntern( const Eigen::Vector3d& data );
 	
     private:
 	osg::Vec4Array *color2; 
