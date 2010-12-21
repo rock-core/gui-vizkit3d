@@ -31,10 +31,9 @@ class QTrajectoryWidget : public QVizkitWidget
 int main( int argc, char **argv )
 {
     QtThreadedWidget<vizkit::QTrajectoryWidget> app;
+    app.start();
 
-    while( !app.isInitialized() );
-
-    for( int i=0; i<10000; i++ )
+    for( int i=0; i<10000 && app.isRunning(); i++ )
     {
 	double r = i/1000.0;
 	double s = r/10;
