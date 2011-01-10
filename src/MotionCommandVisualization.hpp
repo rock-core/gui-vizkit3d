@@ -8,14 +8,15 @@
 namespace vizkit 
 {
 
-class MotionCommandVisualization : public VizPluginAdapter<std::pair<double, double> >
+class MotionCommandVisualization : public VizPlugin<std::pair<double, double> >
 {
     public:
 	MotionCommandVisualization();	
 
     protected:
-        virtual void operatorIntern ( osg::Node* node, osg::NodeVisitor* nv );
-	virtual void updateDataIntern ( const std::pair<double, double> & data );
+        virtual osg::ref_ptr<osg::Node> createMainNode();
+        virtual void updateMainNode( osg::Node* node );
+	void updateDataIntern ( const std::pair<double, double> & data );
 
     private:
 	double tv;

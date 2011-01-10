@@ -9,16 +9,15 @@
 namespace vizkit 
 {
     
-class WaypointVisualization: public VizPluginAdapter<base::Waypoint>
+class WaypointVisualization: public VizPlugin<base::Waypoint>
 {
     public:
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	WaypointVisualization();
 
     protected:
-	bool updated;
-	virtual void operatorIntern ( osg::Node* node, osg::NodeVisitor* nv );
-	virtual void updateDataIntern ( const base::Waypoint& data );
+        virtual osg::ref_ptr<osg::Node> createMainNode();
+	virtual void updateMainNode( osg::Node* node );
+	void updateDataIntern ( const base::Waypoint& data );
 	osg::ref_ptr<osg::PositionAttitudeTransform> waypointPosition;
 	base::Waypoint waypoint;
 	osg::ref_ptr<osg::Vec3Array> pointsOSG;

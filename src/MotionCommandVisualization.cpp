@@ -13,7 +13,10 @@ MotionCommandVisualization::MotionCommandVisualization()
 {
     tv = 0;
     rv = 0;
-    
+}
+
+osg::ref_ptr< osg::Node > MotionCommandVisualization::createMainNode()
+{
     osg::ref_ptr<osg::Group> group = new osg::Group;    
     osg::StateSet* state = group->getOrCreateStateSet();
     state->setMode( GL_LIGHTING, osg::StateAttribute::ON );
@@ -68,12 +71,11 @@ MotionCommandVisualization::MotionCommandVisualization()
     
     group->addChild(geode.release());
     
-    ownNode = group.release();
-    setMainNode( ownNode );
+    return group;
 }
 
 
-void MotionCommandVisualization::operatorIntern ( osg::Node* node, osg::NodeVisitor* nv )
+void MotionCommandVisualization::updateMainNode( osg::Node* node )
 {
     //DEBUG REMOVE ME
     if(tv < 0.1)

@@ -7,6 +7,11 @@ namespace vizkit
 
 WaypointVisualization::WaypointVisualization()
 {
+    
+}
+
+osg::ref_ptr< osg::Node > WaypointVisualization::createMainNode()
+{
     //draw a cycle
     geom = new osg::Geometry;
     pointsOSG = new osg::Vec3Array;
@@ -32,41 +37,34 @@ WaypointVisualization::WaypointVisualization()
     
     waypointPosition->addChild(geode.release());
     
-    ownNode = waypointPosition;
-    setMainNode( ownNode );
-    
-    updated = false;
+    return waypointPosition;
 }
 
 void WaypointVisualization::updateDataIntern ( const base::Waypoint& data )
 {
     waypoint = data;
-    updated = true;
 }
 
-void WaypointVisualization::operatorIntern ( osg::Node* node, osg::NodeVisitor* nv )
+void WaypointVisualization::updateMainNode( osg::Node* node )
 {
-    if(updated) {
-	double radiusX = waypoint.tol_position;
-	double radiusY = waypoint.tol_position;
-	int stepsize = 100;
-	
-	double step = 2*M_PI / stepsize;
-	osg::Vec3 startPoint = osg::Vec3(0, radiusY, 0);
-	for(int i = 0; i < stepsize; i++) {
-	    osg::Vec3 endPoint;
-	    endPoint.x() = -sin(step * i) * radiusX;
-	    endPoint.y() = cos(step * i) * radiusY;
-	    pointsOSG->push_back(startPoint);
-	    pointsOSG->push_back(endPoint);
-	    startPoint = endPoint;
-	}
-	drawArrays->setCount(pointsOSG->size());
-	geom->setVertexArray(pointsOSG.get());
-
-	waypointPosition->setPosition(osg::Vec3(waypoint.position.x(), waypoint.position.y(), waypoint.position.z()));
-	updated = false;
+    double radiusX = waypoint.tol_position;
+    double radiusY = waypoint.tol_position;
+    int stepsize = 100;
+    
+    double step = 2*M_PI / stepsize;
+    osg::Vec3 startPoint = osg::Vec3(0, radiusY, 0);
+    for(int i = 0; i < stepsize; i++) {
+        osg::Vec3 endPoint;
+        endPoint.x() = -sin(step * i) * radiusX;
+        endPoint.y() = cos(step * i) * radiusY;
+        pointsOSG->push_back(startPoint);
+        pointsOSG->push_back(endPoint);
+        startPoint = endPoint;
     }
+    drawArrays->setCount(pointsOSG->size());
+    geom->setVertexArray(pointsOSG.get());
+
+    waypointPosition->setPosition(osg::Vec3(waypoint.position.x(), waypoint.position.y(), waypoint.position.z()));
 }
 
 }
