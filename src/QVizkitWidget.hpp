@@ -19,6 +19,9 @@ public:
 
     void addDataHandler(VizPluginBase *viz);
     void removeDataHandler(VizPluginBase *viz);
+    
+    void changeCameraView(const osg::Vec3& lookAtPos);
+    void changeCameraView(const osg::Vec3& lookAtPos, const osg::Vec3& eyePos);
 
     QSize sizeHint() const;
 

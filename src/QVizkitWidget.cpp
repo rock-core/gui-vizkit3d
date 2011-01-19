@@ -92,3 +92,42 @@ void QVizkitWidget::removeDataHandler(VizPluginBase *viz)
     root->removeChild( viz->getVizNode() );
 }
 
+/**
+ * Sets the camera focus to specific position.
+ * @param lookAtPos focus this point
+ */
+void QVizkitWidget::changeCameraView(const osg::Vec3& lookAtPos)
+{
+    osgGA::KeySwitchMatrixManipulator* switchMatrixManipulator = dynamic_cast<osgGA::KeySwitchMatrixManipulator*>(view->getCameraManipulator());
+    if (!switchMatrixManipulator) return;
+    //select TerrainManipulator
+    switchMatrixManipulator->selectMatrixManipulator(3);
+    
+    //get current eye position
+    osg::Matrixd matrix = switchMatrixManipulator->getMatrix();
+    osg::Vec3d currentEyePos = matrix.getTrans();
+    
+    changeCameraView(lookAtPos, currentEyePos);
+}
+
+/**
+ * Sets the camera focus and the camera itself to specific position.
+ * @param lookAtPos focus this point
+ * @param eyePos position of the camera
+ */
+void QVizkitWidget::changeCameraView(const osg::Vec3& lookAtPos, const osg::Vec3& eyePos)
+{
+    osgGA::KeySwitchMatrixManipulator* switchMatrixManipulator = dynamic_cast<osgGA::KeySwitchMatrixManipulator*>(view->getCameraManipulator());
+    if (!switchMatrixManipulator) return;
+    //select TerrainManipulator
+    switchMatrixManipulator->selectMatrixManipulator(3);
+    
+    //get last values of eye, center and up
+    osg::Vec3d eye, center, up;
+    switchMatrixManipulator->getHomePosition(eye, center, up);
+
+    //set new values
+    switchMatrixManipulator->setHomePosition(eyePos, lookAtPos, up);
+
+    view->home();
+}
