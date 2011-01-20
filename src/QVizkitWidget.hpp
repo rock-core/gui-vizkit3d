@@ -22,6 +22,7 @@ public:
     
     void changeCameraView(const osg::Vec3& lookAtPos);
     void changeCameraView(const osg::Vec3& lookAtPos, const osg::Vec3& eyePos);
+    void setTrackedNode( vizkit::VizPluginBase* plugin );
 
     QSize sizeHint() const;
 

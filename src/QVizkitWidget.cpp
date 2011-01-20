@@ -38,6 +38,11 @@ osg::ref_ptr<osg::Group> QVizkitWidget::getRootNode() const
     return root;
 }
 
+void QVizkitWidget::setTrackedNode( VizPluginBase* plugin )
+{
+    view->setTrackedNode(plugin->getVizNode());
+}
+
 void QVizkitWidget::createSceneGraph() 
 {
     //create root node that holds all other nodes
