@@ -9,18 +9,20 @@ set(SOURCES
     WaypointVisualization.cpp
     MotionCommandVisualization.cpp
     TrajectoryVisualization.cpp
+    QVizkitWidgetLoader.cpp 
     )
 
 set(QT_HEADERS 
+    VizPlugin.hpp
     QOSGWidget.hpp 
     QVizkitWidget.hpp 
     CompositeViewerQOSG.hpp 
     PickHandler.hpp
+    QVizkitWidgetLoader.hpp
     )
 
 set(HEADERS 
     ${QT_HEADERS}
-    VizPlugin.hpp
     CoordinateFrame.hpp
     GridNode.hpp
     MotionCommandVisualization.hpp
