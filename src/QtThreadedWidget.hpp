@@ -19,9 +19,20 @@ class QtThreadedWidget
     boost::condition_variable cond;
     bool running;
 
-public:
     T *widget;
 
+public:
+
+    T *getWidget()
+    {
+	if(!running)
+	{
+	    throw std::runtime_error("Tried to access widget before thread was started");
+	}
+	
+	return widget;
+    }
+    
     QtThreadedWidget()
 	: argc(0), argv(NULL), running(false)
     {

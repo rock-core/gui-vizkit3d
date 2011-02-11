@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(trajectoryVisualization_test)
     {
         double r = i/1000.0;
         double s = r/10;
-        app.widget->updateData( Eigen::Vector3d( cos(r) * s, sin(r) * s, s ) );
+        app.getWidget()->updateData( Eigen::Vector3d( cos(r) * s, sin(r) * s, s ) );
         
         usleep( 1000 );
     }
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(waypointVisualization_test)
     {
         double r = i/1000.0;
         double s = r/10;
-        app.widget->updateData( base::Waypoint(Eigen::Vector3d( cos(r) * r, sin(r) * r, s), s, s*r, s ));
+        app.getWidget()->updateData( base::Waypoint(Eigen::Vector3d( cos(r) * r, sin(r) * r, s), s, s*r, s ));
         
         usleep( 1000 );
     }
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(motionCommandVisualization_test)
     {
         double r = i/1000.0;
         double s = r/10;
-        app.widget->updateData(std::pair<double, double>(s, sin(r) * r));
+        app.getWidget()->updateData(std::pair<double, double>(s, sin(r) * r));
         
         usleep( 1000 );
     }
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(changeCameraView_test)
     {
         double r = i/1000.0;
         double s = r/10;
-        app.widget->changeCameraView(osg::Vec3d(cos(r)*s,sin(r)*s,0));
+        app.getWidget()->changeCameraView(osg::Vec3d(cos(r)*s,sin(r)*s,0));
         
         usleep( 500 );
     }
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(changeCameraView_test)
     {
         double r = i/1000.0;
         double s = r/10;
-        app.widget->changeCameraView(osg::Vec3d(cos(r)*s,sin(r)*s,0), osg::Vec3d(cos(r)*s,(sin(r)*s)-20,20));
+        app.getWidget()->changeCameraView(osg::Vec3d(cos(r)*s,sin(r)*s,0), osg::Vec3d(cos(r)*s,(sin(r)*s)-20,20));
         
         usleep( 500 );
     } 
