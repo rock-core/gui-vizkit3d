@@ -6,5 +6,6 @@ includedir=${prefix}/include
 Name: @PROJECT_NAME@
 Description: @PROJECT_DESCRIPTION@
 Version: @PROJECT_VERSION@
+Requires: base-types
 Libs: -L${libdir} -l@PROJECT_NAME@ -l@OSG_LIBRARY@ -l@OSGVIEWER_LIBRARY@ -l@OSGMANIPULATOR_LIBRARY@ -l@Boost_THREAD_LIBRARY@
 Cflags: -I${includedir} -I@QT_INCLUDE_DIR@ -I@QT_QTCORE_INCLUDE_DIR@ -I@QT_QTGUI_INCLUDE_DIR@ -I@OSG_INCLUDE_DIR@
