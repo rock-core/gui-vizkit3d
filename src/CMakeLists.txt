@@ -43,8 +43,9 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 # setup, so if you change the setup here
 add_library(${PROJECT_NAME} SHARED ${SOURCES} ${moc_cpp} ${ui_cpp})
 add_library(${LIB_WIDGET_LOADER} SHARED QVizkitWidgetLoader.cpp ${moc_cpp_widget_loader})
-target_link_libraries(${PROJECT_NAME} ${EXTERNAL_LIBS})
-target_link_libraries(${LIB_WIDGET_LOADER} ${EXTERNAL_LIBS} ${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME} ${EXTERNAL_LIBS} ${QT_QTGUI_LIBRARY} ${QT_QTCORE_LIBRARY})
+target_link_libraries(${LIB_WIDGET_LOADER} ${EXTERNAL_LIBS} ${PROJECT_NAME} ${QT_QTGUI_LIBRARY} ${QT_QTCORE_LIBRARY})
+
 
 # Installing relative to you installation prefix 
 # e.g. test it via: make install DESTDIR=./tmp
