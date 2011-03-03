@@ -1,4 +1,5 @@
 set(LIB_WIDGET_LOADER ${PROJECT_NAME}widgetloader)
+set(TYPELIB_TO_QVARIANT ${PROJECT_NAME}typelib)
 
 set(SOURCES 
     VizPlugin.cpp
@@ -60,3 +61,34 @@ install(TARGETS ${LIB_WIDGET_LOADER}
 )
 INSTALL(FILES ${HEADERS} 
     DESTINATION include/${PROJECT_NAME})
+
+find_package(Gem COMPONENTS rice)
+pkg_check_modules(TYPELIB "rtt-typelib")
+pkg_check_modules(TYPELIBRUBY "typelib_ruby")
+
+if (TYPELIB_FOUND AND TYPELIBRUBY_FOUND AND GEM_FOUND)
+	include_directories(${GEM_INCLUDE_DIRS})
+
+	include_directories(${TYPELIB_INCLUDE_DIRS})
+	link_directories(${TYPELIB_LIBRARY_DIRS})
+	add_definitions(${TYPELIB_CFLAGS_OTHER})
+
+	include_directories(${TYPELIBRUBY_INCLUDE_DIRS})
+	link_directories(${TYPELIBRUBY_LIBRARY_DIRS})
+
+	QT4_WRAP_CPP(rqt_MOC_SRCS TypelibToQVariant.hpp)
+	ADD_RUBY_EXTENSION(${TYPELIB_TO_QVARIANT} SHARED
+			TypelibToQVariant.cpp ${rqt_MOC_SRCS})
+	target_link_libraries(${TYPELIB_TO_QVARIANT} 
+		                          ${QT_LIBRARIES}
+		                          ${QT_QTCORE_LIBRARY} 
+		                          ${QT_QTGUI_LIBRARY} 
+		                          ${GEM_LIBRARIES}
+		                          ${TYPELIB_LIBRARIES}
+		                          ${TYPELIBRUBY_LIBRARIES}) 
+
+	install(TARGETS ${TYPELIB_TO_QVARIANT}
+		  LIBRARY DESTINATION ${RUBY_EXTENSIONS_INSTALL_DIR}
+	)
+endif()
+
