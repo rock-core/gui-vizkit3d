@@ -12,6 +12,7 @@ set(SOURCES
     WaypointVisualization.cpp
     MotionCommandVisualization.cpp
     TrajectoryVisualization.cpp
+    MouseManipulationManipulator.cpp
     )
 
 set(QT_HEADERS 
