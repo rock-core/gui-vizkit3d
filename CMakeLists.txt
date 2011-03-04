@@ -13,7 +13,7 @@ add_definitions(-Wall -DDebug)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 include(CommonSetup)
 
-include(RubyExtensions)
+include(RockRuby)
 
 # command line output on, you can also use make VERBOSE=1
 # set(CMAKE_VERBOSE_MAKEFILE on)
