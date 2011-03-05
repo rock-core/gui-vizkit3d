@@ -24,7 +24,9 @@ osg::ref_ptr<osg::Node> TrajectoryVisualization::createMainNode()
     //   return the Geode.
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
     geode->addDrawable( geom.get() );
-    geode->setDataVariance( osg::Object::DYNAMIC );
+
+    osg::StateSet* stategeode = geode->getOrCreateStateSet();
+    stategeode->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
     
     return geode;
 }
