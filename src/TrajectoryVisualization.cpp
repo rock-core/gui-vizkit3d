@@ -7,24 +7,24 @@ namespace vizkit
 
 TrajectoryVisualization::TrajectoryVisualization()
 {
-}
-
-osg::ref_ptr<osg::Node> TrajectoryVisualization::createMainNode()
-{
+    // initialize here so that setColor can be called event
     doClear = false;
     color2 = new osg::Vec4Array;
     geom = new osg::Geometry;
     pointsOSG = new osg::Vec3Array;
+}
 
+osg::ref_ptr<osg::Node> TrajectoryVisualization::createMainNode()
+{
     geom->setVertexArray(pointsOSG);
-    drawArrays = new osg::DrawArrays( osg::PrimitiveSet::LINES, 0, pointsOSG->size() );
-    // Draw a four-vertex quad from the stored data.
+    drawArrays = new osg::DrawArrays( osg::PrimitiveSet::LINE_STRIP, 0, pointsOSG->size() );
     geom->addPrimitiveSet(drawArrays.get());
 
     // Add the Geometry (Drawable) to a Geode and
     //   return the Geode.
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
     geode->addDrawable( geom.get() );
+    geode->setDataVariance( osg::Object::DYNAMIC );
     
     return geode;
 }
@@ -48,21 +48,11 @@ void TrajectoryVisualization::updateMainNode( osg::Node* node )
     std::vector<Eigen::Vector3d>::const_iterator it = points.begin();
     
     pointsOSG->clear();
-    //push first point as start point
-    if(it != points.end()) {
-	pointsOSG->push_back(osg::Vec3(it->x(), it->y(), it->z()));
-	it++;
-    }
-    
     for(; it != points.end(); it++) {
-	//push tow point, as osg wants an start end endpoint for lines
-	//endpoint
-	pointsOSG->push_back(osg::Vec3(it->x(), it->y(), it->z()));
-	//startpoint
 	pointsOSG->push_back(osg::Vec3(it->x(), it->y(), it->z()));
     }
-    drawArrays->setCount(pointsOSG->size());
     geom->setVertexArray(pointsOSG);
+    drawArrays->setCount(pointsOSG->size());
 }
 
 

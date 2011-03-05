@@ -34,7 +34,6 @@ class QVisualisationTestWidget : public QVizkitMainWindow
             viz->updateData(data);
         }
       
-    private:
         boost::shared_ptr<T> viz;
 };
 
@@ -49,13 +48,14 @@ BOOST_AUTO_TEST_CASE(trajectoryVisualization_test)
     QtThreadedWidget<vizkit::QVisualisationTestWidget<vizkit::TrajectoryVisualization, Eigen::Vector3d> > app;
     app.start();
     std::cout << "Close the visualization window to abort this test." << std::endl;
-    for( int i=0; i<10000 && app.isRunning(); i++ )
+    for( int i=0; i<1000 && app.isRunning(); i++ )
     {
-        double r = i/1000.0;
-        double s = r/10;
+        double r = i/100.0;
+        double s = r/10.0;
         app.getWidget()->updateData( Eigen::Vector3d( cos(r) * s, sin(r) * s, s ) );
+	app.getWidget()->viz->setColor( 1.0, 0, 0, 1.0 );
         
-        usleep( 1000 );
+        usleep( 10000 );
     }
 }
 
