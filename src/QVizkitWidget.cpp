@@ -190,3 +190,21 @@ QStringList* vizkit::QVizkitWidget::getListOfAvailablePlugins()
     }
     return pluginNames;
 }
+
+void vizkit::QVizkitWidget::addPlugin(QObject* plugin)
+{
+    vizkit::VizPluginWidgetBase* pluginWidget = dynamic_cast<vizkit::VizPluginWidgetBase*>(plugin);
+    if 
+        (pluginWidget) addDataHandler(pluginWidget->getPlugin());
+    else
+        std::cerr << "The given attribute is no VizPlugin!" << std::endl;
+}
+
+void vizkit::QVizkitWidget::removePlugin(QObject* plugin)
+{
+    vizkit::VizPluginWidgetBase* pluginWidget = dynamic_cast<vizkit::VizPluginWidgetBase*>(plugin);
+    if 
+        (pluginWidget) removeDataHandler(pluginWidget->getPlugin());
+    else
+        std::cerr << "The given attribute is no VizPlugin!" << std::endl;
+}
