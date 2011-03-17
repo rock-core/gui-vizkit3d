@@ -29,8 +29,7 @@ public:
 public slots:    
     QStringList* getListOfAvailablePlugins();
     QObject* createPlugin(QString pluginName);
-    void addPlugin(QObject* plugin);
-    void removePlugin(QObject* plugin);
+    QObject* createExternalPlugin(QObject* plugin);
 
 protected:
     osg::ref_ptr<osg::Group> root;

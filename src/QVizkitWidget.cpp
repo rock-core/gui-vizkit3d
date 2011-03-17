@@ -146,7 +146,7 @@ void QVizkitWidget::changeCameraView(const osg::Vec3& lookAtPos, const osg::Vec3
  * Creates an instance of a visualization plugin given by its name 
  * and returns the adapter collection of the plugin, used in ruby.
  * @param pluginName Name of the plugin
- * @return Instanc of the adapter collection of this plugin
+ * @return Instance of the adapter collection of this plugin
  */
 QObject* vizkit::QVizkitWidget::createPlugin(QString pluginName)
 {
@@ -177,6 +177,28 @@ QObject* vizkit::QVizkitWidget::createPlugin(QString pluginName)
 }
 
 /**
+ * Creates an instance of a visualization plugin using its
+ * Vizkit Qt Plugin.
+ * @param plugin Qt Plugin of the visualization plugin
+ * @return Instance of the adapter collection of this plugin
+ */
+QObject* vizkit::QVizkitWidget::createExternalPlugin(QObject* plugin)
+{
+    vizkit::VizkitQtPluginBase* qtPlugin = dynamic_cast<vizkit::VizkitQtPluginBase*>(plugin);
+    if (qtPlugin) 
+    {
+        vizkit::VizPluginBase* plugin = qtPlugin->createPlugin();
+        addDataHandler(plugin);
+        return plugin->getRubyAdapterCollection();
+    }
+    else 
+    {
+        std::cerr << "The given attribute is no Vizkit Qt Plugin!" << std::endl;
+        return NULL;
+    }
+}
+
+/**
  * Returns a list of all available visualization plugins.
  * @return list of plugin names
  */
@@ -189,22 +211,4 @@ QStringList* vizkit::QVizkitWidget::getListOfAvailablePlugins()
         pluginNames->push_back("MotionCommandVisualization");
     }
     return pluginNames;
-}
-
-void vizkit::QVizkitWidget::addPlugin(QObject* plugin)
-{
-    vizkit::VizPluginWidgetBase* pluginWidget = dynamic_cast<vizkit::VizPluginWidgetBase*>(plugin);
-    if 
-        (pluginWidget) addDataHandler(pluginWidget->getPlugin());
-    else
-        std::cerr << "The given attribute is no VizPlugin!" << std::endl;
-}
-
-void vizkit::QVizkitWidget::removePlugin(QObject* plugin)
-{
-    vizkit::VizPluginWidgetBase* pluginWidget = dynamic_cast<vizkit::VizPluginWidgetBase*>(plugin);
-    if 
-        (pluginWidget) removeDataHandler(pluginWidget->getPlugin());
-    else
-        std::cerr << "The given attribute is no VizPlugin!" << std::endl;
 }
