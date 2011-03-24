@@ -91,5 +91,13 @@ if (TYPELIB_FOUND AND TYPELIBRUBY_FOUND AND GEM_FOUND)
 	install(TARGETS ${TYPELIB_TO_QVARIANT}
 		  LIBRARY DESTINATION ${RUBY_EXTENSIONS_INSTALL_DIR}
 	)
+else()
+    if (NOT TYPELIB_FOUND)
+        message(STATUS "cannot find typelib, the vizkit-ruby bridge is disabled")
+    elseif (NOT TYPELIBRUBY_FOUND)
+        message(STATUS "cannot find typelib's ruby bindings, the vizkit-ruby bridge is disabled")
+    elseif (NOT GEM_FOUND)
+        message(STATUS "cannot find the rice gem, the vizkit-ruby bridge is disabled")
+    endif()
 endif()
 
