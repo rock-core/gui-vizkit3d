@@ -7,7 +7,7 @@ namespace vizkit
 
 WaypointVisualization::WaypointVisualization()
 {    
-    VizPluginRubyAdapter(WaypointVisualization, Waypoint, base::Waypoint, base::Waypoint)
+    VizPluginRubyAdapter(WaypointVisualization, base::Waypoint, Waypoint)
 }
 
 osg::ref_ptr< osg::Node > WaypointVisualization::createMainNode()
