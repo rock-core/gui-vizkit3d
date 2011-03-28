@@ -5,12 +5,11 @@
 #include <vizkit/VizPlugin.hpp>
 #include <vizkit/CompositeViewerQOSG.hpp>
 #include <vizkit/PickHandler.hpp>
-#include <QtDesigner/QDesignerExportWidget>
 
 namespace vizkit 
 {
 
-class QDESIGNER_WIDGET_EXPORT QVizkitWidget : public CompositeViewerQOSG 
+class QVizkitWidget : public CompositeViewerQOSG 
 {
     Q_OBJECT
 

@@ -3,10 +3,11 @@
 #include <QMainWindow>
 #include <vizkit/VizPlugin.hpp>
 #include <vizkit/QVizkitWidget.hpp>
+#include <QtDesigner/QDesignerExportWidget>
 
 namespace vizkit {
 
-class QVizkitMainWindow : public QMainWindow
+class QDESIGNER_WIDGET_EXPORT QVizkitMainWindow : public QMainWindow
 {
     Q_OBJECT
         
