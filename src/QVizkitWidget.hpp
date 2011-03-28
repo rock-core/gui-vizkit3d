@@ -25,20 +25,12 @@ public:
     void setTrackedNode( vizkit::VizPluginBase* plugin );
 
     QSize sizeHint() const;
-    
-public slots:    
-    QStringList* getListOfAvailablePlugins();
-    QObject* createPlugin(QString pluginName);
-    QObject* createExternalPlugin(QObject* plugin);
 
 protected:
     osg::ref_ptr<osg::Group> root;
     void createSceneGraph();
     osg::ref_ptr<PickHandler> pickHandler;
-
     osg::ref_ptr<ViewQOSG> view;
-    
-    QStringList* pluginNames;    
 };
 
 }

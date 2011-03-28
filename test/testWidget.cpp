@@ -3,6 +3,7 @@
 #define BOOST_TEST_MODULE "test"
 #define BOOST_AUTO_TEST_MAIN
 
+#include <vizkit/QVizkitMainWindow.hpp>
 #include <vizkit/QVizkitWidget.hpp>
 #include <vizkit/QtThreadedWidget.hpp>
 #include <vizkit/TrajectoryVisualization.hpp>
@@ -14,18 +15,18 @@ namespace vizkit
 {
     
 template <class T, class D>
-class QVisualisationTestWidget : public QVizkitWidget
+class QVisualisationTestWidget : public QVizkitMainWindow
 {
     public:
         QVisualisationTestWidget( QWidget* parent = 0, Qt::WindowFlags f = 0 )
-            : QVizkitWidget( parent, f ), viz(new T())
+            : QVizkitMainWindow(parent, f), viz(new T())
         {
-            addDataHandler( viz.get() );
+            addPlugin( viz.get() );
         }
 
         ~QVisualisationTestWidget()
         {
-            removeDataHandler( viz.get() );
+            removePlugin( viz.get() );
         }
 
         void updateData( const D &data )
@@ -103,7 +104,7 @@ BOOST_AUTO_TEST_CASE(changeCameraView_test)
     {
         double r = i/1000.0;
         double s = r/10;
-        app.getWidget()->changeCameraView(osg::Vec3d(cos(r)*s,sin(r)*s,0));
+        app.getWidget()->getVizkitWidget()->changeCameraView(osg::Vec3d(cos(r)*s,sin(r)*s,0));
         
         usleep( 500 );
     }
@@ -112,7 +113,7 @@ BOOST_AUTO_TEST_CASE(changeCameraView_test)
     {
         double r = i/1000.0;
         double s = r/10;
-        app.getWidget()->changeCameraView(osg::Vec3d(cos(r)*s,sin(r)*s,0), osg::Vec3d(cos(r)*s,(sin(r)*s)-20,20));
+        app.getWidget()->getVizkitWidget()->changeCameraView(osg::Vec3d(cos(r)*s,sin(r)*s,0), osg::Vec3d(cos(r)*s,(sin(r)*s)-20,20));
         
         usleep( 500 );
     } 

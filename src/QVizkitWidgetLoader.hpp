@@ -2,7 +2,7 @@
 #define QVIZKITWIDGETLOADER_HPP
 
 #include <QtDesigner/QDesignerCustomWidgetInterface>
-#include <vizkit/QVizkitWidget.hpp>
+#include <vizkit/QVizkitMainWindow.hpp>
 
 /**
  * This class is used to create an instance of QVizkitWidget in ruby.

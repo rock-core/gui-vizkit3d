@@ -14,6 +14,7 @@ set(SOURCES
     TrajectoryVisualization.cpp
     MouseManipulationManipulator.cpp
     QtThreadedWidget.cpp
+    QVizkitMainWindow.cpp
     )
 
 set(QT_HEADERS 
@@ -22,6 +23,7 @@ set(QT_HEADERS
     QVizkitWidget.hpp 
     CompositeViewerQOSG.hpp 
     PickHandler.hpp
+    QVizkitMainWindow.hpp
     )
 
 set(HEADERS 

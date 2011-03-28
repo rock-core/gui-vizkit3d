@@ -1,9 +1,6 @@
 #include "QVizkitWidget.hpp"
 #include <QVBoxLayout>
 #include <GridNode.hpp>
-#include <vizkit/MotionCommandVisualization.hpp>
-#include <vizkit/TrajectoryVisualization.hpp>
-#include <vizkit/WaypointVisualization.hpp>
 
 using namespace vizkit;
 
@@ -29,8 +26,6 @@ QVizkitWidget::QVizkitWidget( QWidget* parent, Qt::WindowFlags f )
     // add visualization of ground grid 
     GridNode *gn = new GridNode();
     root->addChild(gn);
-    
-    pluginNames = new QStringList();
 }
 
 QSize QVizkitWidget::sizeHint() const
@@ -140,75 +135,4 @@ void QVizkitWidget::changeCameraView(const osg::Vec3& lookAtPos, const osg::Vec3
     switchMatrixManipulator->setHomePosition(eyePos, lookAtPos, up);
 
     view->home();
-}
-
-/**
- * Creates an instance of a visualization plugin given by its name 
- * and returns the adapter collection of the plugin, used in ruby.
- * @param pluginName Name of the plugin
- * @return Instance of the adapter collection of this plugin
- */
-QObject* vizkit::QVizkitWidget::createPlugin(QString pluginName)
-{
-    vizkit::VizPluginBase* plugin = 0;
-    if (pluginName == "WaypointVisualization")
-    {
-        plugin = new vizkit::WaypointVisualization();
-    }
-    else if (pluginName == "MotionCommandVisualization")
-    {
-        plugin = new vizkit::MotionCommandVisualization();
-    }
-    else if (pluginName == "TrajectoryVisualization")
-    {
-        plugin = new vizkit::TrajectoryVisualization();
-    }
-
-    if (plugin) 
-    {
-        this->addDataHandler(plugin);
-        VizPluginRubyAdapterCollection* adapterCollection = plugin->getRubyAdapterCollection();
-        return adapterCollection;
-    }
-    else {
-        std::cerr << "The Pluginname " << pluginName.toStdString() << " is unknown!" << std::endl;
-        return NULL;
-    }
-}
-
-/**
- * Creates an instance of a visualization plugin using its
- * Vizkit Qt Plugin.
- * @param plugin Qt Plugin of the visualization plugin
- * @return Instance of the adapter collection of this plugin
- */
-QObject* vizkit::QVizkitWidget::createExternalPlugin(QObject* plugin)
-{
-    vizkit::VizkitQtPluginBase* qtPlugin = dynamic_cast<vizkit::VizkitQtPluginBase*>(plugin);
-    if (qtPlugin) 
-    {
-        vizkit::VizPluginBase* plugin = qtPlugin->createPlugin();
-        addDataHandler(plugin);
-        return plugin->getRubyAdapterCollection();
-    }
-    else 
-    {
-        std::cerr << "The given attribute is no Vizkit Qt Plugin!" << std::endl;
-        return NULL;
-    }
-}
-
-/**
- * Returns a list of all available visualization plugins.
- * @return list of plugin names
- */
-QStringList* vizkit::QVizkitWidget::getListOfAvailablePlugins()
-{
-    if (!pluginNames->size()) 
-    {
-        pluginNames->push_back("WaypointVisualization");
-        pluginNames->push_back("TrajectoryVisualization");
-        pluginNames->push_back("MotionCommandVisualization");
-    }
-    return pluginNames;
 }
