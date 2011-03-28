@@ -13,6 +13,7 @@ set(SOURCES
     MotionCommandVisualization.cpp
     TrajectoryVisualization.cpp
     MouseManipulationManipulator.cpp
+    QtThreadedWidget.cpp
     )
 
 set(QT_HEADERS 
