@@ -28,16 +28,16 @@ public:
 protected:
     QWidget *widget;
     void run();
+    virtual QWidget* createWidget() = 0;
 };
 
 template <class T>
 class QtThreadedWidget : public QtThreadedWidgetBase
 {
 public:
-    void start()
+    QWidget* createWidget()
     {
-        widget = new T();
-        QtThreadedWidgetBase::start();
+	return new T();
     }
 
     T *getWidget()

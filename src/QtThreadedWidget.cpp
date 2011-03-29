@@ -49,10 +49,10 @@ QWidget* QtThreadedWidgetBase::getWidget()
 void QtThreadedWidgetBase::run()
 {
     app = boost::shared_ptr<QApplication>( new QApplication( argc, argv ) );
+    widget = createWidget();
     app->connect( app.get(), SIGNAL(lastWindowClosed()), app.get(), SLOT(quit()) );    
     widget->show();
     while( app->startingUp() );
-
     {
         boost::lock_guard<boost::mutex> lock( mut );
         running = true;
