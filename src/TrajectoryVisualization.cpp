@@ -63,14 +63,13 @@ void TrajectoryVisualization::updateDataIntern(const base::geometry::Spline3& da
     base::geometry::Spline3 spline = data; 
     
     //delete old trajectory
-    clear();
+    points.clear();
     
     //a point every 5 cm
     double stepSize = (spline.getEndParam() - spline.getStartParam()) / (spline.getCurveLength() / 0.05);
     for(double p = spline.getStartParam(); p <= spline.getEndParam(); p += stepSize )
     {
-	Eigen::Vector3d point(spline.getPoint(p)); 
-	updateData(point);
+	points.push_back(spline.getPoint(p));
     }
 }
 

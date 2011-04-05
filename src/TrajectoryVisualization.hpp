@@ -9,7 +9,7 @@
 namespace vizkit 
 {
 
-class TrajectoryVisualization: public VizPlugin<Eigen::Vector3d>, VizPluginAddType<base::geometry::Spline3>
+class TrajectoryVisualization: public VizPlugin<Eigen::Vector3d>, public VizPluginAddType<base::geometry::Spline3>
 {
     public:
 	TrajectoryVisualization();    
