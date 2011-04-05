@@ -57,6 +57,22 @@ void TrajectoryVisualization::updateMainNode( osg::Node* node )
     drawArrays->setCount(pointsOSG->size());
 }
 
+void TrajectoryVisualization::updateDataIntern(const base::geometry::Spline3& data)
+{
+    //needs a copy as getCurveLength is not const
+    base::geometry::Spline3 spline = data; 
+    
+    //delete old trajectory
+    clear();
+    
+    //a point every 5 cm
+    double stepSize = (spline.getEndParam() - spline.getStartParam()) / (spline.getCurveLength() / 0.05);
+    for(double p = spline.getStartParam(); p <= spline.getEndParam(); p += stepSize )
+    {
+	Eigen::Vector3d point(spline.getPoint(p)); 
+	updateData(point);
+    }
+}
 
 void TrajectoryVisualization::updateDataIntern( const Eigen::Vector3d& data )
 {

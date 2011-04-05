@@ -4,21 +4,23 @@
 #include <vector>
 #include <vizkit/VizPlugin.hpp>
 #include <osg/Geometry>
+#include <base/geometry/spline.h>
 
 namespace vizkit 
 {
 
-class TrajectoryVisualization: public VizPlugin<Eigen::Vector3d>
+class TrajectoryVisualization: public VizPlugin<Eigen::Vector3d>, VizPluginAddType<base::geometry::Spline3>
 {
     public:
 	TrajectoryVisualization();    
 	void setColor(double r, double g, double b, double a);
 	void clear();
-	
+
     protected:
 	virtual osg::ref_ptr<osg::Node> createMainNode();
 	virtual void updateMainNode( osg::Node* node );
 	void updateDataIntern( const Eigen::Vector3d& data );
+	void updateDataIntern(const base::geometry::Spline3& data);
 	
     private:
 	osg::Vec4Array *color2; 

@@ -5,6 +5,11 @@ include_directories(${BASE_INCLUDE_DIRS})
 link_directories(${BASE_LIBRARY_DIRS})
 set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${BASE_LIBRARIES})
 
+pkg_check_modules(BASE_LIB "base-lib")
+include_directories(${BASE_LIB_INCLUDE_DIRS})
+link_directories(${BASE_LIB_LIBRARY_DIRS})
+set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${BASE_LIB_LIBRARIES})
+
 pkg_check_modules(YAML "yaml-cpp")
 include_directories(${YAML_INCLUDE_DIRS})
 link_directories(${YAML_LIBRARY_DIRS})
