@@ -65,6 +65,9 @@ void TrajectoryVisualization::updateDataIntern(const base::geometry::Spline3& da
     //delete old trajectory
     points.clear();
     
+    if(!data.getSISLCurve())
+	return;
+    
     //a point every 5 cm
     double stepSize = (spline.getEndParam() - spline.getStartParam()) / (spline.getCurveLength() / 0.05);
     for(double p = spline.getStartParam(); p <= spline.getEndParam(); p += stepSize )
