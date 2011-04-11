@@ -97,30 +97,33 @@ void QVizkitWidget::removeDataHandler(VizPluginBase *viz)
     root->removeChild( viz->getVizNode() );
 }
 
-/**
- * Sets the camera focus to specific position.
- * @param lookAtPos focus this point
- */
 void QVizkitWidget::changeCameraView(const osg::Vec3& lookAtPos)
 {
-    osgGA::KeySwitchMatrixManipulator* switchMatrixManipulator = dynamic_cast<osgGA::KeySwitchMatrixManipulator*>(view->getCameraManipulator());
-    if (!switchMatrixManipulator) return;
-    //select TerrainManipulator
-    switchMatrixManipulator->selectMatrixManipulator(3);
-    
-    //get current eye position
-    osg::Matrixd matrix = switchMatrixManipulator->getMatrix();
-    osg::Vec3d currentEyePos = matrix.getTrans();
-    
-    changeCameraView(lookAtPos, currentEyePos);
+    changeCameraView(&lookAtPos, 0, 0);
 }
 
-/**
- * Sets the camera focus and the camera itself to specific position.
- * @param lookAtPos focus this point
- * @param eyePos position of the camera
- */
 void QVizkitWidget::changeCameraView(const osg::Vec3& lookAtPos, const osg::Vec3& eyePos)
+{
+    changeCameraView(&lookAtPos, &eyePos, 0);
+}
+
+void QVizkitWidget::setCameraLookAt(double x, double y, double z)
+{
+    osg::Vec3 lookAt(x, y, z);
+    changeCameraView(&lookAt, 0, 0);
+}
+void QVizkitWidget::setCameraEye(double x, double y, double z)
+{
+    osg::Vec3 eye(x, y, z);
+    changeCameraView(0, &eye, 0);
+}
+void QVizkitWidget::setCameraUp(double x, double y, double z)
+{
+    osg::Vec3 up(x, y, z);
+    changeCameraView(0, 0, &up);
+}
+
+void QVizkitWidget::changeCameraView(const osg::Vec3* lookAtPos, const osg::Vec3* eyePos, const osg::Vec3* upVector)
 {
     osgGA::KeySwitchMatrixManipulator* switchMatrixManipulator = dynamic_cast<osgGA::KeySwitchMatrixManipulator*>(view->getCameraManipulator());
     if (!switchMatrixManipulator) return;
@@ -131,8 +134,15 @@ void QVizkitWidget::changeCameraView(const osg::Vec3& lookAtPos, const osg::Vec3
     osg::Vec3d eye, center, up;
     switchMatrixManipulator->getHomePosition(eye, center, up);
 
-    //set new values
-    switchMatrixManipulator->setHomePosition(eyePos, lookAtPos, up);
+    if (lookAtPos)
+        center = *lookAtPos;
+    if (eyePos)
+        eye = *eyePos;
+    if (upVector)
+        up = *upVector;
 
+    //set new values
+    switchMatrixManipulator->setHomePosition(eye, center, up);
     view->home();
 }
+
