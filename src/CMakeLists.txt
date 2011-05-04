@@ -1,3 +1,8 @@
+pkg_check_modules(YAML REQUIRED yaml-cpp)
+add_definitions(${YAML_CFLAGS})
+include_directories(${YAML_INCLUDE_DIRS})
+link_directories(${YAML_LIBRARY_DIRS})
+
 set(LIB_WIDGET_LOADER ${PROJECT_NAME}widgetloader)
 set(LIB_MAINWINDOW_LOADER ${PROJECT_NAME}mainwindowloader)
 set(TYPELIB_TO_QVARIANT ${PROJECT_NAME}typelib)
@@ -51,7 +56,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_library(${PROJECT_NAME} SHARED ${SOURCES} ${moc_cpp} ${ui_cpp})
 add_library(${LIB_WIDGET_LOADER} SHARED QVizkitWidgetLoader.cpp ${moc_cpp_widget_loader})
 add_library(${LIB_MAINWINDOW_LOADER} SHARED QVizkitMainWindowLoader.cpp ${moc_cpp_mainwindow_loader})
-target_link_libraries(${PROJECT_NAME} ${EXTERNAL_LIBS} ${QT_QTGUI_LIBRARY} ${QT_QTCORE_LIBRARY})
+target_link_libraries(${PROJECT_NAME} ${EXTERNAL_LIBS} ${QT_QTGUI_LIBRARY} ${QT_QTCORE_LIBRARY} ${YAML_LIBRARIES})
 target_link_libraries(${LIB_WIDGET_LOADER} ${EXTERNAL_LIBS} ${PROJECT_NAME} ${QT_QTGUI_LIBRARY} ${QT_QTCORE_LIBRARY})
 target_link_libraries(${LIB_MAINWINDOW_LOADER} ${EXTERNAL_LIBS} ${PROJECT_NAME} ${QT_QTGUI_LIBRARY} ${QT_QTCORE_LIBRARY})
 
