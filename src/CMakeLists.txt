@@ -21,6 +21,8 @@ set(SOURCES
     MouseManipulationManipulator.cpp
     QtThreadedWidget.cpp
     QVizkitMainWindow.cpp
+    Uncertainty.cpp
+    RigidBodyStateVisualization.cpp
     )
 
 set(QT_HEADERS 
@@ -40,6 +42,8 @@ set(HEADERS
     TrajectoryVisualization.hpp
     WaypointVisualization.hpp
     QtThreadedWidget.hpp
+    Uncertainty.hpp
+    RigidBodyStateVisualization.hpp
     )
 
 # Add your .ui files ot the following line (and uncomment it)
