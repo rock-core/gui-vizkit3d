@@ -7,6 +7,7 @@ namespace vizkit
 
 TrajectoryVisualization::TrajectoryVisualization()
 {
+    VizPluginRubyAdapter(TrajectoryVisualization, base::geometry::Spline3, Trajectory)
     // initialize here so that setColor can be called event
     doClear = false;
     color2 = new osg::Vec4Array;
