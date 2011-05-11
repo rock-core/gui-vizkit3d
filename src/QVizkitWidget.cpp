@@ -4,6 +4,7 @@
 #include <vizkit/MotionCommandVisualization.hpp>
 #include <vizkit/TrajectoryVisualization.hpp>
 #include <vizkit/WaypointVisualization.hpp>
+#include <vizkit/RigidBodyStateVisualization.hpp>
 
 using namespace vizkit;
 
@@ -194,6 +195,10 @@ QObject* QVizkitWidget::createPluginByName(QString pluginName)
     {
         plugin = new vizkit::TrajectoryVisualization();
     }
+    else if (pluginName == "RigidBodyStateVisualization")
+    {
+        plugin = new vizkit::RigidBodyStateVisualization();
+    }
 
     if (plugin) 
     {
@@ -218,6 +223,7 @@ QStringList* QVizkitWidget::getListOfAvailablePlugins()
         pluginNames->push_back("WaypointVisualization");
         pluginNames->push_back("TrajectoryVisualization");
         pluginNames->push_back("MotionCommandVisualization");
+        pluginNames->push_back("RigidBodyStateVisualization");
     }
     return pluginNames;
 }

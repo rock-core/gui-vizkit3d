@@ -10,6 +10,7 @@ namespace vizkit
 
 RigidBodyStateVisualization::RigidBodyStateVisualization()
 {
+    VizPluginRubyAdapter(RigidBodyStateVisualization, base::samples::RigidBodyState, RigidBodyState)
 }
 
 RigidBodyStateVisualization::~RigidBodyStateVisualization()
