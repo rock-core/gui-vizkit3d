@@ -18,7 +18,7 @@ class QDESIGNER_WIDGET_EXPORT QVizkitMainWindow : public QMainWindow
         QVizkitWidget* getVizkitWidget();
         
     public slots:    
-        QObject* createExternalPlugin(QObject* plugin);
+        QObject* createExternalPlugin(QObject* plugin, QString const& name);
         QStringList* getListOfAvailablePlugins();
         QObject* createPluginByName(QString pluginName);
         

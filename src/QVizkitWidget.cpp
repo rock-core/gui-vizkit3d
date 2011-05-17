@@ -158,12 +158,12 @@ void QVizkitWidget::changeCameraView(const osg::Vec3* lookAtPos, const osg::Vec3
  * @param plugin Qt Plugin of the visualization plugin
  * @return Instance of the adapter collection of this plugin
  */
-QObject* QVizkitWidget::createExternalPlugin(QObject* plugin)
+QObject* QVizkitWidget::createExternalPlugin(QObject* plugin, QString const& name)
 {
     vizkit::VizkitQtPluginBase* qtPlugin = dynamic_cast<vizkit::VizkitQtPluginBase*>(plugin);
     if (qtPlugin) 
     {
-        vizkit::VizPluginBase* plugin = qtPlugin->createPlugin();
+        vizkit::VizPluginBase* plugin = qtPlugin->createPlugin(name);
         addDataHandler(plugin);
         return plugin->getRubyAdapterCollection();
     }

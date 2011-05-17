@@ -36,7 +36,7 @@ public:
     QSize sizeHint() const;
     
 public slots:
-    QObject* createExternalPlugin(QObject* plugin);
+    QObject* createExternalPlugin(QObject* plugin, QString const& name);
     QStringList* getListOfAvailablePlugins();
     QObject* createPluginByName(QString pluginName);
 

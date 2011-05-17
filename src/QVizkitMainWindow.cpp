@@ -90,9 +90,9 @@ QVizkitWidget* QVizkitMainWindow::getVizkitWidget()
  * @param plugin Qt Plugin of the visualization plugin
  * @return Instance of the adapter collection of this plugin
  */
-QObject* QVizkitMainWindow::createExternalPlugin(QObject* plugin)
+QObject* QVizkitMainWindow::createExternalPlugin(QObject* plugin, QString const& name)
 {
-    return vizKitWidget->createExternalPlugin(plugin);
+    return vizKitWidget->createExternalPlugin(plugin, name);
 }
 
 /**
