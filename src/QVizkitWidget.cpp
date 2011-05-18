@@ -163,6 +163,11 @@ QObject* QVizkitWidget::createExternalPlugin(QObject* plugin, QString const& nam
     vizkit::VizkitQtPluginBase* qtPlugin = dynamic_cast<vizkit::VizkitQtPluginBase*>(plugin);
     if (qtPlugin) 
     {
+        if (!qtPlugin->getAvailablePlugins().contains(name))
+        {
+            std::cerr << "There is no Vizkit plugin available called " << name.toStdString() << std::endl;
+            return NULL;
+        }
         vizkit::VizPluginBase* plugin = qtPlugin->createPlugin(name);
         addDataHandler(plugin);
         return plugin->getRubyAdapterCollection();
