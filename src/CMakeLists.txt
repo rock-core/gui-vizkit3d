@@ -44,6 +44,7 @@ set(HEADERS
     QtThreadedWidget.hpp
     Uncertainty.hpp
     RigidBodyStateVisualization.hpp
+    QVisualizationTestWidget.hpp
     )
 
 # Add your .ui files ot the following line (and uncomment it)
