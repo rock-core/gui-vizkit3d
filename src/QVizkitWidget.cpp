@@ -163,9 +163,14 @@ QObject* QVizkitWidget::createExternalPlugin(QObject* plugin, QString const& nam
     vizkit::VizkitQtPluginBase* qtPlugin = dynamic_cast<vizkit::VizkitQtPluginBase*>(plugin);
     if (qtPlugin) 
     {
-        if (!qtPlugin->getAvailablePlugins().contains(name))
+	QStringList plugin_names = qtPlugin->getAvailablePlugins();
+        if (!plugin_names.contains(name))
         {
-            std::cerr << "There is no Vizkit plugin available called " << name.toStdString() << std::endl;
+	    std::cerr << "There is no Vizkit plugin available called '" <<
+		name.toStdString() << "'. Available plugins are" << std::endl;
+	    for( QStringList::const_iterator it = plugin_names.constBegin(); it != plugin_names.constEnd(); it++ )
+		std::cerr << it->toStdString() << std::endl;
+
             return NULL;
         }
         vizkit::VizPluginBase* plugin = qtPlugin->createPlugin(name);
