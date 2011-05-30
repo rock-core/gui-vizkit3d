@@ -163,17 +163,41 @@ QObject* QVizkitWidget::createExternalPlugin(QObject* plugin, QString const& nam
     vizkit::VizkitQtPluginBase* qtPlugin = dynamic_cast<vizkit::VizkitQtPluginBase*>(plugin);
     if (qtPlugin) 
     {
-	QStringList plugin_names = qtPlugin->getAvailablePlugins();
-        if (!plugin_names.contains(name))
+        QStringList plugins = qtPlugin->getAvailablePlugins();
+        vizkit::VizPluginBase* plugin = 0;
+        if (name.isEmpty())
         {
-	    std::cerr << "There is no Vizkit plugin available called '" <<
-		name.toStdString() << "'. Available plugins are" << std::endl;
-	    for( QStringList::const_iterator it = plugin_names.constBegin(); it != plugin_names.constEnd(); it++ )
-		std::cerr << it->toStdString() << std::endl;
+            if (plugins.size() == 0)
+            {
+                std::cerr << "this Qt Designer plugin defines no vizkit plugins" << std::endl;
+                return NULL;
+            }
+            else if (plugins.size() > 1)
+            {
+                std::cerr << "this Qt Designer plugin defines more than one vizkit plugin, you must select one explicitely" << std::endl;
+                return NULL;
+            }
+
+            plugin = qtPlugin->createPlugin(*plugins.begin());
+        }
+        else if (!plugins.contains(name))
+        {
+            std::cerr << "there is no Vizkit plugin available called " << name.toStdString() << std::endl;
+            std::cerr << "available plugins are:" << std::endl;
+            for (QStringList::const_iterator it = plugins.begin(); it != plugins.end(); ++it)
+                std::cerr << "  " << it->toStdString() << std::endl;
 
             return NULL;
         }
-        vizkit::VizPluginBase* plugin = qtPlugin->createPlugin(name);
+        else
+        {
+            plugin = qtPlugin->createPlugin(name);
+            if (!plugin)
+            {
+                std::cerr << "createPlugin(" << name.toStdString() << ") returned NULL" << std::endl;
+                return NULL;
+            }
+        }
         addDataHandler(plugin);
         return plugin->getRubyAdapterCollection();
     }
