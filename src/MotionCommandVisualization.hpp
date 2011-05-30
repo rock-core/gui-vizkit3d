@@ -1,6 +1,7 @@
 #ifndef MOTIONCOMMANDVISUALIZATION_H
 #define MOTIONCOMMANDVISUALIZATION_H
 #include <vizkit/VizPlugin.hpp>
+#include <base/motion_command.h>
 #include <osg/Shape>
 #include <Eigen/Geometry>
 #include <osg/Drawable>
@@ -8,7 +9,7 @@
 namespace vizkit 
 {
 
-class MotionCommandVisualization : public VizPlugin<std::pair<double, double> >
+class MotionCommandVisualization : public VizPlugin< base::MotionCommand2D >
 {
     public:
 	MotionCommandVisualization();	
@@ -16,7 +17,7 @@ class MotionCommandVisualization : public VizPlugin<std::pair<double, double> >
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();
         virtual void updateMainNode( osg::Node* node );
-	void updateDataIntern ( const std::pair<double, double> & data );
+	void updateDataIntern ( const base::MotionCommand2D& data );
 
     private:
 	double tv;

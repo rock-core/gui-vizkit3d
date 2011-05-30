@@ -13,6 +13,7 @@ MotionCommandVisualization::MotionCommandVisualization()
 {
     tv = 0;
     rv = 0;
+    VizPluginRubyAdapter(MotionCommandVisualization, base::MotionCommand2D, MotionCommand)
 }
 
 osg::ref_ptr< osg::Node > MotionCommandVisualization::createMainNode()
@@ -91,10 +92,10 @@ void MotionCommandVisualization::updateMainNode( osg::Node* node )
     drawRotation();
 }
 
-void MotionCommandVisualization::updateDataIntern ( const std::pair<double, double> & data )
+void MotionCommandVisualization::updateDataIntern ( const base::MotionCommand2D& data )
 {
-    tv = data.first;
-    rv = data.second;
+    tv = data.translation;
+    rv = data.rotation;
 }
 
 
