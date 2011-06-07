@@ -185,21 +185,27 @@ QObject* QVizkitWidget::createExternalPlugin(QObject* plugin, QString const& nam
         }
         else if (!plugins.contains(name))
         {
-            std::cerr << "there is no Vizkit plugin available called " << name.toStdString() << std::endl;
-            std::cerr << "available plugins are:" << std::endl;
-            for (QStringList::const_iterator it = plugins.begin(); it != plugins.end(); ++it)
-                std::cerr << "  " << it->toStdString() << std::endl;
+            if (plugins.contains(name + "Visualization"))
+                plugin = qtPlugin->createPlugin(name + "Visualization");
+            else
+            {
+                std::cerr << "there is no Vizkit plugin available called " << name.toStdString() << std::endl;
+                std::cerr << "available plugins are:" << std::endl;
+                for (QStringList::const_iterator it = plugins.begin(); it != plugins.end(); ++it)
+                    std::cerr << "  " << it->toStdString() << std::endl;
 
-            return NULL;
+                return NULL;
+            }
         }
         else
         {
             plugin = qtPlugin->createPlugin(name);
-            if (!plugin)
-            {
-                std::cerr << "createPlugin(" << name.toStdString() << ") returned NULL" << std::endl;
-                return NULL;
-            }
+        }
+
+        if (!plugin)
+        {
+            std::cerr << "createPlugin returned NULL" << std::endl;
+            return NULL;
         }
         addDataHandler(plugin);
         return plugin->getRubyAdapterCollection();
