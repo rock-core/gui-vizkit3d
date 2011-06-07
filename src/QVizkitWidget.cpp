@@ -175,6 +175,9 @@ QObject* QVizkitWidget::createExternalPlugin(QObject* plugin, QString const& nam
             else if (plugins.size() > 1)
             {
                 std::cerr << "this Qt Designer plugin defines more than one vizkit plugin, you must select one explicitely" << std::endl;
+                std::cerr << "available plugins are:" << std::endl;
+                for (QStringList::const_iterator it = plugins.begin(); it != plugins.end(); ++it)
+                    std::cerr << "  " << it->toStdString() << std::endl;
                 return NULL;
             }
 
