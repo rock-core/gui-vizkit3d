@@ -2,6 +2,7 @@
 #define MOTIONCOMMANDVISUALIZATION_H
 #include <vizkit/VizPlugin.hpp>
 #include <base/motion_command.h>
+#include <base/pose.h>
 #include <osg/Shape>
 #include <Eigen/Geometry>
 #include <osg/Drawable>
@@ -9,7 +10,7 @@
 namespace vizkit 
 {
 
-class MotionCommandVisualization : public VizPlugin< base::MotionCommand2D >
+class MotionCommandVisualization : public VizPlugin< std::pair<base::MotionCommand2D, base::Pose> >
 {
     public:
 	MotionCommandVisualization();	
@@ -17,7 +18,7 @@ class MotionCommandVisualization : public VizPlugin< base::MotionCommand2D >
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();
         virtual void updateMainNode( osg::Node* node );
-	void updateDataIntern ( const base::MotionCommand2D& data );
+	void updateDataIntern ( const std::pair<base::MotionCommand2D, base::Pose>& data );
 
     private:
 	double tv;
@@ -30,6 +31,7 @@ class MotionCommandVisualization : public VizPlugin< base::MotionCommand2D >
 	osg::ref_ptr<osg::DrawArrays> drawArrays;
 	osg::ref_ptr<osg::Geometry> geom;
 	osg::ref_ptr<osg::PositionAttitudeTransform> arrowRotation;
+	osg::ref_ptr<osg::PositionAttitudeTransform> positionTransformation;
 	void drawRotation();
 };
 
