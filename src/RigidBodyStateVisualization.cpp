@@ -9,10 +9,14 @@ namespace vizkit
 {
 
 RigidBodyStateVisualization::RigidBodyStateVisualization()
+    : covariance(false), covariance_with_samples(false), color(1, 1, 1), main_size(0.1)
 {
     VizPluginRubyAdapter(RigidBodyStateVisualization, base::samples::RigidBodyState, RigidBodyState)
-    VizPluginRubyConfig(RigidBodyStateVisualization, double, resetModel);
-    VizPluginRubyConfig(RigidBodyStateVisualization, bool, displayCovarianceWithSamples);
+    VizPluginRubyMethod(RigidBodyStateVisualization, double, resetModel);
+    VizPluginRubyMethod(RigidBodyStateVisualization, double, setMainSphereSize);
+    VizPluginRubyMethod(RigidBodyStateVisualization, bool, displayCovariance);
+    VizPluginRubyMethod(RigidBodyStateVisualization, bool, displayCovarianceWithSamples);
+    VizPluginRubyMethod(RigidBodyStateVisualization, base::Vector3d, setColor);
 }
 
 RigidBodyStateVisualization::~RigidBodyStateVisualization()
@@ -23,8 +27,9 @@ osg::ref_ptr<osg::Geode> RigidBodyStateVisualization::createSimpleBody(double si
 {   
     osg::ref_ptr<osg::Geode> geode = new osg::Geode();
 
-    osg::ref_ptr<osg::Sphere> sp = new osg::Sphere(osg::Vec3f(0,0,0), size / 10);
+    osg::ref_ptr<osg::Sphere> sp = new osg::Sphere(osg::Vec3f(0,0,0), main_size * size);
     osg::ref_ptr<osg::ShapeDrawable> spd = new osg::ShapeDrawable(sp);
+    spd->setColor(osg::Vec4f(color.x(), color.y(), color.z(), 1.0));
     geode->addDrawable(spd);
     
     //up
@@ -48,6 +53,11 @@ osg::ref_ptr<osg::Geode> RigidBodyStateVisualization::createSimpleBody(double si
     return geode;
 }
 
+void RigidBodyStateVisualization::setMainSphereSize(double size)
+{
+    main_size = size;
+}
+
 void RigidBodyStateVisualization::resetModel(double size)
 {
     body_model = createSimpleBody(size);
@@ -57,6 +67,16 @@ void RigidBodyStateVisualization::loadModel(std::string const& path)
 {
     osg::ref_ptr<osg::Node> model = osgDB::readNodeFile(path);
     body_model = model;
+}
+
+void RigidBodyStateVisualization::displayCovariance(bool enable)
+{
+    covariance = enable;
+}
+
+void RigidBodyStateVisualization::setColor(base::Vector3d const& color)
+{
+    this->color = color;
 }
 
 void RigidBodyStateVisualization::displayCovarianceWithSamples(bool enable)

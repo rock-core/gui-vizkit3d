@@ -22,15 +22,35 @@ class RigidBodyStateVisualization : public VizPlugin<base::samples::RigidBodySta
         base::samples::RigidBodyState state;
         void resetModel(double size);
         void loadModel(std::string const& path);
+
+        /** When using the default body, sets the size of the main sphere,
+         * relative to the size of the complete object
+         *
+         * The default is 0.1
+         */
+        void setMainSphereSize(double size);
+
+        void displayCovariance(bool enable);
         void displayCovarianceWithSamples(bool enable);
+
+        /** Sets the color of the default body model in R, G, B
+         *
+         * Values must be between 0 and 1
+         *
+         * If you call it after the plugin got attached, call resetModel to
+         * apply the new color
+         */
+        void setColor(base::Vector3d const& color);
 	
     private:
+        bool covariance;
         bool covariance_with_samples;
+        base::Vector3d color;
+        double main_size;
+
 	osg::Vec3d pos;
 	osg::Quat orientation;
-
-	osg::ref_ptr<osg::Node> body_model;
-
+	osg::ref_ptr<osg::Node>  body_model;
         osg::ref_ptr<osg::Geode> createSimpleBody(double size);
 };
 
