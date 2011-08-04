@@ -9,7 +9,7 @@
 namespace vizkit 
 {
     
-class WaypointVisualization: public VizPlugin<base::Waypoint>
+class WaypointVisualization: public Vizkit3DPlugin<base::Waypoint>
 {
     public:
 	WaypointVisualization();

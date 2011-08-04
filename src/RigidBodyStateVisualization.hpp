@@ -8,7 +8,7 @@
 namespace vizkit 
 {
 
-class RigidBodyStateVisualization : public VizPlugin<base::samples::RigidBodyState>
+class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBodyState>
 {
     public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW

@@ -10,7 +10,7 @@
 namespace vizkit 
 {
 
-class MotionCommandVisualization : public VizPlugin< std::pair<base::MotionCommand2D, base::Pose> >
+class MotionCommandVisualization : public Vizkit3DPlugin< std::pair<base::MotionCommand2D, base::Pose> >
 {
     public:
 	MotionCommandVisualization();	
