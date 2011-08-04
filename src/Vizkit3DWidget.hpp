@@ -10,12 +10,12 @@
 namespace vizkit 
 {
 
-class QDESIGNER_WIDGET_EXPORT QVizkitWidget : public CompositeViewerQOSG 
+class QDESIGNER_WIDGET_EXPORT Vizkit3DWidget : public CompositeViewerQOSG 
 {
     Q_OBJECT
 
 public:
-    QVizkitWidget( QWidget* parent = 0, Qt::WindowFlags f = 0 );
+    Vizkit3DWidget( QWidget* parent = 0, Qt::WindowFlags f = 0 );
     osg::ref_ptr<osg::Group> getRootNode() const;
     void addDataHandler(VizPluginBase *viz);
     void removeDataHandler(VizPluginBase *viz);

@@ -2,7 +2,7 @@
 #define QVIZKITMAINWINDOW_H
 #include <QMainWindow>
 #include <vizkit/VizPlugin.hpp>
-#include <vizkit/QVizkitWidget.hpp>
+#include <vizkit/Vizkit3DWidget.hpp>
 #include <QtDesigner/QDesignerExportWidget>
 
 namespace vizkit {
@@ -15,7 +15,7 @@ class QDESIGNER_WIDGET_EXPORT QVizkitMainWindow : public QMainWindow
 	QVizkitMainWindow(QWidget * parent = 0, Qt::WindowFlags flags = 0);
         void addPlugin(vizkit::VizPluginBase *plugin);
         void removePlugin(vizkit::VizPluginBase* plugin);
-        QVizkitWidget* getVizkitWidget();
+        Vizkit3DWidget* getVizkitWidget();
         
     public slots:    
         QObject* createExternalPlugin(QObject* plugin, QString const& name);
@@ -33,7 +33,7 @@ class QDESIGNER_WIDGET_EXPORT QVizkitMainWindow : public QMainWindow
     private:
         std::vector<vizkit::VizPluginBase *> pluginsToAdd;
         std::vector<vizkit::VizPluginBase *> pluginsToRemove;
-	QVizkitWidget *vizKitWidget;
+	Vizkit3DWidget *vizKitWidget;
 };
 
 }

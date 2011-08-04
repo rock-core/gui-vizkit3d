@@ -14,7 +14,7 @@ set(SOURCES
     GridNode.cpp
     PickHandler.cpp
     QOSGWidget.cpp
-    QVizkitWidget.cpp
+    Vizkit3DWidget.cpp
     WaypointVisualization.cpp
     MotionCommandVisualization.cpp
     TrajectoryVisualization.cpp
@@ -28,7 +28,7 @@ set(SOURCES
 set(QT_HEADERS 
     VizPlugin.hpp
     QOSGWidget.hpp 
-    QVizkitWidget.hpp 
+    Vizkit3DWidget.hpp 
     CompositeViewerQOSG.hpp 
     PickHandler.hpp
     QVizkitMainWindow.hpp

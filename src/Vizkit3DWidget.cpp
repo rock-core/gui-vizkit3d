@@ -1,4 +1,4 @@
-#include "QVizkitWidget.hpp"
+#include "Vizkit3DWidget.hpp"
 #include <QVBoxLayout>
 #include <GridNode.hpp>
 #include <vizkit/MotionCommandVisualization.hpp>
@@ -8,7 +8,7 @@
 
 using namespace vizkit;
 
-QVizkitWidget::QVizkitWidget( QWidget* parent, Qt::WindowFlags f )
+Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     : CompositeViewerQOSG( parent, f )
 {
     createSceneGraph();
@@ -34,22 +34,22 @@ QVizkitWidget::QVizkitWidget( QWidget* parent, Qt::WindowFlags f )
     pluginNames = new QStringList;
 }
 
-QSize QVizkitWidget::sizeHint() const
+QSize Vizkit3DWidget::sizeHint() const
 {
     return QSize( 800, 600 );
 }
 
-osg::ref_ptr<osg::Group> QVizkitWidget::getRootNode() const
+osg::ref_ptr<osg::Group> Vizkit3DWidget::getRootNode() const
 {
     return root;
 }
 
-void QVizkitWidget::setTrackedNode( VizPluginBase* plugin )
+void Vizkit3DWidget::setTrackedNode( VizPluginBase* plugin )
 {
     view->setTrackedNode(plugin->getVizNode());
 }
 
-void QVizkitWidget::createSceneGraph() 
+void Vizkit3DWidget::createSceneGraph() 
 {
     //create root node that holds all other nodes
     root = new osg::Group;
@@ -93,43 +93,43 @@ void QVizkitWidget::createSceneGraph()
     }
 }
 
-void QVizkitWidget::addDataHandler(VizPluginBase *viz)
+void Vizkit3DWidget::addDataHandler(VizPluginBase *viz)
 {
     root->addChild( viz->getVizNode() );
 }
 
-void QVizkitWidget::removeDataHandler(VizPluginBase *viz)
+void Vizkit3DWidget::removeDataHandler(VizPluginBase *viz)
 {
     root->removeChild( viz->getVizNode() );
 }
 
-void QVizkitWidget::changeCameraView(const osg::Vec3& lookAtPos)
+void Vizkit3DWidget::changeCameraView(const osg::Vec3& lookAtPos)
 {
     changeCameraView(&lookAtPos, 0, 0);
 }
 
-void QVizkitWidget::changeCameraView(const osg::Vec3& lookAtPos, const osg::Vec3& eyePos)
+void Vizkit3DWidget::changeCameraView(const osg::Vec3& lookAtPos, const osg::Vec3& eyePos)
 {
     changeCameraView(&lookAtPos, &eyePos, 0);
 }
 
-void QVizkitWidget::setCameraLookAt(double x, double y, double z)
+void Vizkit3DWidget::setCameraLookAt(double x, double y, double z)
 {
     osg::Vec3 lookAt(x, y, z);
     changeCameraView(&lookAt, 0, 0);
 }
-void QVizkitWidget::setCameraEye(double x, double y, double z)
+void Vizkit3DWidget::setCameraEye(double x, double y, double z)
 {
     osg::Vec3 eye(x, y, z);
     changeCameraView(0, &eye, 0);
 }
-void QVizkitWidget::setCameraUp(double x, double y, double z)
+void Vizkit3DWidget::setCameraUp(double x, double y, double z)
 {
     osg::Vec3 up(x, y, z);
     changeCameraView(0, 0, &up);
 }
 
-void QVizkitWidget::changeCameraView(const osg::Vec3* lookAtPos, const osg::Vec3* eyePos, const osg::Vec3* upVector)
+void Vizkit3DWidget::changeCameraView(const osg::Vec3* lookAtPos, const osg::Vec3* eyePos, const osg::Vec3* upVector)
 {
     osgGA::KeySwitchMatrixManipulator* switchMatrixManipulator = dynamic_cast<osgGA::KeySwitchMatrixManipulator*>(view->getCameraManipulator());
     if (!switchMatrixManipulator) return;
@@ -158,7 +158,7 @@ void QVizkitWidget::changeCameraView(const osg::Vec3* lookAtPos, const osg::Vec3
  * @param plugin Qt Plugin of the visualization plugin
  * @return Instance of the adapter collection of this plugin
  */
-QObject* QVizkitWidget::createExternalPlugin(QObject* plugin, QString const& name)
+QObject* Vizkit3DWidget::createExternalPlugin(QObject* plugin, QString const& name)
 {
     vizkit::VizkitQtPluginBase* qtPlugin = dynamic_cast<vizkit::VizkitQtPluginBase*>(plugin);
     if (qtPlugin) 
@@ -223,7 +223,7 @@ QObject* QVizkitWidget::createExternalPlugin(QObject* plugin, QString const& nam
  * @param pluginName Name of the plugin
  * @return Instance of the adapter collection of this plugin
  */
-QObject* QVizkitWidget::createPluginByName(QString pluginName)
+QObject* Vizkit3DWidget::createPluginByName(QString pluginName)
 {
     vizkit::VizPluginBase* plugin = 0;
     if (pluginName == "WaypointVisualization")
@@ -259,7 +259,7 @@ QObject* QVizkitWidget::createPluginByName(QString pluginName)
  * Returns a list of all available visualization plugins.
  * @return list of plugin names
  */
-QStringList* QVizkitWidget::getListOfAvailablePlugins()
+QStringList* Vizkit3DWidget::getListOfAvailablePlugins()
 {
     if (!pluginNames->size()) 
     {

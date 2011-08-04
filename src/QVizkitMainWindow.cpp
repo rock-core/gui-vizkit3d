@@ -6,7 +6,7 @@ namespace vizkit {
 QVizkitMainWindow::QVizkitMainWindow(QWidget* parent, Qt::WindowFlags flags) 
     : QMainWindow(parent, flags)
 {
-    vizKitWidget = new vizkit::QVizkitWidget(parent, flags);
+    vizKitWidget = new vizkit::Vizkit3DWidget(parent, flags);
     this->setCentralWidget(vizKitWidget);    
     connect(this, SIGNAL(addPlugins()), this, SLOT(addPluginIntern()), Qt::QueuedConnection);
     connect(this, SIGNAL(removePlugins()), this, SLOT(removePluginIntern()), Qt::QueuedConnection);
@@ -79,7 +79,7 @@ void QVizkitMainWindow::removePluginIntern()
 /**
  * @return Instance of the OSG Widget
  */
-QVizkitWidget* QVizkitMainWindow::getVizkitWidget()
+Vizkit3DWidget* QVizkitMainWindow::getVizkitWidget()
 {
     return vizKitWidget;
 }

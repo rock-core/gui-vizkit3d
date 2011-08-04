@@ -4,7 +4,7 @@
 #define BOOST_AUTO_TEST_MAIN
 
 #include <vizkit/QVizkitMainWindow.hpp>
-#include <vizkit/QVizkitWidget.hpp>
+#include <vizkit/Vizkit3DWidget.hpp>
 #include <vizkit/QtThreadedWidget.hpp>
 #include <vizkit/TrajectoryVisualization.hpp>
 #include <vizkit/WaypointVisualization.hpp>
