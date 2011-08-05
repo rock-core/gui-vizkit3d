@@ -9,6 +9,8 @@
     </copyright>
     <depend package="base/types" />
     <depend package="external/yaml-cpp" />
+    <!-- needed for the vizkit/Ruby parts -->
+    <depend package="tools/orocos.rb" optional="1" />
     <rosdep name="osg" />
     <rosdep name="qt4" />
     <rosdep name="qt-designer" />
