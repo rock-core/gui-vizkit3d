@@ -42,6 +42,8 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
          */
         void setColor(base::Vector3d const& color);
 	
+	void setColor(const osg::Vec4d& color, osg::Geode* geode);
+	
     private:
         bool covariance;
         bool covariance_with_samples;
@@ -51,7 +53,7 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
 	osg::Vec3d pos;
 	osg::Quat orientation;
 	osg::ref_ptr<osg::Node>  body_model;
-        osg::ref_ptr<osg::Geode> createSimpleBody(double size);
+        osg::ref_ptr<osg::Group> createSimpleBody(double size);
 };
 
 }

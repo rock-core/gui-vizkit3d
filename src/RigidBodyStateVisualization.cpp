@@ -4,6 +4,7 @@
 #include <osg/ShapeDrawable>
 #include <osg/PositionAttitudeTransform>
 #include <osgDB/ReadFile>
+#include <osg/Material>
 
 namespace vizkit 
 {
@@ -23,34 +24,57 @@ RigidBodyStateVisualization::~RigidBodyStateVisualization()
 {
 }
 
-osg::ref_ptr<osg::Geode> RigidBodyStateVisualization::createSimpleBody(double size)
-{   
-    osg::ref_ptr<osg::Geode> geode = new osg::Geode();
+void RigidBodyStateVisualization::setColor(const osg::Vec4d& color, osg::Geode* geode)
+{
+    osg::Material *material = new osg::Material();
+    material->setDiffuse(osg::Material::FRONT,  osg::Vec4(0.1, 0.1, 0.1, 1.0));
+    material->setSpecular(osg::Material::FRONT, osg::Vec4(0.6, 0.6, 0.6, 1.0));
+    material->setAmbient(osg::Material::FRONT,  osg::Vec4(0.1, 0.1, 0.1, 1.0));
+    material->setEmission(osg::Material::FRONT, color);
+    material->setShininess(osg::Material::FRONT, 10.0);
 
+    geode->getOrCreateStateSet()->setAttribute(material);    
+}
+
+
+osg::ref_ptr<osg::Group> RigidBodyStateVisualization::createSimpleBody(double size)
+{   
+    osg::ref_ptr<osg::Group> group = new osg::Group();
+    
+    osg::ref_ptr<osg::Geode> geode = new osg::Geode();
     osg::ref_ptr<osg::Sphere> sp = new osg::Sphere(osg::Vec3f(0,0,0), main_size * size);
     osg::ref_ptr<osg::ShapeDrawable> spd = new osg::ShapeDrawable(sp);
     spd->setColor(osg::Vec4f(color.x(), color.y(), color.z(), 1.0));
     geode->addDrawable(spd);
+    group->addChild(geode);
     
     //up
+    osg::ref_ptr<osg::Geode> c1g = new osg::Geode();
     osg::ref_ptr<osg::Cylinder> c1 = new osg::Cylinder(osg::Vec3f(0, 0, size / 2), size / 40, size);
     osg::ref_ptr<osg::ShapeDrawable> c1d = new osg::ShapeDrawable(c1);
-    geode->addDrawable(c1d);
+    c1g->addDrawable(c1d);
+    setColor(osg::Vec4f(0, 0, 1.0, 1.0), c1g);
+    group->addChild(c1g);
     
     //north direction
+    osg::ref_ptr<osg::Geode> c2g = new osg::Geode();
     osg::ref_ptr<osg::Cylinder> c2 = new osg::Cylinder(osg::Vec3f(0, size / 2, 0), size / 40, size);
     c2->setRotation(osg::Quat(M_PI/2.0, osg::Vec3d(1,0,0)));
     osg::ref_ptr<osg::ShapeDrawable> c2d = new osg::ShapeDrawable(c2);
-    c2d->setColor(osg::Vec4f(1.0, 0, 0, 1.0));
-    geode->addDrawable(c2d);
-  
+    c2g->addDrawable(c2d);
+    setColor(osg::Vec4f(1.0, 0, 0, 1.0), c2g);
+    group->addChild(c2g);
+
     //east
+    osg::ref_ptr<osg::Geode> c3g = new osg::Geode();
     osg::ref_ptr<osg::Cylinder> c3 = new osg::Cylinder(osg::Vec3f(size / 2, 0, 0), size / 40, size);
     c3->setRotation(osg::Quat(M_PI/2.0, osg::Vec3d(0,1,0)));
     osg::ref_ptr<osg::ShapeDrawable> c3d = new osg::ShapeDrawable(c3);
-    geode->addDrawable(c3d);
-    
-    return geode;
+    c3g->addDrawable(c3d);
+    setColor(osg::Vec4f(0.0, 1.0, 0, 1.0), c3g);
+    group->addChild(c3g);
+
+    return group;
 }
 
 void RigidBodyStateVisualization::setMainSphereSize(double size)
