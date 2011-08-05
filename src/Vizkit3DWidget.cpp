@@ -32,6 +32,8 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     root->addChild(gn);
     
     pluginNames = new QStringList;
+    
+    changeCameraView(osg::Vec3d(0,0,0), osg::Vec3d(0,-5,5));
 }
 
 QSize Vizkit3DWidget::sizeHint() const
