@@ -36,7 +36,20 @@ public:
     QSize sizeHint() const;
     
 public slots:
+    /**
+     * Creates an instance of a visualization plugin using its
+     * Vizkit Qt Plugin.
+     * @param plugin Qt Plugin of the visualization plugin
+     * @return Instance of the adapter collection of this plugin
+     */
     QObject* createExternalPlugin(QObject* plugin, QString const& name);
+    /**
+     * Returns the list of visualization plugins a library provides
+     *
+     * @param plugin Qt Plugin used to discover the visualization plugins
+     * @return the list of plugin names
+     */
+    QStringList* getListOfExternalPlugins(QObject* qt_plugin);
     QStringList* getListOfAvailablePlugins();
     QObject* createPluginByName(QString pluginName);
 

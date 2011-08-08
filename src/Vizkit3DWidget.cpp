@@ -154,12 +154,22 @@ void Vizkit3DWidget::changeCameraView(const osg::Vec3* lookAtPos, const osg::Vec
     view->home();
 }
 
-/**
- * Creates an instance of a visualization plugin using its
- * Vizkit Qt Plugin.
- * @param plugin Qt Plugin of the visualization plugin
- * @return Instance of the adapter collection of this plugin
- */
+
+
+QStringList* Vizkit3DWidget::getListOfExternalPlugins(QObject* qt_plugin)
+{
+    vizkit::VizkitQtPluginBase* qtPlugin = dynamic_cast<vizkit::VizkitQtPluginBase*>(qt_plugin);
+    if (qtPlugin) 
+    {
+        return new QStringList(qtPlugin->getAvailablePlugins());
+    }
+    else 
+    {
+        std::cerr << "The given attribute is no Vizkit Qt Plugin!" << std::endl;
+        return NULL;
+    }
+}
+
 QObject* Vizkit3DWidget::createExternalPlugin(QObject* plugin, QString const& name)
 {
     vizkit::VizkitQtPluginBase* qtPlugin = dynamic_cast<vizkit::VizkitQtPluginBase*>(plugin);
