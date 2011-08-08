@@ -35,15 +35,15 @@ if(DOXYGEN_EXECUTABLE)
     # OUTPUT_DIRECTORY       = @PROJECT_BINARY_DIR@/doc
     # INPUT                  = @PROJECT_SOURCE_DIR@/src
     # input output @ONLY: replace @VAR@ in the input file with the cmake variables
-    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/doc/Doxyfile.in ${PROJECT_SOURCE_DIR}/doc/Doxyfile @ONLY)
+    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/Doxyfile.in ${PROJECT_BINARY_DIR}/Doxyfile @ONLY)
     # documentation can be generated with 'make doc'
-    ADD_CUSTOM_TARGET(doc ${DOXYGEN_EXECUTABLE} ${PROJECT_SOURCE_DIR}/doc/Doxyfile)
+    ADD_CUSTOM_TARGET(doc ${DOXYGEN_EXECUTABLE} ${PROJECT_BINARY_DIR}/Doxyfile)
     # generates documentation with cmake
     # QUIET mode is enabled in the configuration file (QUIET = YES)
     # If you want to autogenerate you documentation use set(AUTOGENERATE_DOC True) in the main 
     # CMakeList.txt file
     if(DEFINED AUTOGENERATE_DOC)
-	    EXECUTE_PROCESS(COMMAND ${DOXYGEN_EXECUTABLE} ${PROJECT_SOURCE_DIR}/doc/Doxyfile )
+        EXECUTE_PROCESS(COMMAND ${DOXYGEN_EXECUTABLE} ${PROJECT_BINARY_DIR}/Doxyfile )
     endif()
 endif(DOXYGEN_EXECUTABLE)
 ##### End doxygen support ###################################################
