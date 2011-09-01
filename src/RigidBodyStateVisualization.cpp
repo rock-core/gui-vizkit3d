@@ -14,6 +14,7 @@ RigidBodyStateVisualization::RigidBodyStateVisualization()
 {
     VizPluginRubyAdapter(RigidBodyStateVisualization, base::samples::RigidBodyState, RigidBodyState)
     VizPluginRubyMethod(RigidBodyStateVisualization, double, resetModel);
+    VizPluginRubyMethod(RigidBodyStateVisualization, double, resetModelSphere);
     VizPluginRubyMethod(RigidBodyStateVisualization, double, setMainSphereSize);
     VizPluginRubyMethod(RigidBodyStateVisualization, bool, displayCovariance);
     VizPluginRubyMethod(RigidBodyStateVisualization, bool, displayCovarianceWithSamples);
@@ -37,6 +38,20 @@ void RigidBodyStateVisualization::setColor(const osg::Vec4d& color, osg::Geode* 
 }
 
 
+osg::ref_ptr<osg::Group> RigidBodyStateVisualization::createSimpleSphere(double size)
+{   
+    osg::ref_ptr<osg::Group> group = new osg::Group();
+    
+    osg::ref_ptr<osg::Geode> geode = new osg::Geode();
+    osg::ref_ptr<osg::Sphere> sp = new osg::Sphere(osg::Vec3f(0,0,0), main_size * size);
+    osg::ref_ptr<osg::ShapeDrawable> spd = new osg::ShapeDrawable(sp);
+    spd->setColor(osg::Vec4f(color.x(), color.y(), color.z(), 1.0));
+    geode->addDrawable(spd);
+    group->addChild(geode);
+    
+    return group;
+}
+  
 osg::ref_ptr<osg::Group> RigidBodyStateVisualization::createSimpleBody(double size)
 {   
     osg::ref_ptr<osg::Group> group = new osg::Group();
@@ -85,6 +100,11 @@ void RigidBodyStateVisualization::setMainSphereSize(double size)
 void RigidBodyStateVisualization::resetModel(double size)
 {
     body_model = createSimpleBody(size);
+}
+
+void RigidBodyStateVisualization::resetModelSphere(double size)
+{
+    body_model = createSimpleSphere(size);
 }
 
 void RigidBodyStateVisualization::loadModel(std::string const& path)

@@ -21,6 +21,8 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
 	void updateDataIntern( const base::samples::RigidBodyState& state );
         base::samples::RigidBodyState state;
         void resetModel(double size);
+	void resetModelSphere(double size);
+	
         void loadModel(std::string const& path);
 
         /** When using the default body, sets the size of the main sphere,
@@ -54,6 +56,7 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
 	osg::Quat orientation;
 	osg::ref_ptr<osg::Node>  body_model;
         osg::ref_ptr<osg::Group> createSimpleBody(double size);
+	osg::ref_ptr<osg::Group> createSimpleSphere(double size);
 };
 
 }
