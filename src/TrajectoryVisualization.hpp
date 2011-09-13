@@ -9,7 +9,7 @@
 namespace vizkit 
 {
 
-class TrajectoryVisualization: public Vizkit3DPlugin<Eigen::Vector3d>, public VizPluginAddType<base::geometry::Spline3>
+class TrajectoryVisualization: public Vizkit3DPlugin<base::Vector3d>, public VizPluginAddType<base::geometry::Spline3>
 {
     public:
 	TrajectoryVisualization();    
@@ -19,7 +19,7 @@ class TrajectoryVisualization: public Vizkit3DPlugin<Eigen::Vector3d>, public Vi
     protected:
 	virtual osg::ref_ptr<osg::Node> createMainNode();
 	virtual void updateMainNode( osg::Node* node );
-	void updateDataIntern( const Eigen::Vector3d& data );
+	void updateDataIntern( const  base::Vector3d& data );
 	void updateDataIntern(const base::geometry::Spline3& data);
 	
     private:

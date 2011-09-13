@@ -7,7 +7,8 @@ namespace vizkit
 
 TrajectoryVisualization::TrajectoryVisualization()
 {
-    VizPluginRubyAdapter(TrajectoryVisualization, base::geometry::Spline3, Trajectory)
+    //VizPluginRubyAdapter(TrajectoryVisualization, base::geometry::Spline<3>, Trajectory);
+    VizPluginRubyAdapter(TrajectoryVisualization, base::Vector3d, Trajectory);
     // initialize here so that setColor can be called event
     doClear = false;
     color2 = new osg::Vec4Array;
@@ -77,14 +78,15 @@ void TrajectoryVisualization::updateDataIntern(const base::geometry::Spline3& da
     }
 }
 
-void TrajectoryVisualization::updateDataIntern( const Eigen::Vector3d& data )
+void TrajectoryVisualization::updateDataIntern( const base::Vector3d& data )
 {
+    
     if(doClear)
     {
 	points.clear();
 	doClear = false;
     }
-    
-    points.push_back(data);
+    Eigen::Vector3d d = data;
+    points.push_back(d);
 }
 }
