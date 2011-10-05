@@ -110,6 +110,7 @@ class VizPluginRubyAdapterCollection : public QObject
 class VizPluginBase : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QString vizkit3d_plugin_name READ getPluginName)
     
     public:
         VizPluginBase();
@@ -123,9 +124,8 @@ class VizPluginBase : public QObject
          * plugin's nodes */
 	osg::ref_ptr<osg::Group> getVizNode() const;
 
-	/** @return the name of the plugin, it's needed to save the 
-         *  configuration data in a YAML file */
-	virtual const std::string getPluginName() const;
+	/** @return the name of the plugin */
+	virtual const QString getPluginName() const;
 
 	/** override this method to save configuration data. Always call the
 	 * superclass as well.

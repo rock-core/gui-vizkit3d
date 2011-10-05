@@ -1,5 +1,6 @@
 #include <osg/Group>
 #include "VizPlugin.hpp"
+#include <typeinfo>
 
 using namespace vizkit;
 
@@ -29,9 +30,9 @@ osg::ref_ptr<osg::Group> VizPluginBase::getVizNode() const
     return vizNode;
 }
 
-const std::string VizPluginBase::getPluginName() const 
+const QString VizPluginBase::getPluginName() const 
 {
-    return "VizPlugin";
+    return typeid(*this).name();
 }
 
 osg::ref_ptr<osg::Node> VizPluginBase::createMainNode()
