@@ -77,7 +77,7 @@ void VizPluginBase::setDirty()
     dirty = true;
 }
 
-vizkit::VizPluginRubyAdapterCollection* vizkit::VizPluginBase::getRubyAdapterCollection()
+QObject* vizkit::VizPluginBase::getRubyAdapterCollection()
 {
     return &adapterCollection;
 }

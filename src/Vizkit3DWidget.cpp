@@ -34,6 +34,9 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     pluginNames = new QStringList;
     
     changeCameraView(osg::Vec3d(0,0,0), osg::Vec3d(0,-5,5));
+    
+    connect(this, SIGNAL(addPlugins()), this, SLOT(addPluginIntern()), Qt::QueuedConnection);
+    connect(this, SIGNAL(removePlugins()), this, SLOT(removePluginIntern()), Qt::QueuedConnection);
 }
 
 QSize Vizkit3DWidget::sizeHint() const
@@ -154,86 +157,67 @@ void Vizkit3DWidget::changeCameraView(const osg::Vec3* lookAtPos, const osg::Vec
     view->home();
 }
 
-
-
-QStringList* Vizkit3DWidget::getListOfExternalPlugins(QObject* qt_plugin)
+/**
+ * Puts the plugin in a list and emits a signal.
+ * Adding the new Plugin will be handled by the main thread.
+ * @param plugin Vizkit Plugin
+ */
+void Vizkit3DWidget::addPlugin(QObject* plugin)
 {
-    vizkit::VizkitQtPluginBase* qtPlugin = dynamic_cast<vizkit::VizkitQtPluginBase*>(qt_plugin);
-    if (qtPlugin) 
+    vizkit::VizPluginBase* viz_plugin = dynamic_cast<vizkit::VizPluginBase*>(plugin);
+    if (viz_plugin)
     {
-        return new QStringList(qtPlugin->getAvailablePlugins());
-    }
-    else 
-    {
-        std::cerr << "The given attribute is no Vizkit Qt Plugin!" << std::endl;
-        return NULL;
+        pluginsToAdd.push_back(viz_plugin);
+        emit addPlugins();
     }
 }
 
-QObject* Vizkit3DWidget::createExternalPlugin(QObject* plugin, QString const& name)
+/**
+ * Puts the plugin in a list and emits a signal.
+ * Removing the new Plugin will be handled by the main thread.
+ * @param plugin Vizkit Plugin
+ */
+void Vizkit3DWidget::removePlugin(QObject* plugin)
 {
-    vizkit::VizkitQtPluginBase* qtPlugin = dynamic_cast<vizkit::VizkitQtPluginBase*>(plugin);
-    if (qtPlugin) 
+    vizkit::VizPluginBase* viz_plugin = dynamic_cast<vizkit::VizPluginBase*>(plugin);
+    if (viz_plugin)
     {
-        QStringList plugins = qtPlugin->getAvailablePlugins();
-        vizkit::VizPluginBase* plugin = 0;
-        if (name.isEmpty())
-        {
-            if (plugins.size() == 0)
-            {
-                std::cerr << "this Qt Designer plugin defines no vizkit plugins" << std::endl;
-                return NULL;
-            }
-            else if (plugins.size() > 1)
-            {
-                std::cerr << "this Qt Designer plugin defines more than one vizkit plugin, you must select one explicitely" << std::endl;
-                std::cerr << "available plugins are:" << std::endl;
-                for (QStringList::const_iterator it = plugins.begin(); it != plugins.end(); ++it)
-                    std::cerr << "  " << it->toStdString() << std::endl;
-                return NULL;
-            }
-
-            plugin = qtPlugin->createPlugin(*plugins.begin());
-        }
-        else if (!plugins.contains(name))
-        {
-            if (plugins.contains(name + "Visualization"))
-                plugin = qtPlugin->createPlugin(name + "Visualization");
-            else
-            {
-                std::cerr << "there is no Vizkit plugin available called " << name.toStdString() << std::endl;
-                std::cerr << "available plugins are:" << std::endl;
-                for (QStringList::const_iterator it = plugins.begin(); it != plugins.end(); ++it)
-                    std::cerr << "  " << it->toStdString() << std::endl;
-
-                return NULL;
-            }
-        }
-        else
-        {
-            plugin = qtPlugin->createPlugin(name);
-        }
-
-        if (!plugin)
-        {
-            std::cerr << "createPlugin returned NULL" << std::endl;
-            return NULL;
-        }
-        addDataHandler(plugin);
-        return plugin->getRubyAdapterCollection();
+        pluginsToRemove.push_back(viz_plugin);
+        emit removePlugins();
     }
-    else 
+}
+
+/**
+ * This slot adds all plugins in the list to the OSG and
+ * their properties to the property browser widget.
+ */
+void Vizkit3DWidget::addPluginIntern()
+{
+    for(std::vector<vizkit::VizPluginBase*>::iterator pluginIt = pluginsToAdd.begin(); pluginIt != pluginsToAdd.end(); pluginIt++)
+    { 
+        addDataHandler(*pluginIt);
+    }
+    pluginsToAdd.clear();
+}
+
+/**
+ * This slot removes all plugins in the list from the OSG and
+ * their properties to the property browser widget.
+ */
+void Vizkit3DWidget::removePluginIntern()
+{
+    for(std::vector<vizkit::VizPluginBase*>::iterator pluginIt = pluginsToRemove.begin(); pluginIt != pluginsToRemove.end(); pluginIt++)
     {
-        std::cerr << "The given attribute is no Vizkit Qt Plugin!" << std::endl;
-        return NULL;
+        removeDataHandler(*pluginIt);
     }
+    pluginsToRemove.clear();
 }
 
 /**
  * Creates an instance of a visualization plugin given by its name 
  * and returns the adapter collection of the plugin, used in ruby.
  * @param pluginName Name of the plugin
- * @return Instance of the adapter collection of this plugin
+ * @return Instance of the plugin
  */
 QObject* Vizkit3DWidget::createPluginByName(QString pluginName)
 {
@@ -257,9 +241,7 @@ QObject* Vizkit3DWidget::createPluginByName(QString pluginName)
 
     if (plugin) 
     {
-        addDataHandler(plugin);
-        VizPluginRubyAdapterCollection* adapterCollection = plugin->getRubyAdapterCollection();
-        return adapterCollection;
+        return plugin;
     }
     else {
         std::cerr << "The Pluginname " << pluginName.toStdString() << " is unknown!" << std::endl;

@@ -12,28 +12,17 @@ class QDESIGNER_WIDGET_EXPORT QVizkitMainWindow : public QMainWindow
     Q_OBJECT
         
     public:
-	QVizkitMainWindow(QWidget * parent = 0, Qt::WindowFlags flags = 0);
-        void addPlugin(vizkit::VizPluginBase *plugin);
-        void removePlugin(vizkit::VizPluginBase* plugin);
+        QVizkitMainWindow(QWidget * parent = 0, Qt::WindowFlags flags = 0);
         Vizkit3DWidget* getVizkitWidget();
         
     public slots:    
-        QObject* createExternalPlugin(QObject* plugin, QString const& name);
+        void addPlugin(QObject* plugin);
+        void removePlugin(QObject* plugin);
         QStringList* getListOfAvailablePlugins();
         QObject* createPluginByName(QString pluginName);
-        
-    signals:
-        void addPlugins();
-        void removePlugins();
-        
-    private slots:
-        void addPluginIntern();
-        void removePluginIntern();
 	
     private:
-        std::vector<vizkit::VizPluginBase *> pluginsToAdd;
-        std::vector<vizkit::VizPluginBase *> pluginsToRemove;
-	Vizkit3DWidget *vizKitWidget;
+        Vizkit3DWidget *vizKitWidget;
 };
 
 }

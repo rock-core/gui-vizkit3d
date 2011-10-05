@@ -36,27 +36,23 @@ public:
     QSize sizeHint() const;
     
 public slots:
-    /**
-     * Creates an instance of a visualization plugin using its
-     * Vizkit Qt Plugin.
-     * @param plugin Qt Plugin of the visualization plugin
-     * @return Instance of the adapter collection of this plugin
-     */
-    QObject* createExternalPlugin(QObject* plugin, QString const& name);
-    /**
-     * Returns the list of visualization plugins a library provides
-     *
-     * @param plugin Qt Plugin used to discover the visualization plugins
-     * @return the list of plugin names
-     */
-    QStringList* getListOfExternalPlugins(QObject* qt_plugin);
+    void addPlugin(QObject* plugin);
+    void removePlugin(QObject* plugin);
+    
     QStringList* getListOfAvailablePlugins();
     QObject* createPluginByName(QString pluginName);
 
-public slots:
     void setCameraLookAt(double x, double y, double z);
     void setCameraEye(double x, double y, double z);
     void setCameraUp(double x, double y, double z);
+        
+signals:
+    void addPlugins();
+    void removePlugins();
+    
+private slots:
+    void addPluginIntern();
+    void removePluginIntern();
 
 protected:
     void changeCameraView(const osg::Vec3* lookAtPos,
@@ -68,6 +64,8 @@ protected:
     osg::ref_ptr<PickHandler> pickHandler;
     osg::ref_ptr<ViewQOSG> view;
     QStringList* pluginNames;
+    std::vector<vizkit::VizPluginBase *> pluginsToAdd;
+    std::vector<vizkit::VizPluginBase *> pluginsToRemove;
 };
 
 }

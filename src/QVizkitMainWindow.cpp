@@ -7,73 +7,46 @@ QVizkitMainWindow::QVizkitMainWindow(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags)
 {
     vizKitWidget = new vizkit::Vizkit3DWidget(parent, flags);
-    this->setCentralWidget(vizKitWidget);    
-    connect(this, SIGNAL(addPlugins()), this, SLOT(addPluginIntern()), Qt::QueuedConnection);
-    connect(this, SIGNAL(removePlugins()), this, SLOT(removePluginIntern()), Qt::QueuedConnection);
+    this->setCentralWidget(vizKitWidget);
 }
 
 /**
- * Puts the plugin in a list and emits a signal.
- * Adding the new Plugin will be handled by the main thread.
+ * Adds the plugin to the vizkit widget and
+ * adds its qdockwidgets to the right side of the 
+ * main window.
  * @param plugin Vizkit Plugin
  */
-void QVizkitMainWindow::addPlugin(vizkit::VizPluginBase* plugin)
+void QVizkitMainWindow::addPlugin(QObject* plugin)
 {
-    if (plugin)
+    vizKitWidget->addPlugin(plugin);
+    vizkit::VizPluginBase* viz_plugin = dynamic_cast<vizkit::VizPluginBase*>(plugin);
+    if (viz_plugin)
     {
-        pluginsToAdd.push_back(plugin);
-        emit addPlugins();
-    }
-}
-
-/**
- * Puts the plugin in a list and emits a signal.
- * Removing the new Plugin will be handled by the main thread.
- * @param plugin Vizkit Plugin
- */
-void QVizkitMainWindow::removePlugin(VizPluginBase* plugin)
-{
-    if (plugin)
-    {
-        pluginsToRemove.push_back(plugin);
-        emit removePlugins();
-    }
-}
-
-/**
- * This slot adds all plugins in the list to the OSG and
- * their QDockWidgets to the QMainWindow.
- */
-void QVizkitMainWindow::addPluginIntern()
-{
-    for(std::vector<vizkit::VizPluginBase*>::iterator pluginIt = pluginsToAdd.begin(); pluginIt != pluginsToAdd.end(); pluginIt++)
-    {
-        vizKitWidget->addDataHandler(*pluginIt);
-        std::vector<QDockWidget*> dockWidgets = (*pluginIt)->getDockWidgets();
+        std::vector<QDockWidget*> dockWidgets = viz_plugin->getDockWidgets();
         for(std::vector<QDockWidget*>::iterator dockit = dockWidgets.begin(); dockit != dockWidgets.end(); dockit++)
         {
-            this->addDockWidget(Qt::LeftDockWidgetArea, *dockit);
+            this->addDockWidget(Qt::RightDockWidgetArea, *dockit);
         }
     }
-    pluginsToAdd.clear();
 }
 
 /**
- * This slot removes all plugins in the list from the OSG and
- * their QDockWidgets from the QMainWindow.
+ * Removes the plugin from the vizkit widget and
+ * removes its qdockwidgets from the main window.
+ * @param plugin Vizkit Plugin
  */
-void QVizkitMainWindow::removePluginIntern()
+void QVizkitMainWindow::removePlugin(QObject* plugin)
 {
-    for(std::vector<vizkit::VizPluginBase*>::iterator pluginIt = pluginsToRemove.begin(); pluginIt != pluginsToRemove.end(); pluginIt++)
+    vizKitWidget->removePlugin(plugin);
+    vizkit::VizPluginBase* viz_plugin = dynamic_cast<vizkit::VizPluginBase*>(plugin);
+    if (viz_plugin)
     {
-        std::vector<QDockWidget*> dockWidgets = (*pluginIt)->getDockWidgets();
+        std::vector<QDockWidget*> dockWidgets = viz_plugin->getDockWidgets();
         for(std::vector<QDockWidget*>::iterator dockit = dockWidgets.begin(); dockit != dockWidgets.end(); dockit++)
         {
             this->removeDockWidget(*dockit);
         }
-        vizKitWidget->removeDataHandler(*pluginIt);
     }
-    pluginsToRemove.clear();
 }
 
 /**
@@ -85,21 +58,10 @@ Vizkit3DWidget* QVizkitMainWindow::getVizkitWidget()
 }
 
 /**
- * Creates an instance of a visualization plugin using its
- * Vizkit Qt Plugin.
- * @param plugin Qt Plugin of the visualization plugin
- * @return Instance of the adapter collection of this plugin
- */
-QObject* QVizkitMainWindow::createExternalPlugin(QObject* plugin, QString const& name)
-{
-    return vizKitWidget->createExternalPlugin(plugin, name);
-}
-
-/**
  * Creates an instance of a visualization plugin given by its name 
  * and returns the adapter collection of the plugin, used in ruby.
  * @param pluginName Name of the plugin
- * @return Instance of the adapter collection of this plugin
+ * @return Instance of the vizkit plugin
  */
 QObject* QVizkitMainWindow::createPluginByName(QString pluginName)
 {

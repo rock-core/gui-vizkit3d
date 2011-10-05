@@ -107,8 +107,10 @@ class VizPluginRubyAdapterCollection : public QObject
  * within the updateMainNode(). Note that updateMainNode() is most likely called
  * from a different thread context than the rest.
  */
-class VizPluginBase
+class VizPluginBase : public QObject
 {
+    Q_OBJECT
+    
     public:
         VizPluginBase();
 
@@ -144,10 +146,12 @@ class VizPluginBase
          */
         std::vector<QDockWidget*> getDockWidgets();
         
+    public slots:
         /**
-         * @return an instance of the ruby adapter collection.
-         */
-        VizPluginRubyAdapterCollection* getRubyAdapterCollection();
+        * @return an instance of the ruby adapter collection.
+        */
+        QObject* getRubyAdapterCollection();
+        
 
     protected:
 	/** override this function to update the visualisation.
@@ -243,23 +247,6 @@ class Vizkit3DPlugin : public VizPluginBase,
 	};
 };
 
-/** 
- * Interface class for all Vizkit Qt plugins.
- * Vizkit Qt plugins are only helper classes to create an
- * instance of the Vizkit plugin using ruby.
- */
-class VizkitQtPluginBase : public QObject
-{
-    Q_OBJECT
-    
-    public:
-        VizkitQtPluginBase(QObject* parent = 0) : QObject(parent){};
-    
-    public slots:
-        virtual VizPluginBase* createPlugin(QString const& name) = 0;
-        virtual QStringList getAvailablePlugins() const = 0;
-};
-
 /**
  * Macro that adds a type-specific ruby adapter, provided by the plugin.
  * Use this if you want to provide ruby adapters:
@@ -311,36 +298,11 @@ class VizkitQtPluginBase : public QObject
     VizPluginRubyAdapterCommon(pluginName, dataType, methodName, methodName)
 
 
-/**
- * Macro that adds a Vizkit Qt plugin to a Vizkit plugin.
- * This is needed to create an instance of the plugin in ruby, if
- * the plugin is part of a external library.
- * The ruby adapter macro is also needed in this case.
- * 
- * Use this to provide a Vizkit Qt plugin:
- *
- * <code>
- *     class WaypointVisualization{..};
- *     
- *     VizkitQtPlugin(WaypointVisualization)
+/** @deprecated 
+ * use Q_EXPORT_PLUGIN2 macro directly instead
  */
 #define VizkitQtPlugin(pluginName)\
-    class QtPlugin##pluginName : public vizkit::VizkitQtPluginBase {\
-        public:\
-        virtual QStringList getAvailablePlugins() const\
-        {\
-            QStringList result; \
-            result.push_back(#pluginName); \
-            return result;\
-        } \
-        virtual vizkit::VizPluginBase* createPlugin(QString const& name)\
-        {\
-            if (name == #pluginName) \
-                return new pluginName;\
-            else return 0;\
-        };\
-    };\
-    Q_EXPORT_PLUGIN2(QtPlugin##pluginName, QtPlugin##pluginName)
+    Q_EXPORT_PLUGIN2(pluginName, pluginName)
 
 
 /** @deprecated adapter item for legacy visualizations. Do not derive from this
