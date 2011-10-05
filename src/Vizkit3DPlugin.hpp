@@ -152,6 +152,11 @@ class VizPluginBase : public QObject
         */
         QObject* getRubyAdapterCollection();
         
+    signals:
+       /**
+        * must be emitted if a property of an inherited plugin changes
+        */
+        void propertyChanged();
 
     protected:
 	/** override this function to update the visualisation.
