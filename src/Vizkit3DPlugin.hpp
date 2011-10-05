@@ -111,6 +111,7 @@ class VizPluginBase : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString vizkit3d_plugin_name READ getPluginName)
+    Q_PROPERTY(bool enabled READ isPluginEnabled WRITE setPluginEnabled)
     
     public:
         VizPluginBase();
@@ -126,6 +127,16 @@ class VizPluginBase : public QObject
 
 	/** @return the name of the plugin */
 	virtual const QString getPluginName() const;
+    
+       /**
+        * @return true if plugin is enabled
+        */
+        bool isPluginEnabled();
+        
+       /**
+        * @param enabled set plugin enabled or disabled
+        */
+        void setPluginEnabled(bool enabled);
 
 	/** override this method to save configuration data. Always call the
 	 * superclass as well.
@@ -157,6 +168,11 @@ class VizPluginBase : public QObject
         * must be emitted if a property of an inherited plugin changes
         */
         void propertyChanged();
+        
+       /**
+        * will emitted if the plugin activity changes
+        */
+        void pluginActivityChanged(bool);
 
     protected:
 	/** override this function to update the visualisation.
@@ -191,6 +207,7 @@ class VizPluginBase : public QObject
         osg::ref_ptr<osg::Node> mainNode;
         osg::ref_ptr<osg::Group> vizNode;
 	bool dirty;
+        bool plugin_enabled;
 };
 
 template <typename T> class Vizkit3DPlugin;

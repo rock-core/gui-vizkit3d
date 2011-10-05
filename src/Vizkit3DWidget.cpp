@@ -196,6 +196,7 @@ void Vizkit3DWidget::addPluginIntern()
     for(std::vector<vizkit::VizPluginBase*>::iterator pluginIt = pluginsToAdd.begin(); pluginIt != pluginsToAdd.end(); pluginIt++)
     { 
         addDataHandler(*pluginIt);
+        connect(*pluginIt, SIGNAL(pluginActivityChanged(bool)), this, SLOT(pluginActivityChanged(bool)));
     }
     pluginsToAdd.clear();
 }
@@ -209,6 +210,7 @@ void Vizkit3DWidget::removePluginIntern()
     for(std::vector<vizkit::VizPluginBase*>::iterator pluginIt = pluginsToRemove.begin(); pluginIt != pluginsToRemove.end(); pluginIt++)
     {
         removeDataHandler(*pluginIt);
+        disconnect(*pluginIt, SIGNAL(pluginActivityChanged(bool)), this, SLOT(pluginActivityChanged(bool)));
     }
     pluginsToRemove.clear();
 }
@@ -263,4 +265,32 @@ QStringList* Vizkit3DWidget::getListOfAvailablePlugins()
         pluginNames->push_back("RigidBodyStateVisualization");
     }
     return pluginNames;
+}
+
+/**
+ * Adds or removes a plugin if the plugin activity 
+ * has changed.
+ * @param enabled 
+ */
+void Vizkit3DWidget::pluginActivityChanged(bool enabled)
+{
+    QObject* obj = QObject::sender();
+    vizkit::VizPluginBase* viz_plugin = dynamic_cast<vizkit::VizPluginBase*>(obj);
+    if(viz_plugin)
+    {
+        // check if root node has plugin as child
+        bool has_child_plugin = false;
+        if(root->getChildIndex(viz_plugin->getVizNode()) < root->getNumChildren())
+            has_child_plugin = true;
+        
+        // add or remove plugin from root node
+        if(enabled && !has_child_plugin)
+        {
+            addDataHandler(viz_plugin);
+        }
+        else if (!enabled && has_child_plugin)
+        {
+            removeDataHandler(viz_plugin);
+        }
+    }
 }

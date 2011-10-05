@@ -53,6 +53,7 @@ signals:
 private slots:
     void addPluginIntern();
     void removePluginIntern();
+    void pluginActivityChanged(bool enabled);
 
 protected:
     void changeCameraView(const osg::Vec3* lookAtPos,

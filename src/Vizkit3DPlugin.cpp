@@ -18,7 +18,7 @@ struct VizPluginBase::CallbackAdapter : public osg::NodeCallback
 };
 
 VizPluginBase::VizPluginBase()
-    : dirty( false )
+    : dirty( false ), plugin_enabled(true)
 {
     vizNode = new osg::Group();
     nodeCallback = new CallbackAdapter( this );
@@ -81,4 +81,15 @@ void VizPluginBase::setDirty()
 QObject* vizkit::VizPluginBase::getRubyAdapterCollection()
 {
     return &adapterCollection;
+}
+
+bool VizPluginBase::isPluginEnabled()
+{
+    return plugin_enabled;
+}
+
+void VizPluginBase::setPluginEnabled(bool enabled)
+{
+    plugin_enabled = enabled;
+    emit pluginActivityChanged(enabled);
 }
