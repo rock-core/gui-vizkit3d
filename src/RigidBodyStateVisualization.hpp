@@ -20,6 +20,8 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
 	virtual void updateMainNode(osg::Node* node);
 	void updateDataIntern( const base::samples::RigidBodyState& state );
         base::samples::RigidBodyState state;
+    
+    public: 
         void resetModel(double size);
 	void resetModelSphere(double size);
 	
