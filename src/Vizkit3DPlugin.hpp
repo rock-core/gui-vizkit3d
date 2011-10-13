@@ -269,6 +269,21 @@ class Vizkit3DPlugin : public VizPluginBase,
 	};
 };
 
+/** 
+ * Interface class to create multiple vizkit plugins.
+ */
+class VizkitPluginFactory : public QObject
+{
+    Q_OBJECT
+    
+    public:
+        VizkitPluginFactory(QObject* parent = 0) : QObject(parent){};
+    
+    public slots:
+        virtual QObject* createPlugin(QString const& name) = 0;
+        virtual QStringList* getAvailablePlugins() const = 0;
+};
+
 /**
  * Macro that adds a type-specific ruby adapter, provided by the plugin.
  * Use this if you want to provide ruby adapters:
