@@ -8,6 +8,14 @@ set(LIB_MAINWINDOW_LOADER ${PROJECT_NAME}mainwindowloader)
 set(TYPELIB_TO_QVARIANT ${PROJECT_NAME}typelib)
 
 set(SOURCES 
+    qtpropertybrowser/qteditorfactory.cpp
+    qtpropertybrowser/qtvariantproperty.cpp
+    qtpropertybrowser/qtpropertymanager.cpp
+    qtpropertybrowser/qtbuttonpropertybrowser.cpp
+    qtpropertybrowser/qtpropertybrowser.cpp
+    qtpropertybrowser/qtpropertybrowserutils.cpp
+    qtpropertybrowser/qttreepropertybrowser.cpp
+    qtpropertybrowser/qtgroupboxpropertybrowser.cpp
     Vizkit3DPlugin.cpp
     CompositeViewerQOSG.cpp
     CoordinateFrame.cpp
@@ -26,6 +34,14 @@ set(SOURCES
     )
 
 set(QT_HEADERS 
+    qtpropertybrowser/qteditorfactory.h
+    qtpropertybrowser/qtvariantproperty.h
+    qtpropertybrowser/qtpropertymanager.h
+    qtpropertybrowser/qtbuttonpropertybrowser.h
+    qtpropertybrowser/qtpropertybrowser.h
+    qtpropertybrowser/qtpropertybrowserutils_p.h
+    qtpropertybrowser/qttreepropertybrowser.h
+    qtpropertybrowser/qtgroupboxpropertybrowser.h
     Vizkit3DPlugin.hpp
     QOSGWidget.hpp 
     Vizkit3DWidget.hpp 
@@ -55,11 +71,12 @@ set(HEADERS
 QT4_WRAP_CPP(moc_cpp ${QT_HEADERS})
 QT4_WRAP_CPP(moc_cpp_widget_loader QVizkitWidgetLoader.hpp)
 QT4_WRAP_CPP(moc_cpp_mainwindow_loader QVizkitMainWindowLoader.hpp)
+QT4_ADD_RESOURCES(PROPERTY_BROWSER_RESOURCES qtpropertybrowser/qtpropertybrowser.qrc)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # We are adding a library here, which is required for the test
 # setup, so if you change the setup here
-add_library(${PROJECT_NAME} SHARED ${SOURCES} ${moc_cpp} ${ui_cpp})
+add_library(${PROJECT_NAME} SHARED ${SOURCES} ${moc_cpp} ${ui_cpp} ${PROPERTY_BROWSER_RESOURCES})
 add_library(${LIB_WIDGET_LOADER} SHARED QVizkitWidgetLoader.cpp ${moc_cpp_widget_loader})
 add_library(${LIB_MAINWINDOW_LOADER} SHARED QVizkitMainWindowLoader.cpp ${moc_cpp_mainwindow_loader})
 target_link_libraries(${PROJECT_NAME} ${EXTERNAL_LIBS} ${QT_QTGUI_LIBRARY} ${QT_QTCORE_LIBRARY} ${YAML_LIBRARIES})
