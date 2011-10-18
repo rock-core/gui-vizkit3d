@@ -35,7 +35,7 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     
     changeCameraView(osg::Vec3d(0,0,0), osg::Vec3d(0,-5,5));
     
-    propertyBrowserWidget = new QProperyBrowserWidget(viewWidget);
+    propertyBrowserWidget = new QProperyBrowserWidget(parent);
     
     connect(this, SIGNAL(addPlugins()), this, SLOT(addPluginIntern()), Qt::QueuedConnection);
     connect(this, SIGNAL(removePlugins()), this, SLOT(removePluginIntern()), Qt::QueuedConnection);
