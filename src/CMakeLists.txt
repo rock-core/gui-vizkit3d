@@ -31,6 +31,7 @@ set(SOURCES
     QVizkitMainWindow.cpp
     Uncertainty.cpp
     RigidBodyStateVisualization.cpp
+    QPropertyBrowserWidget.cpp
     )
 
 set(QT_HEADERS 
@@ -48,6 +49,7 @@ set(QT_HEADERS
     CompositeViewerQOSG.hpp 
     PickHandler.hpp
     QVizkitMainWindow.hpp
+    QPropertyBrowserWidget.hpp
     )
 
 set(HEADERS 

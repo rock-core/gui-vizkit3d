@@ -8,6 +8,9 @@ QVizkitMainWindow::QVizkitMainWindow(QWidget* parent, Qt::WindowFlags flags)
 {
     vizKitWidget = new vizkit::Vizkit3DWidget(parent, flags);
     this->setCentralWidget(vizKitWidget);
+    QDockWidget* leftDockWidget = new QDockWidget;
+    leftDockWidget->setWidget(vizKitWidget->getPropertyWidget());
+    this->addDockWidget(Qt::LeftDockWidgetArea, leftDockWidget);
 }
 
 /**

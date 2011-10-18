@@ -35,6 +35,8 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     
     changeCameraView(osg::Vec3d(0,0,0), osg::Vec3d(0,-5,5));
     
+    propertyBrowserWidget = new QProperyBrowserWidget(viewWidget);
+    
     connect(this, SIGNAL(addPlugins()), this, SLOT(addPluginIntern()), Qt::QueuedConnection);
     connect(this, SIGNAL(removePlugins()), this, SLOT(removePluginIntern()), Qt::QueuedConnection);
 }
@@ -196,6 +198,7 @@ void Vizkit3DWidget::addPluginIntern()
     for(std::vector<vizkit::VizPluginBase*>::iterator pluginIt = pluginsToAdd.begin(); pluginIt != pluginsToAdd.end(); pluginIt++)
     { 
         addDataHandler(*pluginIt);
+        propertyBrowserWidget->addPropertys(*pluginIt);
         connect(*pluginIt, SIGNAL(pluginActivityChanged(bool)), this, SLOT(pluginActivityChanged(bool)));
     }
     pluginsToAdd.clear();
@@ -210,6 +213,7 @@ void Vizkit3DWidget::removePluginIntern()
     for(std::vector<vizkit::VizPluginBase*>::iterator pluginIt = pluginsToRemove.begin(); pluginIt != pluginsToRemove.end(); pluginIt++)
     {
         removeDataHandler(*pluginIt);
+        propertyBrowserWidget->removePropertys(*pluginIt);
         disconnect(*pluginIt, SIGNAL(pluginActivityChanged(bool)), this, SLOT(pluginActivityChanged(bool)));
     }
     pluginsToRemove.clear();
@@ -293,4 +297,12 @@ void Vizkit3DWidget::pluginActivityChanged(bool enabled)
             removeDataHandler(viz_plugin);
         }
     }
+}
+
+/**
+ * @return property browser widget
+ */
+QWidget* Vizkit3DWidget::getPropertyWidget()
+{
+    return propertyBrowserWidget;
 }

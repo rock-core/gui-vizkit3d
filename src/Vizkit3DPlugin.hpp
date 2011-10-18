@@ -167,7 +167,7 @@ class VizPluginBase : public QObject
        /**
         * must be emitted if a property of an inherited plugin changes
         */
-        void propertyChanged();
+        void propertyChanged(QString property_name);
         
        /**
         * will emitted if the plugin activity changes

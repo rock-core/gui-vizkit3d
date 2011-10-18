@@ -5,6 +5,7 @@
 #include <vizkit/VizPlugin.hpp>
 #include <vizkit/CompositeViewerQOSG.hpp>
 #include <vizkit/PickHandler.hpp>
+#include <vizkit/QPropertyBrowserWidget.hpp>
 #include <QtDesigner/QDesignerExportWidget>
 
 namespace vizkit 
@@ -41,6 +42,8 @@ public slots:
     
     QStringList* getListOfAvailablePlugins();
     QObject* createPluginByName(QString pluginName);
+    
+    QWidget* getPropertyWidget();
 
     void setCameraLookAt(double x, double y, double z);
     void setCameraEye(double x, double y, double z);
@@ -65,6 +68,7 @@ protected:
     osg::ref_ptr<PickHandler> pickHandler;
     osg::ref_ptr<ViewQOSG> view;
     QStringList* pluginNames;
+    QProperyBrowserWidget* propertyBrowserWidget;
     std::vector<vizkit::VizPluginBase *> pluginsToAdd;
     std::vector<vizkit::VizPluginBase *> pluginsToRemove;
 };
