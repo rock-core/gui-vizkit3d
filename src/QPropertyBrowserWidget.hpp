@@ -15,8 +15,8 @@ class QProperyBrowserWidget : public QtTreePropertyBrowser
     
 public:
     QProperyBrowserWidget(QWidget* parent = 0);
-    void addPropertys(QObject* obj);
-    void removePropertys(QObject* obj);
+    void addProperties(QObject* obj);
+    void removeProperties(QObject* obj);
     
 protected slots:
     void propertyChangedInGUI(QtProperty *property, const QVariant &val);

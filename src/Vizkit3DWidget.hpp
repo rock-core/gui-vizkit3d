@@ -2,7 +2,7 @@
 #define __VIZKIT_QVIZKITWIDGET__
 
 #include <vizkit/QOSGWidget.hpp>
-#include <vizkit/VizPlugin.hpp>
+#include <vizkit/Vizkit3DPlugin.hpp>
 #include <vizkit/CompositeViewerQOSG.hpp>
 #include <vizkit/PickHandler.hpp>
 #include <vizkit/QPropertyBrowserWidget.hpp>

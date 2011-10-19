@@ -92,4 +92,5 @@ void VizPluginBase::setPluginEnabled(bool enabled)
 {
     plugin_enabled = enabled;
     emit pluginActivityChanged(enabled);
+    emit propertyChanged("enabled");
 }

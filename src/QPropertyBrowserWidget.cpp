@@ -1,7 +1,6 @@
 #include "QPropertyBrowserWidget.hpp"
 #include <qmetaobject.h>
 #include <QString>
-#include <vizkit/Vizkit3DPlugin.hpp>
 #include <iostream>
 
 namespace vizkit
@@ -23,8 +22,11 @@ QProperyBrowserWidget::QProperyBrowserWidget(QWidget* parent)
 
 /**
  * Adds all properties of a QObject to the property browser widget.
+/**
+ * Adds all properties of a QObject to the property browser widget,
+ * grouped by the name of the vizkit plugin.
  */
-void QProperyBrowserWidget::addPropertys(QObject* obj)
+void QProperyBrowserWidget::addProperties(QObject* obj)
 {
     const QMetaObject* metaObj = obj->metaObject();
     
@@ -72,20 +74,20 @@ void QProperyBrowserWidget::addPropertys(QObject* obj)
     this->addProperty(group);
     
     // connect plugin signal, to notice if a property has changed
-    VizPluginBase* plugin = dynamic_cast<VizPluginBase*>(obj);
-    if(plugin)
-        this->connect(plugin, SIGNAL(propertyChanged(QString)), this, SLOT(propertyChangedInObject(QString)));
+    if (!this->connect(obj, SIGNAL(propertyChanged(QString)), this, SLOT(propertyChangedInObject(QString))))
+    {
+        std::cerr << "The QObject has no SIGNAL 'propertyChanged(QString)', the property browser widget won't get updated "
+                  << "if properties in the QObject will change." << std::endl;
+    }
 }
 
 /**
  * Removes all properies of a QObject from the property browser widget.
  */
-void QProperyBrowserWidget::removePropertys(QObject* obj)
+void QProperyBrowserWidget::removeProperties(QObject* obj)
 {
     // disconnect signal
-    VizPluginBase* plugin = dynamic_cast<VizPluginBase*>(obj);
-    if(plugin)
-        this->disconnect(plugin, SIGNAL(propertyChanged(QString)), this, SLOT(propertyChangedInObject(QString)));
+    this->disconnect(obj, SIGNAL(propertyChanged(QString)), this, SLOT(propertyChangedInObject(QString)));
     
     // remove properties
     if(objectToGroup[obj])
