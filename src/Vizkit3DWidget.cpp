@@ -1,6 +1,5 @@
 #include "Vizkit3DWidget.hpp"
 #include <QVBoxLayout>
-#include <GridNode.hpp>
 #include <vizkit/MotionCommandVisualization.hpp>
 #include <vizkit/TrajectoryVisualization.hpp>
 #include <vizkit/WaypointVisualization.hpp>
@@ -28,8 +27,11 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     view->addEventHandler( pickHandler );
     
     // add visualization of ground grid 
-    GridNode *gn = new GridNode();
-    root->addChild(gn);
+    groundGrid = new GridNode();
+    root->addChild(groundGrid);
+    
+    // create visualization of the coordinate axes
+    coordinateFrame = new CoordinateFrame();
     
     pluginNames = new QStringList;
     
@@ -37,6 +39,11 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     
     // create propertyBrowserWidget
     propertyBrowserWidget = new QProperyBrowserWidget(parent);
+    
+    // add some properties of this widget as global properties
+    QStringList property_names("show_grid");
+    property_names.push_back("show_axes");
+    propertyBrowserWidget->addGlobalProperties(this, property_names);
     
     connect(this, SIGNAL(addPlugins()), this, SLOT(addPluginIntern()), Qt::QueuedConnection);
     connect(this, SIGNAL(removePlugins()), this, SLOT(removePluginIntern()), Qt::QueuedConnection);
@@ -306,4 +313,54 @@ void Vizkit3DWidget::pluginActivityChanged(bool enabled)
 QWidget* Vizkit3DWidget::getPropertyWidget()
 {
     return propertyBrowserWidget;
+}
+
+/**
+ * @return true if ground grid is enabled
+ */
+bool Vizkit3DWidget::isGridEnabled()
+{
+    return (root->getChildIndex(groundGrid) < root->getNumChildren());
+}
+
+/**
+ * Enable or disable ground grid.
+ * @param enabled
+ */
+void Vizkit3DWidget::setGridEnabled(bool enabled)
+{
+    if(!enabled && isGridEnabled())
+    {
+        root->removeChild(groundGrid);
+    }
+    else if(enabled && !isGridEnabled())
+    {
+        root->addChild(groundGrid);
+    }
+    emit propertyChanged("show_grid");
+}
+
+/**
+ * @return true if axes coordinates are enabled
+ */
+bool Vizkit3DWidget::areAxesEnabled()
+{
+    return (root->getChildIndex(coordinateFrame) < root->getNumChildren());
+}
+
+/**
+ * Enable or disable axes of the coordinate system.
+ * @param enabled
+ */
+void Vizkit3DWidget::setAxesEnabled(bool enabled)
+{
+    if(!enabled && areAxesEnabled())
+    {
+        root->removeChild(coordinateFrame);
+    }
+    else if(enabled && !areAxesEnabled())
+    {
+        root->addChild(coordinateFrame);
+    }
+    emit propertyChanged("show_axes");
 }

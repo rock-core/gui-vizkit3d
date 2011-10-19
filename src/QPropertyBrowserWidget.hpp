@@ -17,6 +17,7 @@ public:
     QProperyBrowserWidget(QWidget* parent = 0);
     void addProperties(QObject* obj);
     void removeProperties(QObject* obj);
+    void addGlobalProperties(QObject* obj, const QStringList &property_list);
     
 protected slots:
     void propertyChangedInGUI(QtProperty *property, const QVariant &val);

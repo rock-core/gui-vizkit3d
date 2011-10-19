@@ -21,7 +21,39 @@ QProperyBrowserWidget::QProperyBrowserWidget(QWidget* parent)
 }
 
 /**
- * Adds all properties of a QObject to the property browser widget.
+ * Adds all properties of a QObject to the property browser widget as ungrouped global properties.
+ */
+void QProperyBrowserWidget::addGlobalProperties(QObject* obj, const QStringList& property_list)
+{
+    const QMetaObject* metaObj = obj->metaObject();
+    QHash<QString, QtProperty*>* groupMap = new QHash<QString, QtProperty*>();
+    
+    for(int i = 1 ; i < metaObj->propertyCount(); i++)
+    {
+        if(property_list.contains(QString::fromAscii(metaObj->property(i).name())))
+        {
+            QtVariantProperty* property = variantManager->addProperty(metaObj->property(i).type(), metaObj->property(i).name());
+            if(property == 0)
+            {
+                std::cerr << "QVariant type " << metaObj->property(i).type() << " with name " << metaObj->property(i).name() 
+                        << " is not supported by the QtPropertyBrowser." << std::endl;
+                continue;
+            }
+            property->setValue(metaObj->property(i).read(obj));
+            propertyToObject[property] = obj;
+            (*groupMap)[property->propertyName()] = property;
+            this->addProperty(property);
+        }
+    }
+    objectToProperties[obj] = groupMap;
+    
+    if (!this->connect(obj, SIGNAL(propertyChanged(QString)), this, SLOT(propertyChangedInObject(QString))))
+    {
+        std::cerr << "The QObject has no SIGNAL 'propertyChanged(QString)', the property browser widget won't get updated "
+                  << "if properties in the QObject will change." << std::endl;
+    }
+}
+
 /**
  * Adds all properties of a QObject to the property browser widget,
  * grouped by the name of the vizkit plugin.

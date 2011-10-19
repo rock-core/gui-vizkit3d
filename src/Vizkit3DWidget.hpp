@@ -3,6 +3,8 @@
 
 #include <vizkit/QOSGWidget.hpp>
 #include <vizkit/Vizkit3DPlugin.hpp>
+#include <vizkit/GridNode.hpp>
+#include <vizkit/CoordinateFrame.hpp>
 #include <vizkit/CompositeViewerQOSG.hpp>
 #include <vizkit/PickHandler.hpp>
 #include <vizkit/QPropertyBrowserWidget.hpp>
@@ -14,6 +16,8 @@ namespace vizkit
 class QDESIGNER_WIDGET_EXPORT Vizkit3DWidget : public CompositeViewerQOSG 
 {
     Q_OBJECT
+    Q_PROPERTY(bool show_grid READ isGridEnabled WRITE setGridEnabled)
+    Q_PROPERTY(bool show_axes READ areAxesEnabled WRITE setAxesEnabled)
 
 public:
     Vizkit3DWidget( QWidget* parent = 0, Qt::WindowFlags f = 0 );
@@ -52,6 +56,7 @@ public slots:
 signals:
     void addPlugins();
     void removePlugins();
+    void propertyChanged(QString propertyName);
     
 private slots:
     void addPluginIntern();
@@ -62,11 +67,17 @@ protected:
     void changeCameraView(const osg::Vec3* lookAtPos,
             const osg::Vec3* eyePos,
             const osg::Vec3* upVector);
+    bool isGridEnabled();
+    void setGridEnabled(bool enabled);
+    bool areAxesEnabled();
+    void setAxesEnabled(bool enabled);
 
     osg::ref_ptr<osg::Group> root;
     void createSceneGraph();
     osg::ref_ptr<PickHandler> pickHandler;
     osg::ref_ptr<ViewQOSG> view;
+    osg::ref_ptr<GridNode> groundGrid;
+    osg::ref_ptr<CoordinateFrame> coordinateFrame;
     QStringList* pluginNames;
     QProperyBrowserWidget* propertyBrowserWidget;
     std::vector<vizkit::VizPluginBase *> pluginsToAdd;
