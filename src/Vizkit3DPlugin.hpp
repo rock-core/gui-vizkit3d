@@ -297,6 +297,7 @@ class VizkitPluginFactory : public QObject
  *     //if you want to call any other method of your plugin in ruby
  *     VizPluginRubyConfig(Pluginname, bool, enableSomething)
  * }
+ * </code>
  */
 #define VizPluginRubyAdapterCommon(pluginName, dataType, methodName, rubyMethodName)\
     class VizPluginRubyAdapter##pluginName##rubyMethodName : public VizPluginRubyAdapterBase {\
@@ -335,12 +336,41 @@ class VizkitPluginFactory : public QObject
     VizPluginRubyAdapterCommon(pluginName, dataType, methodName, methodName)
 
 
-/** @deprecated 
- * use Q_EXPORT_PLUGIN2 macro directly instead
+/**
+ * Macro that exports a Vizkit3D plugin so that it can be dynamically loaded by vizkit
+ * 
+ * Example:
+ *
+ * <code>
+ *     class WaypointVisualization : public vizkit::Vizkit3DPlugin {..};
+ *     VizkitQtPlugin(WaypointVisualization)
+ * </code>
+ *
+ * This works if your shared library exports only one plugin. To export multiple
+ * plugins, you need to create a subclass of vizkit::VizkitPluginFactory which
+ * handles the plugins, and export it with
+ *
+ * <code>
+ * Q_EXPORT_PLUGIN2(FactoryClass, FactoryClass)
+ * </code>
  */
 #define VizkitQtPlugin(pluginName)\
-    Q_EXPORT_PLUGIN2(pluginName, pluginName)
-
+    class QtPlugin##pluginName : public vizkit::VizkitPluginFactory {\
+        public:\
+        virtual QStringList* getAvailablePlugins() const\
+        {\
+            QStringList* result = new QStringList; \
+            result->push_back(#pluginName); \
+            return result;\
+        } \
+        virtual QObject* createPlugin(QString const& name)\
+        {\
+            if (name == #pluginName) \
+                return new pluginName;\
+            else return 0;\
+        };\
+    };\
+    Q_EXPORT_PLUGIN2(QtPlugin##pluginName, QtPlugin##pluginName)
 
 /** @deprecated adapter item for legacy visualizations. Do not derive from this
  * class for new designs. Use VizPlugin directly instead.
