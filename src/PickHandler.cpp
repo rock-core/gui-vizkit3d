@@ -8,6 +8,8 @@
 
 #include <osgGA/TrackballManipulator>
 #include <osgGA/StateSetManipulator>
+#include <osgGA/KeySwitchMatrixManipulator>
+#include <osgGA/NodeTrackerManipulator>
 
 #include "PickHandler.hpp"
 
@@ -176,6 +178,26 @@ void PickHandler::pick(const osgGA::GUIEventAdapter& ea, osgViewer::View* viewer
 		pc->picked();
 
 	    if (node) std::cout<<"  Hits "<<node->className()<<" nodePath size"<<nodePath.size()<<std::endl;
+        
+        setTrackedNode(viewer, node);
 	}
     }        
 }
+
+void PickHandler::setTrackedNode(osgViewer::View* viewer, osg::ref_ptr< osg::Node > node)
+{
+    osgGA::KeySwitchMatrixManipulator *keyswitchManipulator = 
+    dynamic_cast<osgGA::KeySwitchMatrixManipulator*>(viewer->getCameraManipulator());
+
+    if( !keyswitchManipulator )
+    return;
+
+    osgGA::NodeTrackerManipulator *tracker = 
+    dynamic_cast<osgGA::NodeTrackerManipulator*>(keyswitchManipulator->getMatrixManipulatorWithIndex( 2 ));
+    if( tracker )
+    {
+    tracker->setTrackerMode( osgGA::NodeTrackerManipulator::NODE_CENTER );
+    tracker->setTrackNode( node );
+    }
+}
+

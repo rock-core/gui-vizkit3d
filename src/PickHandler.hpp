@@ -28,6 +28,8 @@ signals:
     void picked(const Eigen::Vector3d& coord);
 
 protected:
+    void setTrackedNode(osgViewer::View* viewer, osg::ref_ptr< osg::Node > node);
+
     float _mx,_my;
     bool _usePolytopeIntersector;
     bool _useWindowCoordinates;

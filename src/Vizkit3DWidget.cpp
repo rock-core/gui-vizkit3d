@@ -26,6 +26,9 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     pickHandler = new PickHandler();
     view->addEventHandler( pickHandler );
     
+    // set root node as default tracked node
+    view->setTrackedNode(getRootNode());
+    
     // add visualization of ground grid 
     groundGrid = new GridNode();
     root->addChild(groundGrid);
