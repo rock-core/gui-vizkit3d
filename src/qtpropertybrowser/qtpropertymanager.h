@@ -52,6 +52,8 @@
 #include <QtCore/QDateTime>
 #include <QtGui/QFontDatabase>
 
+#include <limits.h>
+
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
 #endif
