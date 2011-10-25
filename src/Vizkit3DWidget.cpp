@@ -1,5 +1,6 @@
 #include "Vizkit3DWidget.hpp"
 #include <QVBoxLayout>
+#include <QSplitter>
 #include <vizkit/MotionCommandVisualization.hpp>
 #include <vizkit/TrajectoryVisualization.hpp>
 #include <vizkit/WaypointVisualization.hpp>
@@ -14,13 +15,20 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
 
     QWidget* viewWidget = new QWidget;
     QVBoxLayout* layout = new QVBoxLayout;
-    layout->addWidget( viewWidget );
+    QSplitter* splitter = new QSplitter(Qt::Horizontal);
+    layout->addWidget( splitter );
     this->setLayout( layout );
+    
+    // create propertyBrowserWidget
+    propertyBrowserWidget = new QProperyBrowserWidget( parent );
+    propertyBrowserWidget->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
+    splitter->addWidget(propertyBrowserWidget);
 
     view = new ViewQOSG( viewWidget );
     view->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
     view->setData( root );
     addView( view );
+    splitter->addWidget(viewWidget);
 
     // pickhandler is for selecting objects in the opengl view
     pickHandler = new PickHandler();
@@ -40,9 +48,6 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     
     changeCameraView(osg::Vec3d(0,0,0), osg::Vec3d(0,-5,5));
     
-    // create propertyBrowserWidget
-    propertyBrowserWidget = new QProperyBrowserWidget(parent);
-    
     // add some properties of this widget as global properties
     QStringList property_names("show_grid");
     property_names.push_back("show_axes");
@@ -54,7 +59,7 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
 
 QSize Vizkit3DWidget::sizeHint() const
 {
-    return QSize( 800, 600 );
+    return QSize( 1000, 600 );
 }
 
 osg::ref_ptr<osg::Group> Vizkit3DWidget::getRootNode() const
