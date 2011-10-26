@@ -79,6 +79,8 @@ Q_DECLARE_METATYPE(QtGroupPropertyType)
 QT_BEGIN_NAMESPACE
 #endif
 
+Q_GLOBAL_STATIC(PropertyMap, propertyToWrappedProperty)
+
 /*!
     Returns the type id for an enum property.
 

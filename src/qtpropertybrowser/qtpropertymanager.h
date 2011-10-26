@@ -1197,8 +1197,6 @@ private:
     Q_PRIVATE_SLOT(d_func(), void slotPropertyDestroyed(QtProperty *))
 };
 
-Q_GLOBAL_STATIC(QFontDatabase, fontDatabase)
-
 class QtFontPropertyManager;
 
 class QtFontPropertyManagerPrivate
@@ -1335,8 +1333,6 @@ private:
 };
 
 Q_GLOBAL_STATIC(QtCursorDatabase, cursorDatabase)
-
-Q_GLOBAL_STATIC(QtMetaEnumProvider, metaEnumProvider)
 
 class QtCursorPropertyManager;
 

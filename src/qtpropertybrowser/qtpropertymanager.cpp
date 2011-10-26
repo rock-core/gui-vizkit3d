@@ -335,6 +335,10 @@ static QList<QLocale::Country> sortCountries(const QList<QLocale::Country> &coun
     return nameToCountry.values();
 }
 
+Q_GLOBAL_STATIC(QFontDatabase, fontDatabase)
+
+Q_GLOBAL_STATIC(QtMetaEnumProvider, metaEnumProvider)
+
 void QtMetaEnumProvider::initLocale()
 {
     QMultiMap<QString, QLocale::Language> nameToLanguage;
