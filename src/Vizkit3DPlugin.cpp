@@ -1,6 +1,7 @@
 #include <osg/Group>
 #include "VizPlugin.hpp"
 #include <typeinfo>
+#include <cxxabi.h>
 
 using namespace vizkit;
 
@@ -32,7 +33,7 @@ osg::ref_ptr<osg::Group> VizPluginBase::getVizNode() const
 
 const QString VizPluginBase::getPluginName() const 
 {
-    return typeid(*this).name();
+    return abi::__cxa_demangle(typeid(*this).name(), 0, 0, 0);
 }
 
 osg::ref_ptr<osg::Node> VizPluginBase::createMainNode()
