@@ -53,8 +53,8 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     property_names.push_back("show_axes");
     propertyBrowserWidget->addGlobalProperties(this, property_names);
     
-    connect(this, SIGNAL(addPlugins()), this, SLOT(addPluginIntern()), Qt::QueuedConnection);
-    connect(this, SIGNAL(removePlugins()), this, SLOT(removePluginIntern()), Qt::QueuedConnection);
+    connect(this, SIGNAL(addPlugins(QObject*)), this, SLOT(addPluginIntern(QObject*)), Qt::QueuedConnection);
+    connect(this, SIGNAL(removePlugins(QObject*)), this, SLOT(removePluginIntern(QObject*)), Qt::QueuedConnection);
 }
 
 QSize Vizkit3DWidget::sizeHint() const
@@ -182,12 +182,7 @@ void Vizkit3DWidget::changeCameraView(const osg::Vec3* lookAtPos, const osg::Vec
  */
 void Vizkit3DWidget::addPlugin(QObject* plugin)
 {
-    vizkit::VizPluginBase* viz_plugin = dynamic_cast<vizkit::VizPluginBase*>(plugin);
-    if (viz_plugin)
-    {
-        pluginsToAdd.push_back(viz_plugin);
-        emit addPlugins();
-    }
+    emit addPlugins(plugin);
 }
 
 /**
@@ -197,42 +192,37 @@ void Vizkit3DWidget::addPlugin(QObject* plugin)
  */
 void Vizkit3DWidget::removePlugin(QObject* plugin)
 {
-    vizkit::VizPluginBase* viz_plugin = dynamic_cast<vizkit::VizPluginBase*>(plugin);
-    if (viz_plugin)
-    {
-        pluginsToRemove.push_back(viz_plugin);
-        emit removePlugins();
-    }
+    emit removePlugins(plugin);
 }
 
 /**
  * This slot adds all plugins in the list to the OSG and
  * their properties to the property browser widget.
  */
-void Vizkit3DWidget::addPluginIntern()
+void Vizkit3DWidget::addPluginIntern(QObject* plugin)
 {
-    for(std::vector<vizkit::VizPluginBase*>::iterator pluginIt = pluginsToAdd.begin(); pluginIt != pluginsToAdd.end(); pluginIt++)
-    { 
-        addDataHandler(*pluginIt);
-        propertyBrowserWidget->addProperties(*pluginIt);
-        connect(*pluginIt, SIGNAL(pluginActivityChanged(bool)), this, SLOT(pluginActivityChanged(bool)));
+    vizkit::VizPluginBase* viz_plugin = dynamic_cast<vizkit::VizPluginBase*>(plugin);
+    if (viz_plugin)
+    {
+        addDataHandler(viz_plugin);
+        propertyBrowserWidget->addProperties(viz_plugin);
+        connect(viz_plugin, SIGNAL(pluginActivityChanged(bool)), this, SLOT(pluginActivityChanged(bool)));
     }
-    pluginsToAdd.clear();
 }
 
 /**
  * This slot removes all plugins in the list from the OSG and
  * their properties to the property browser widget.
  */
-void Vizkit3DWidget::removePluginIntern()
+void Vizkit3DWidget::removePluginIntern(QObject* plugin)
 {
-    for(std::vector<vizkit::VizPluginBase*>::iterator pluginIt = pluginsToRemove.begin(); pluginIt != pluginsToRemove.end(); pluginIt++)
+    vizkit::VizPluginBase* viz_plugin = dynamic_cast<vizkit::VizPluginBase*>(plugin);
+    if (viz_plugin)
     {
-        removeDataHandler(*pluginIt);
-        propertyBrowserWidget->removeProperties(*pluginIt);
-        disconnect(*pluginIt, SIGNAL(pluginActivityChanged(bool)), this, SLOT(pluginActivityChanged(bool)));
+        removeDataHandler(viz_plugin);
+        propertyBrowserWidget->removeProperties(viz_plugin);
+        disconnect(viz_plugin, SIGNAL(pluginActivityChanged(bool)), this, SLOT(pluginActivityChanged(bool)));
     }
-    pluginsToRemove.clear();
 }
 
 /**

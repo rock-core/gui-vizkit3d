@@ -54,13 +54,13 @@ public slots:
     void setCameraUp(double x, double y, double z);
         
 signals:
-    void addPlugins();
-    void removePlugins();
+    void addPlugins(QObject* plugin);
+    void removePlugins(QObject* plugin);
     void propertyChanged(QString propertyName);
     
 private slots:
-    void addPluginIntern();
-    void removePluginIntern();
+    void addPluginIntern(QObject* plugin);
+    void removePluginIntern(QObject* plugin);
     void pluginActivityChanged(bool enabled);
 
 protected:
@@ -80,8 +80,6 @@ protected:
     osg::ref_ptr<CoordinateFrame> coordinateFrame;
     QStringList* pluginNames;
     QProperyBrowserWidget* propertyBrowserWidget;
-    std::vector<vizkit::VizPluginBase *> pluginsToAdd;
-    std::vector<vizkit::VizPluginBase *> pluginsToRemove;
 };
 
 }
