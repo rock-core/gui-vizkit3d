@@ -66,10 +66,10 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/src/ DESTINATION include/${PROJECT_NAME}
 ## configuration/
 # COPY Configuration files into build directory. Workaround: remove the .pc.in
 # file, as we don't want to install it
-execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/config ${PROJECT_BINARY_DIR}/config)
+execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/configuration ${PROJECT_BINARY_DIR}/configuration)
 
 # install configuration files
-install(DIRECTORY ${PROJECT_BINARY_DIR}/config/ DESTINATION config/${PROJECT_NAME}
+install(DIRECTORY ${PROJECT_BINARY_DIR}/configuration/ DESTINATION configuration/${PROJECT_NAME}
 	        FILES_MATCHING PATTERN "*" 
 	                       PATTERN "*.pc" EXCLUDE)
 
@@ -77,7 +77,7 @@ install(DIRECTORY ${PROJECT_BINARY_DIR}/config/ DESTINATION config/${PROJECT_NAM
 # First making sure we are not in the source directory, otherwise we can delete the in files
 string(COMPARE NOTEQUAL "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}" BUILDING_IN_SRC_DIR)
 if ( ${BUILDING_IN_SRC_DIR} )
-		execute_process(COMMAND ${CMAKE_COMMAND} -E remove -f ${PROJECT_BINARY_DIR}/config/${PROJECT_NAME}.pc.in)
+		execute_process(COMMAND ${CMAKE_COMMAND} -E remove -f ${PROJECT_BINARY_DIR}/configuration/${PROJECT_NAME}.pc.in)
 else ( ${BUILDING_IN_SRC_DIR} )
     message("WARNING: Your are building in the source directory. Recommending to abort and using a designated build directory.") 
 endif( ${BUILDING_IN_SRC_DIR} )
