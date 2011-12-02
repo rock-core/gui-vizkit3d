@@ -12,7 +12,8 @@ namespace vizkit
 class TrajectoryVisualization: public Vizkit3DPlugin<base::Vector3d>, public VizPluginAddType<base::geometry::Spline3>
 {
     public:
-	TrajectoryVisualization();    
+	TrajectoryVisualization();
+        void setColor(const base::Vector3d& color); 
 	void setColor(double r, double g, double b, double a);
 	void clear();
 

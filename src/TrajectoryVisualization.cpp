@@ -9,6 +9,8 @@ TrajectoryVisualization::TrajectoryVisualization()
 {
     //VizPluginRubyAdapter(TrajectoryVisualization, base::geometry::Spline<3>, Trajectory);
     VizPluginRubyAdapter(TrajectoryVisualization, base::Vector3d, Trajectory);
+    VizPluginRubyMethod(TrajectoryVisualization, base::Vector3d, setColor);
+
     // initialize here so that setColor can be called event
     doClear = false;
     color2 = new osg::Vec4Array;
@@ -41,6 +43,13 @@ void TrajectoryVisualization::setColor(double r, double g, double b, double a)
     geom->setColorArray( color2 );
     geom->setColorBinding( osg::Geometry::BIND_OVERALL );
 }
+
+
+void TrajectoryVisualization::setColor(const base::Vector3d& color)
+{
+    setColor(color.x(), color.y(), color.z(), 1.0);
+}
+
 
 void TrajectoryVisualization::clear()
 {
