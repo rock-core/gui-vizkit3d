@@ -17,6 +17,7 @@ set(SOURCES
     qtpropertybrowser/qttreepropertybrowser.cpp
     qtpropertybrowser/qtgroupboxpropertybrowser.cpp
     Vizkit3DPlugin.cpp
+    Vizkit3DHelper.cpp
     CompositeViewerQOSG.cpp
     CoordinateFrame.cpp
     GridNode.cpp
@@ -44,6 +45,7 @@ set(QT_HEADERS
     qtpropertybrowser/qttreepropertybrowser.h
     qtpropertybrowser/qtgroupboxpropertybrowser.h
     Vizkit3DPlugin.hpp
+    Vizkit3DHelper.hpp
     QOSGWidget.hpp 
     Vizkit3DWidget.hpp 
     CompositeViewerQOSG.hpp 
