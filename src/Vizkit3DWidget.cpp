@@ -53,7 +53,7 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     property_names.push_back("show_axes");
     propertyBrowserWidget->addGlobalProperties(this, property_names);
     
-    connect(this, SIGNAL(addPlugins(QObject*)), this, SLOT(addPluginIntern(QObject*)), Qt::QueuedConnection);
+    connect(this, SIGNAL(addPlugins(QObject*,QObject*)), this, SLOT(addPluginIntern(QObject*,QObject*)), Qt::QueuedConnection);
     connect(this, SIGNAL(removePlugins(QObject*)), this, SLOT(removePluginIntern(QObject*)), Qt::QueuedConnection);
 }
 
@@ -180,9 +180,9 @@ void Vizkit3DWidget::changeCameraView(const osg::Vec3* lookAtPos, const osg::Vec
  * Adding the new Plugin will be handled by the main thread.
  * @param plugin Vizkit Plugin
  */
-void Vizkit3DWidget::addPlugin(QObject* plugin)
+void Vizkit3DWidget::addPlugin(QObject* plugin,QObject *parent)
 {
-    emit addPlugins(plugin);
+    emit addPlugins(plugin,parent);
 }
 
 /**
@@ -199,15 +199,20 @@ void Vizkit3DWidget::removePlugin(QObject* plugin)
  * This slot adds all plugins in the list to the OSG and
  * their properties to the property browser widget.
  */
-void Vizkit3DWidget::addPluginIntern(QObject* plugin)
+void Vizkit3DWidget::addPluginIntern(QObject* plugin,QObject *parent)
 {
     vizkit::VizPluginBase* viz_plugin = dynamic_cast<vizkit::VizPluginBase*>(plugin);
     if (viz_plugin)
     {
         addDataHandler(viz_plugin);
-        propertyBrowserWidget->addProperties(viz_plugin);
+        propertyBrowserWidget->addProperties(viz_plugin,parent);
         connect(viz_plugin, SIGNAL(pluginActivityChanged(bool)), this, SLOT(pluginActivityChanged(bool)));
     }
+
+    // add sub plugins if object has some
+    QList<QObject*> object_list = plugin->findChildren<QObject *>();
+    for(QList<QObject*>::const_iterator it =object_list.begin(); it != object_list.end(); it++)
+        addPluginIntern(*it,plugin);
 }
 
 /**

@@ -41,7 +41,7 @@ public:
     QSize sizeHint() const;
     
 public slots:
-    void addPlugin(QObject* plugin);
+    void addPlugin(QObject* plugin, QObject* parent = NULL);
     void removePlugin(QObject* plugin);
     
     QStringList* getListOfAvailablePlugins();
@@ -54,12 +54,12 @@ public slots:
     void setCameraUp(double x, double y, double z);
         
 signals:
-    void addPlugins(QObject* plugin);
+    void addPlugins(QObject* plugin,QObject* parent);
     void removePlugins(QObject* plugin);
     void propertyChanged(QString propertyName);
     
 private slots:
-    void addPluginIntern(QObject* plugin);
+    void addPluginIntern(QObject* plugin,QObject *parent=NULL);
     void removePluginIntern(QObject* plugin);
     void pluginActivityChanged(bool enabled);
 

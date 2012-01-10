@@ -18,8 +18,8 @@ struct VizPluginBase::CallbackAdapter : public osg::NodeCallback
     }
 };
 
-VizPluginBase::VizPluginBase()
-    : dirty( false ), plugin_enabled(true)
+VizPluginBase::VizPluginBase(QObject *parent)
+    : QObject(parent),dirty( false ), plugin_enabled(true)
 {
     vizNode = new osg::Group();
     nodeCallback = new CallbackAdapter( this );

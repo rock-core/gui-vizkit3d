@@ -114,7 +114,7 @@ class VizPluginBase : public QObject
     Q_PROPERTY(bool enabled READ isPluginEnabled WRITE setPluginEnabled)
     
     public:
-        VizPluginBase();
+        VizPluginBase(QObject *parent=NULL);
 
 	/** @return true if the plugins internal state has been updated */
 	virtual bool isDirty() const;
@@ -131,12 +131,12 @@ class VizPluginBase : public QObject
        /**
         * @return true if plugin is enabled
         */
-        bool isPluginEnabled();
+        virtual bool isPluginEnabled();
         
        /**
         * @param enabled set plugin enabled or disabled
         */
-        void setPluginEnabled(bool enabled);
+        virtual void setPluginEnabled(bool enabled);
 
 	/** override this method to save configuration data. Always call the
 	 * superclass as well.

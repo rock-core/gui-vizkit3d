@@ -15,7 +15,7 @@ class QProperyBrowserWidget : public QtTreePropertyBrowser
     
 public:
     QProperyBrowserWidget(QWidget* parent = 0);
-    void addProperties(QObject* obj);
+    void addProperties(QObject* obj,QObject* parent = NULL);
     void removeProperties(QObject* obj);
     void addGlobalProperties(QObject* obj, const QStringList &property_list);
     

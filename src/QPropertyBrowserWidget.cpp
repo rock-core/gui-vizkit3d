@@ -58,12 +58,15 @@ void QProperyBrowserWidget::addGlobalProperties(QObject* obj, const QStringList&
  * Adds all properties of a QObject to the property browser widget,
  * grouped by the name of the vizkit plugin.
  */
-void QProperyBrowserWidget::addProperties(QObject* obj)
+void QProperyBrowserWidget::addProperties(QObject* obj,QObject* parent)
 {
     const QMetaObject* metaObj = obj->metaObject();
+    QtProperty *group = NULL;
+    QtProperty *parent_group = NULL;
+    if(parent)
+        parent_group = objectToGroup[parent];
     
     // genarate group entry and all variant properties
-    QtProperty* group = 0;
     QList<QtVariantProperty*> properties;
     for(int i = 1 ; i < metaObj->propertyCount(); i++)
     {
@@ -71,6 +74,8 @@ void QProperyBrowserWidget::addProperties(QObject* obj)
         {
             QVariant var = metaObj->property(i).read(obj);
             group = groupManager->addProperty(var.toString());
+            if(parent_group)
+                parent_group->addSubProperty(group);
         }
         else
         {
@@ -88,7 +93,9 @@ void QProperyBrowserWidget::addProperties(QObject* obj)
     // add default plugin name if plugin name property is missing 
     if(group == 0)
     {
-        group = groupManager->addProperty("Vizkit3DPlugin");
+        group = groupManager->addProperty(obj->objectName());
+        if(parent_group)
+            parent_group->addSubProperty(group);
     }
     
     // add variant properties to the group
@@ -103,7 +110,10 @@ void QProperyBrowserWidget::addProperties(QObject* obj)
     // add group to the tree
     objectToGroup[obj] = group;
     objectToProperties[obj] = groupMap;
-    this->addProperty(group);
+
+    // do not add property if it is already added to a parent_group
+    if(!parent_group)
+        this->addProperty(group);
     
     // connect plugin signal, to notice if a property has changed
     if (!this->connect(obj, SIGNAL(propertyChanged(QString)), this, SLOT(propertyChangedInObject(QString))))
