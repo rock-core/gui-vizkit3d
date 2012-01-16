@@ -10,6 +10,11 @@ namespace vizkit
 
 class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBodyState>
 {
+        Q_OBJECT
+        Q_PROPERTY(bool displayCovariance READ isCovarianceDisplayed WRITE displayCovariance)
+        Q_PROPERTY(bool displayCovarianceWithSamples READ isCovarianceDisplayedWithSamples WRITE displayCovarianceWithSamples)
+        Q_PROPERTY(bool forcePositionDisplay READ isPositionDisplayForced WRITE setPositionDisplayForceFlag)
+        Q_PROPERTY(bool forceOrientationDisplay READ isOrientationDisplayForced WRITE setOrientationDisplayForceFlag)
     public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	RigidBodyStateVisualization();	
@@ -22,6 +27,11 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         base::samples::RigidBodyState state;
     
     public: 
+        bool isPositionDisplayForced() const;
+        void setPositionDisplayForceFlag(bool flag);
+        bool isOrientationDisplayForced() const;
+        void setOrientationDisplayForceFlag(bool flag);
+
         void resetModel(double size);
 	void resetModelSphere(double size);
 	
@@ -35,7 +45,9 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         void setMainSphereSize(double size);
 
         void displayCovariance(bool enable);
+        bool isCovarianceDisplayed() const;
         void displayCovarianceWithSamples(bool enable);
+        bool isCovarianceDisplayedWithSamples() const;
 
         /** Sets the color of the default body model in R, G, B
          *
@@ -59,6 +71,10 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
 	osg::ref_ptr<osg::Node>  body_model;
         osg::ref_ptr<osg::Group> createSimpleBody(double size);
 	osg::ref_ptr<osg::Group> createSimpleSphere(double size);
+
+        bool forcePositionDisplay;
+        bool forceOrientationDisplay;
+
 };
 
 }

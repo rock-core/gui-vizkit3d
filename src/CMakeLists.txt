@@ -52,6 +52,7 @@ set(QT_HEADERS
     PickHandler.hpp
     QVizkitMainWindow.hpp
     QPropertyBrowserWidget.hpp
+    RigidBodyStateVisualization.hpp
     )
 
 set(HEADERS 
