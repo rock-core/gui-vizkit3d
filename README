@@ -1,28 +1,13 @@
-NOTE
-This directory structure follows some simple rules, to allow for generic build
-processes and simplify reuse of this project. 
+/*! \mainpage Vizkit: an infrastructure for data display using C++, OpenSceneGraph and Qt, with transparent Ruby bindings
 
-For build automation the project structure should be parsed and validated
+This is the API documentation of vizkit, which offers an infrastructure for 2D
+and 3D displays using C++, OpenSceneGraph and Qt. Most of the power of Vizkit is
+unleashed in its use in Rock, the Robot Construction Kit
+(http://rock-robotics.org), but thanks to its use of standard libraries (OSG and
+Qt), the main features are available outside of Rock.
 
+This documents the C++ part of the library.
 
-STRUCTURE
--- src/ 
-	Contains all header (*.h/*.hpp) and source files
--- build/
-	The target directory for the build process, temporary content
--- resources/
-	General resources such as images that are needed by the program
--- etc/
-	Configuration files for running the program
--- external/
-	When including software that needs a non standard installation process, or one that can be
-	easily embedded include the external software directly here
-   |-- include
-	header files
-   |-- libs
-	precompiled libraries 
--- doc/
-	should contain the existing doxygen file: doxygen.conf
-   |-- manual/
-	Should contain manual.tex 
-	Manual for the software 	
+The Ruby API documentation can be accessed <a href="ruby/index.html">here</a>
+*/
+
