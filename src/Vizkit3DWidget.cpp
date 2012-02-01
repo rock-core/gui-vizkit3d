@@ -1,10 +1,6 @@
 #include "Vizkit3DWidget.hpp"
 #include <QVBoxLayout>
 #include <QSplitter>
-#include <vizkit/MotionCommandVisualization.hpp>
-#include <vizkit/TrajectoryVisualization.hpp>
-#include <vizkit/WaypointVisualization.hpp>
-#include <vizkit/RigidBodyStateVisualization.hpp>
 
 using namespace vizkit;
 
@@ -228,58 +224,6 @@ void Vizkit3DWidget::removePluginIntern(QObject* plugin)
         propertyBrowserWidget->removeProperties(viz_plugin);
         disconnect(viz_plugin, SIGNAL(pluginActivityChanged(bool)), this, SLOT(pluginActivityChanged(bool)));
     }
-}
-
-/**
- * Creates an instance of a visualization plugin given by its name 
- * and returns the adapter collection of the plugin, used in ruby.
- * @param pluginName Name of the plugin
- * @return Instance of the plugin
- */
-QObject* Vizkit3DWidget::createPluginByName(QString pluginName)
-{
-    vizkit::VizPluginBase* plugin = 0;
-    if (pluginName == "WaypointVisualization")
-    {
-        plugin = new vizkit::WaypointVisualization();
-    }
-    else if (pluginName == "MotionCommandVisualization")
-    {
-        plugin = new vizkit::MotionCommandVisualization();
-    }
-    else if (pluginName == "TrajectoryVisualization")
-    {
-        plugin = new vizkit::TrajectoryVisualization();
-    }
-    else if (pluginName == "RigidBodyStateVisualization")
-    {
-        plugin = new vizkit::RigidBodyStateVisualization();
-    }
-
-    if (plugin) 
-    {
-        return plugin;
-    }
-    else {
-        std::cerr << "The Pluginname " << pluginName.toStdString() << " is unknown!" << std::endl;
-        return NULL;
-    }
-}
-
-/**
- * Returns a list of all available visualization plugins.
- * @return list of plugin names
- */
-QStringList* Vizkit3DWidget::getListOfAvailablePlugins()
-{
-    if (!pluginNames->size()) 
-    {
-        pluginNames->push_back("WaypointVisualization");
-        pluginNames->push_back("TrajectoryVisualization");
-        pluginNames->push_back("MotionCommandVisualization");
-        pluginNames->push_back("RigidBodyStateVisualization");
-    }
-    return pluginNames;
 }
 
 /**

@@ -24,14 +24,10 @@ set(SOURCES
     PickHandler.cpp
     QOSGWidget.cpp
     Vizkit3DWidget.cpp
-    WaypointVisualization.cpp
-    MotionCommandVisualization.cpp
-    TrajectoryVisualization.cpp
     MouseManipulationManipulator.cpp
     QtThreadedWidget.cpp
     QVizkitMainWindow.cpp
     Uncertainty.cpp
-    RigidBodyStateVisualization.cpp
     QPropertyBrowserWidget.cpp
     )
 
@@ -52,20 +48,16 @@ set(QT_HEADERS
     PickHandler.hpp
     QVizkitMainWindow.hpp
     QPropertyBrowserWidget.hpp
-    RigidBodyStateVisualization.hpp
     )
 
 set(HEADERS 
     ${QT_HEADERS}
     VizPlugin.hpp
+    Vizkit3DHelper.hpp
     CoordinateFrame.hpp
     GridNode.hpp
-    MotionCommandVisualization.hpp
-    TrajectoryVisualization.hpp
-    WaypointVisualization.hpp
     QtThreadedWidget.hpp
     Uncertainty.hpp
-    RigidBodyStateVisualization.hpp
     QVisualizationTestWidget.hpp
     )
 

@@ -18,9 +18,6 @@ class QDESIGNER_WIDGET_EXPORT QVizkitMainWindow : public QMainWindow
     public slots:    
         void addPlugin(QObject* plugin);
         void removePlugin(QObject* plugin);
-        QStringList* getListOfAvailablePlugins();
-        QObject* createPluginByName(QString pluginName);
-	
     private:
         Vizkit3DWidget *vizKitWidget;
 };

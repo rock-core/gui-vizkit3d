@@ -27,13 +27,9 @@ add_subdirectory(src)
 
 # Add testing facility based on the boost unittest framework
 # (requires boost header files) 
+add_subdirectory(viz)
+
 add_subdirectory(test)
 
 # Performing some setup step after all variables are know, e.g. such as needed for pkg-config
 include(PostSetup)
-
-if (RDOC_EXECUTABLE)
-    add_custom_target(ruby_doc rdoc -o ${CMAKE_BINARY_DIR}/doc/ruby/ --title "Vizkit: a collection of data display widgets"
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ruby)
-    add_dependencies(doc ruby_doc)
-endif()

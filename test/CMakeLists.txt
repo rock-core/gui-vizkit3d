@@ -4,7 +4,7 @@ if (Boost_FOUND)
     add_executable(testWidget testWidget.cpp)
     include_directories(${Boost_INCLUDE_DIRS})
     link_directories(${Boost_LIBRARY_DIRS})
-    target_link_libraries(testWidget vizkit 
+    target_link_libraries(testWidget vizkit vizkit-base-viz
         ${Boost_LIBRARIES}
         )   
 else(Boost_FOUND)

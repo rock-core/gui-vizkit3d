@@ -56,25 +56,4 @@ Vizkit3DWidget* QVizkitMainWindow::getVizkitWidget()
 {
     return vizKitWidget;
 }
-
-/**
- * Creates an instance of a visualization plugin given by its name 
- * and returns the adapter collection of the plugin, used in ruby.
- * @param pluginName Name of the plugin
- * @return Instance of the vizkit plugin
- */
-QObject* QVizkitMainWindow::createPluginByName(QString pluginName)
-{
-    return vizKitWidget->createPluginByName(pluginName);
-}
-
-/**
- * Returns a list of all available visualization plugins.
- * @return list of plugin names
- */
-QStringList* QVizkitMainWindow::getListOfAvailablePlugins()
-{
-    return vizKitWidget->getListOfAvailablePlugins();
-}
-
 }

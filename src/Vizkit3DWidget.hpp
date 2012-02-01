@@ -44,9 +44,6 @@ public slots:
     void addPlugin(QObject* plugin, QObject* parent = NULL);
     void removePlugin(QObject* plugin);
     
-    QStringList* getListOfAvailablePlugins();
-    QObject* createPluginByName(QString pluginName);
-    
     QWidget* getPropertyWidget();
 
     void setCameraLookAt(double x, double y, double z);
