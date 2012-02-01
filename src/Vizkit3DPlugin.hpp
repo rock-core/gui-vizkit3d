@@ -3,12 +3,14 @@
 
 #include <osg/NodeCallback>
 #include <osg/Group>
+#include <osg/PositionAttitudeTransform>
 
 #include <boost/thread/mutex.hpp>
 #include <qobject.h>
 #include <QDockWidget>
 #include <QVariant>
 #include <QtPlugin>
+#include <base/eigen.h>
 
 namespace YAML
 {
@@ -57,6 +59,12 @@ class VizPluginRubyAdapterCollection : public QObject
             std::vector<VizPluginRubyAdapterBase*>::iterator it = std::find(adapterList.begin(), adapterList.end(), adapter);
             if (it != adapterList.end()) adapterList.erase(it);
         };
+        
+        const std::vector<VizPluginRubyAdapterBase*> &getAdapterList() const
+        {
+            return adapterList;
+        }
+        
     public slots:
         /**
          * The method names of all available adapers will be returned.
@@ -157,6 +165,8 @@ class VizPluginBase : public QObject
          */
         std::vector<QDockWidget*> getDockWidgets();
         
+        void setPose(const base::Vector3d &position, const base::Quaterniond &orientation);
+        
     public slots:
         /**
         * @return an instance of the ruby adapter collection.
@@ -205,7 +215,12 @@ class VizPluginBase : public QObject
 	void updateCallback(osg::Node* node);
 
         osg::ref_ptr<osg::Node> mainNode;
-        osg::ref_ptr<osg::Group> vizNode;
+        osg::ref_ptr<osg::PositionAttitudeTransform> vizNode;
+        //position of the vizNode
+        base::Vector3d position;
+        //orientation of the viznode
+        base::Quaterniond orientation;
+        
 	bool dirty;
         bool plugin_enabled;
 };

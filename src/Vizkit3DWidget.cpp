@@ -200,6 +200,18 @@ void Vizkit3DWidget::addPluginIntern(QObject* plugin,QObject *parent)
     vizkit::VizPluginBase* viz_plugin = dynamic_cast<vizkit::VizPluginBase*>(plugin);
     if (viz_plugin)
     {
+        //pass ownership to c++
+        //QT-Ruby honors the parent pointer
+        //if it is set, the Object will not get autodeleted
+        plugin->setParent(this);
+        
+        plugins.push_back(viz_plugin);
+	
+	if(pluginToTransformData.count(viz_plugin))
+	    throw std::runtime_error("Error added same plugin twice");
+	
+	pluginToTransformData[viz_plugin] = TransformationData();
+
         addDataHandler(viz_plugin);
         propertyBrowserWidget->addProperties(viz_plugin,parent);
         connect(viz_plugin, SIGNAL(pluginActivityChanged(bool)), this, SLOT(pluginActivityChanged(bool)));
@@ -223,7 +235,91 @@ void Vizkit3DWidget::removePluginIntern(QObject* plugin)
         removeDataHandler(viz_plugin);
         propertyBrowserWidget->removeProperties(viz_plugin);
         disconnect(viz_plugin, SIGNAL(pluginActivityChanged(bool)), this, SLOT(pluginActivityChanged(bool)));
+        
+        std::vector<vizkit::VizPluginBase *>::iterator it = std::find(plugins.begin(), plugins.end(), viz_plugin);
+        if(it == plugins.end())
+            throw std::runtime_error("Tried to remove an vizkit3d plugin that was not registered before");
+
+	pluginToTransformData.erase(viz_plugin);
+	
+        plugins.erase(it);
     }
+}
+
+
+void Vizkit3DWidget::setPluginDataFrame(const std::string& frame, QObject* plugin)
+{
+    vizkit::VizPluginBase* viz_plugin = dynamic_cast<vizkit::VizPluginBase*>(plugin);
+    if(!viz_plugin)
+	throw std::runtime_error("setPluginDataFrame called with something that is no vizkit plugin");
+    
+    if(pluginToTransformData.count(viz_plugin) == 0)
+        throw std::runtime_error("Tried to set frame for unknown plugin");
+    
+    TransformationData td = pluginToTransformData[viz_plugin]; 
+    
+    if(!td.dataFrame.empty())
+    {
+        transformer.unregisterTransformation(td.transformation);
+    }
+    
+    td.dataFrame = frame;
+    
+    if(!displayFrame.empty())
+        td.transformation = &transformer.registerTransformation(td.dataFrame, displayFrame);
+    else
+        td.transformation = NULL;
+    
+    pluginToTransformData[viz_plugin] = td;
+}
+
+void Vizkit3DWidget::setVizualisationFrame(const std::string& frame)
+{
+    displayFrame = frame;
+    
+    for(std::map<vizkit::VizPluginBase *, TransformationData>::iterator it = pluginToTransformData.begin(); it != pluginToTransformData.end(); it++)
+    {
+        TransformationData &data(it->second);
+        
+        if(!data.dataFrame.empty())
+        {
+            if(data.transformation)
+                transformer.unregisterTransformation(data.transformation);
+            
+            data.transformation = &transformer.registerTransformation(data.dataFrame, displayFrame);
+            
+            it->second = data;
+        }
+    }
+    
+}
+
+void Vizkit3DWidget::pushDynamicTransformation(const base::samples::RigidBodyState& tr)
+{
+    transformer.pushDynamicTransformation(tr);
+    while(transformer.step())
+    {
+	;
+    }
+
+    for(std::map<vizkit::VizPluginBase *, TransformationData>::iterator it = pluginToTransformData.begin(); it != pluginToTransformData.end(); it++)
+    {
+        TransformationData &data(it->second);
+	if(data.transformation)
+	{
+	    Eigen::Affine3d pose;
+	    if(data.transformation->get(tr.time, pose, false))
+	    {
+		it->first->setPose(pose.translation(), Eigen::Quaterniond(pose.rotation()));
+	    }
+	}
+    }
+
+}
+
+void Vizkit3DWidget::pushStaticTransformation(const base::samples::RigidBodyState& tr)
+{
+    transformer.pushStaticTransformation(tr);
 }
 
 /**

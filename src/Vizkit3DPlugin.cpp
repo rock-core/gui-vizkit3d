@@ -2,6 +2,7 @@
 #include "VizPlugin.hpp"
 #include <typeinfo>
 #include <cxxabi.h>
+#include "Vizkit3DHelper.hpp"
 
 using namespace vizkit;
 
@@ -21,7 +22,9 @@ struct VizPluginBase::CallbackAdapter : public osg::NodeCallback
 VizPluginBase::VizPluginBase(QObject *parent)
     : QObject(parent),dirty( false ), plugin_enabled(true)
 {
-    vizNode = new osg::Group();
+    position.setZero();
+    orientation = Eigen::Quaterniond::Identity();
+    vizNode = new osg::PositionAttitudeTransform();
     nodeCallback = new CallbackAdapter( this );
     vizNode->setUpdateCallback( nodeCallback );
 }
@@ -29,6 +32,14 @@ VizPluginBase::VizPluginBase(QObject *parent)
 osg::ref_ptr<osg::Group> VizPluginBase::getVizNode() const 
 {
     return vizNode;
+}
+
+void VizPluginBase::setPose(const base::Vector3d& position, const base::Quaterniond& orientation)
+{
+    boost::mutex::scoped_lock lock(updateMutex);
+    
+    this->position = position;
+    this->orientation = orientation;    
 }
 
 const QString VizPluginBase::getPluginName() const 
@@ -56,6 +67,9 @@ void VizPluginBase::updateCallback(osg::Node* node)
 {
     boost::mutex::scoped_lock lockit(updateMutex);
 
+    vizNode->setPosition(eigenVectorToOsgVec3(position));
+    vizNode->setAttitude(eigenQuatToOsgQuat(orientation));
+    
     if (!mainNode)
     {
         mainNode = createMainNode();

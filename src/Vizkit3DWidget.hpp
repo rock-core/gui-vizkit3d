@@ -9,6 +9,7 @@
 #include <vizkit/PickHandler.hpp>
 #include <vizkit/QPropertyBrowserWidget.hpp>
 #include <QtDesigner/QDesignerExportWidget>
+#include <transformer/NonAligningTransformer.hpp>
 
 namespace vizkit 
 {
@@ -44,6 +45,24 @@ public slots:
     void addPlugin(QObject* plugin, QObject* parent = NULL);
     void removePlugin(QObject* plugin);
     
+    ///The frame in which the data should be displayed
+    void setVizualisationFrame(const std::string &frame);
+    
+    /**
+     * Sets frame plugin data for a given plugin.
+     * The pluging data frame is the frame in which the 
+     * plugin expects the data to be.  
+     * e.g. in case of the LaserScanVisualization 'laser'
+     * */
+    void setPluginDataFrame(const std::string &frame, QObject *plugin);
+    
+    void pushDynamicTransformation(const base::samples::RigidBodyState &tr);
+	
+    /**
+    * Function for adding static Transformations.
+    * */
+    void pushStaticTransformation(const base::samples::RigidBodyState &tr);
+
     QWidget* getPropertyWidget();
 
     void setCameraLookAt(double x, double y, double z);
@@ -77,6 +96,25 @@ protected:
     osg::ref_ptr<CoordinateFrame> coordinateFrame;
     QStringList* pluginNames;
     QProperyBrowserWidget* propertyBrowserWidget;
+    transformer::NonAligningTransformer transformer;
+    
+    std::string displayFrame;
+    std::vector<VizPluginBase *> plugins;
+ 
+    /**
+     * Book keeper class for the transfomrations
+     * */
+    class TransformationData
+    {
+        public:
+	    TransformationData() : transformation(NULL) {};
+            std::string dataFrame;
+            transformer::Transformation *transformation;
+    };
+    
+    std::map<vizkit::VizPluginBase*, TransformationData> pluginToTransformData;
+
+    
 };
 
 }
