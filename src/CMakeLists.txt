@@ -133,8 +133,21 @@ if (TYPELIB_FOUND AND TYPELIBRUBY_FOUND AND GEM_FOUND)
 		                          ${TYPELIBRUBY_LIBRARIES}) 
 
 	install(TARGETS ${TYPELIB_TO_QVARIANT}
-		  LIBRARY DESTINATION ${RUBY_EXTENSIONS_INSTALL_DIR}
-	)
+		  LIBRARY DESTINATION ${RUBY_EXTENSIONS_INSTALL_DIR})
+
+	ROCK_RUBY_EXTENSION(TypelibQtAdapter SHARED
+			TypelibQtAdapter.cpp)
+	target_link_libraries(TypelibQtAdapter 
+				${QT_LIBRARIES}
+				${QT_QTCORE_LIBRARY} 
+				${QT_QTGUI_LIBRARY} 
+				${GEM_LIBRARIES}
+				${TYPELIB_LIBRARIES}
+				${TYPELIBRUBY_LIBRARIES}) 
+
+	install(TARGETS TypelibQtAdapter
+		  LIBRARY DESTINATION ${RUBY_EXTENSIONS_INSTALL_DIR})
+
 else()
     if (NOT TYPELIB_FOUND)
         message(STATUS "cannot find typelib, the vizkit-ruby bridge is disabled")
