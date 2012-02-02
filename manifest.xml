@@ -9,6 +9,7 @@
     </copyright>
     <depend package="base/types" />
     <depend package="external/yaml-cpp" />
+    <depend package="drivers/transformer" />
     <!-- needed for the vizkit/Ruby parts -->
     <depend package="tools/orocos.rb" optional="1" />
     <rosdep name="osg" />
