@@ -138,7 +138,6 @@ void PickHandler::pick(const osgGA::GUIEventAdapter& ea, osgViewer::View* viewer
 			    global.y(),
 			    global.z() );
 		
-		std::cout << globalPoint.transpose() << std::endl;
 		emit picked( globalPoint );
 	    }
 	}
@@ -176,8 +175,6 @@ void PickHandler::pick(const osgGA::GUIEventAdapter& ea, osgViewer::View* viewer
 	    PickedCallback *pc = dynamic_cast<PickedCallback*>(node->getUserData());
 	    if( pc )
 		pc->picked();
-
-	    if (node) std::cout<<"  Hits "<<node->className()<<" nodePath size"<<nodePath.size()<<std::endl;
         
         setTrackedNode(viewer, node);
 	}
