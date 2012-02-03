@@ -42,7 +42,7 @@
 #define QTEDITORFACTORY_H
 
 #include "qtpropertymanager.h"
-#include "qtpropertybrowserutils_p.h"
+#include "qtpropertybrowserutils.h"
 #include <QtGui/QSpinBox>
 #include <QtGui/QScrollBar>
 #include <QtGui/QLabel>

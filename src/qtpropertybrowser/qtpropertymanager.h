@@ -42,7 +42,7 @@
 #define QTPROPERTYMANAGER_H
 
 #include "qtpropertybrowser.h"
-#include "qtpropertybrowserutils_p.h"
+#include "qtpropertybrowserutils.h"
 #include <QtGui/QLineEdit>
 #include <QtCore/QMetaEnum>
 #include <QtCore/QMap>

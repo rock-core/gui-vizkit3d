@@ -6,11 +6,12 @@
 #include <vizkit/QVizkitMainWindow.hpp>
 #include <vizkit/Vizkit3DWidget.hpp>
 #include <vizkit/QtThreadedWidget.hpp>
-#include <vizkit/TrajectoryVisualization.hpp>
-#include <vizkit/WaypointVisualization.hpp>
-#include <vizkit/MotionCommandVisualization.hpp>
 #include <vizkit/QVisualizationTestWidget.hpp>
 #include <boost/test/unit_test.hpp>
+
+#include "../viz/TrajectoryVisualization.hpp"
+#include "../viz/WaypointVisualization.hpp"
+#include "../viz/MotionCommandVisualization.hpp"
 
 BOOST_AUTO_TEST_SUITE(vizkit_test)
 
