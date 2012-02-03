@@ -54,7 +54,7 @@ public slots:
     void removePlugin(QObject* plugin);
     
     ///The frame in which the data should be displayed
-    void setVizualisationFrame(const std::string &frame);
+    void setVizualisationFrame(const QString &frame);
     
     /**
      * Sets frame plugin data for a given plugin.
@@ -62,7 +62,7 @@ public slots:
      * plugin expects the data to be.  
      * e.g. in case of the LaserScanVisualization 'laser'
      * */
-    void setPluginDataFrame(const std::string &frame, QObject *plugin);
+    void setPluginDataFrame(const QString &frame, QObject *plugin);
     
     void pushDynamicTransformation(const base::samples::RigidBodyState &tr);
 	
