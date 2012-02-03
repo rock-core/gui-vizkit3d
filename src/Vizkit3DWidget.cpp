@@ -1,6 +1,7 @@
 #include "Vizkit3DWidget.hpp"
 #include <QVBoxLayout>
 #include <QSplitter>
+#include <QComboBox>
 
 #include <vizkit/QOSGWidget.hpp>
 #include <vizkit/Vizkit3DPlugin.hpp>
@@ -21,12 +22,20 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     QSplitter* splitter = new QSplitter(Qt::Horizontal);
     layout->addWidget( splitter );
     this->setLayout( layout );
+
+    QSplitter* leftsplitter = new QSplitter(Qt::Vertical);
+    splitter->addWidget(leftsplitter);
     
+    frameSelector = new QComboBox();
+    leftsplitter->addWidget(frameSelector);
+
     // create propertyBrowserWidget
     propertyBrowserWidget = new QProperyBrowserWidget( parent );
     propertyBrowserWidget->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
-    splitter->addWidget(propertyBrowserWidget);
+    leftsplitter->addWidget(propertyBrowserWidget);
 
+    
+    
     view = new ViewQOSG( viewWidget );
     view->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
     view->setData( root );
@@ -58,6 +67,7 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     
     connect(this, SIGNAL(addPlugins(QObject*,QObject*)), this, SLOT(addPluginIntern(QObject*,QObject*)), Qt::QueuedConnection);
     connect(this, SIGNAL(removePlugins(QObject*)), this, SLOT(removePluginIntern(QObject*)), Qt::QueuedConnection);
+    connect(frameSelector, SIGNAL(currentIndexChanged(QString)), this, SLOT(setVizualisationFrame(QString)));
 }
 
 Vizkit3DWidget::~Vizkit3DWidget() {}
@@ -308,6 +318,9 @@ void Vizkit3DWidget::setVizualisationFrame(const QString& frame)
 
 void Vizkit3DWidget::pushDynamicTransformation(const base::samples::RigidBodyState& tr)
 {
+    checkAddFrame(tr.sourceFrame);
+    checkAddFrame(tr.targetFrame);
+
     transformer.pushDynamicTransformation(tr);
     while(transformer.step())
     {
@@ -331,7 +344,27 @@ void Vizkit3DWidget::pushDynamicTransformation(const base::samples::RigidBodySta
 
 void Vizkit3DWidget::pushStaticTransformation(const base::samples::RigidBodyState& tr)
 {
+    checkAddFrame(tr.sourceFrame);
+    checkAddFrame(tr.targetFrame);
     transformer.pushStaticTransformation(tr);
+}
+
+void Vizkit3DWidget::checkAddFrame(const std::string& frame)
+{
+    std::map<std::string, bool>::iterator it;
+    it = availableFrames.find(frame);
+    if(it == availableFrames.end())
+    {
+	availableFrames[frame] = true;
+	frameSelector->addItem(QString::fromStdString(frame));
+	if(frame == "body")
+	{
+	    int index = frameSelector->findText(QString::fromStdString(frame));
+	    if(index != -1) {
+		frameSelector->setCurrentIndex(index);
+	    }
+	}
+    }
 }
 
 /**
