@@ -7,6 +7,7 @@
 #include <vizkit/Vizkit3DPlugin.hpp>
 
 class ViewQOSG;
+class QComboBox;
 namespace vizkit 
 {
     class PickHandler;
