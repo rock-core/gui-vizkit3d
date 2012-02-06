@@ -33,6 +33,7 @@ rock_library(vizkit
         QVizkitMainWindow.hpp
         VizPlugin.hpp
         CompositeViewerQOSG.hpp
+        PickHandler.hpp
 
     DEPS_PLAIN Boost
     DEPS_PKGCONFIG yaml-cpp transformer openscenegraph base-types)
