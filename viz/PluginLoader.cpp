@@ -1,4 +1,4 @@
-#include <vizkit/VizPlugin.hpp>
+#include <vizkit/Vizkit3DPlugin.hpp>
 #include "LaserScanVisualization.hpp"
 #include "WaypointVisualization.hpp"
 #include "MotionCommandVisualization.hpp"

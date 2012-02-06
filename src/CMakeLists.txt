@@ -23,8 +23,19 @@ rock_library(vizkit
         qtpropertybrowser/qttreepropertybrowser.cpp
         qtpropertybrowser/qtgroupboxpropertybrowser.cpp
         QPropertyBrowserWidget.cpp
+
+    HEADERS
+        Uncertainty.hpp Vizkit3DHelper.hpp
+        QtThreadedWidget.hpp
+        Vizkit3DPlugin.hpp
+        QOSGWidget.hpp
+        Vizkit3DWidget.hpp
+        QVizkitMainWindow.hpp
+        VizPlugin.hpp
+        CompositeViewerQOSG.hpp
+
     DEPS_PLAIN Boost
-    DEPS_PKGCONFIG yaml-cpp transformer openscenegraph)
+    DEPS_PKGCONFIG yaml-cpp transformer openscenegraph base-types)
 
 rock_library(vizkitwidgetloader
     MOC QVizkitWidgetLoader.cpp

@@ -13,6 +13,8 @@
 
 #include "PickHandler.hpp"
 
+using namespace vizkit;
+
 PickHandler::PickHandler():
     _mx(0.0),_my(0.0),
     _usePolytopeIntersector(false),

@@ -1,7 +1,7 @@
 #ifndef QVIZKITMAINWINDOW_H
 #define QVIZKITMAINWINDOW_H
 #include <QMainWindow>
-#include <vizkit/VizPlugin.hpp>
+#include <vizkit/Vizkit3DPlugin.hpp>
 #include <vizkit/Vizkit3DWidget.hpp>
 #include <QtDesigner/QDesignerExportWidget>
 

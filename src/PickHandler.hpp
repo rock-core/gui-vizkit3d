@@ -6,6 +6,8 @@
 #include <iostream>
 #include <Eigen/Core>
 
+namespace vizkit
+{
 class PickedCallback : public osg::Referenced
 {
 public:
@@ -34,5 +36,6 @@ protected:
     bool _usePolytopeIntersector;
     bool _useWindowCoordinates;
 };
+}
 
 #endif

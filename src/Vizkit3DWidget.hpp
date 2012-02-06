@@ -1,18 +1,18 @@
 #ifndef __VIZKIT_QVIZKITWIDGET__
 #define __VIZKIT_QVIZKITWIDGET__
 
-#include <vizkit/QOSGWidget.hpp>
-#include <vizkit/Vizkit3DPlugin.hpp>
-#include <vizkit/GridNode.hpp>
-#include <vizkit/CoordinateFrame.hpp>
 #include <vizkit/CompositeViewerQOSG.hpp>
-#include <vizkit/PickHandler.hpp>
-#include <vizkit/QPropertyBrowserWidget.hpp>
 #include <QtDesigner/QDesignerExportWidget>
 #include <transformer/NonAligningTransformer.hpp>
+#include <vizkit/Vizkit3DPlugin.hpp>
 
+class ViewQOSG;
 namespace vizkit 
 {
+    class PickHandler;
+    class CoordinateFrame;
+    class GridNode;
+    class QProperyBrowserWidget;
 
 class QDESIGNER_WIDGET_EXPORT Vizkit3DWidget : public CompositeViewerQOSG 
 {
@@ -22,6 +22,14 @@ class QDESIGNER_WIDGET_EXPORT Vizkit3DWidget : public CompositeViewerQOSG
 
 public:
     Vizkit3DWidget( QWidget* parent = 0, Qt::WindowFlags f = 0 );
+    
+    /** Defined to avoid unnecessary dependencies in the headers
+     *
+     * If it is not defined explicitely, GCC will try to emit it inline, which
+     * means that the types used in the osg_ptr below must be defined.
+     */
+    ~Vizkit3DWidget();
+
     osg::ref_ptr<osg::Group> getRootNode() const;
     void addDataHandler(VizPluginBase *viz);
     void removeDataHandler(VizPluginBase *viz);

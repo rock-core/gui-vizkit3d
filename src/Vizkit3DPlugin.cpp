@@ -1,7 +1,7 @@
 #include <osg/Group>
-#include "VizPlugin.hpp"
 #include <typeinfo>
 #include <cxxabi.h>
+#include "Vizkit3DPlugin.hpp"
 #include "Vizkit3DHelper.hpp"
 
 using namespace vizkit;

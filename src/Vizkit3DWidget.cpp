@@ -2,6 +2,13 @@
 #include <QVBoxLayout>
 #include <QSplitter>
 
+#include <vizkit/QOSGWidget.hpp>
+#include <vizkit/Vizkit3DPlugin.hpp>
+#include <vizkit/GridNode.hpp>
+#include <vizkit/CoordinateFrame.hpp>
+#include <vizkit/PickHandler.hpp>
+#include <vizkit/QPropertyBrowserWidget.hpp>
+
 using namespace vizkit;
 
 Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
@@ -52,6 +59,8 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     connect(this, SIGNAL(addPlugins(QObject*,QObject*)), this, SLOT(addPluginIntern(QObject*,QObject*)), Qt::QueuedConnection);
     connect(this, SIGNAL(removePlugins(QObject*)), this, SLOT(removePluginIntern(QObject*)), Qt::QueuedConnection);
 }
+
+Vizkit3DWidget::~Vizkit3DWidget() {}
 
 QSize Vizkit3DWidget::sizeHint() const
 {
