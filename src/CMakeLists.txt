@@ -27,6 +27,7 @@ rock_library(vizkit
     HEADERS
         Uncertainty.hpp Vizkit3DHelper.hpp
         QtThreadedWidget.hpp
+	QVisualizationTestWidget.hpp
         Vizkit3DPlugin.hpp
         QOSGWidget.hpp
         Vizkit3DWidget.hpp
