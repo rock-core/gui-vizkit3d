@@ -2,6 +2,8 @@
 #include <QVBoxLayout>
 #include <QSplitter>
 #include <QComboBox>
+#include <QGroupBox>
+#include <QPlastiqueStyle>
 
 #include <vizkit/QOSGWidget.hpp>
 #include <vizkit/Vizkit3DPlugin.hpp>
@@ -18,23 +20,30 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     createSceneGraph();
 
     QWidget* viewWidget = new QWidget;
+    QWidget* controlWidget = new QWidget;
     QVBoxLayout* layout = new QVBoxLayout;
     QSplitter* splitter = new QSplitter(Qt::Horizontal);
     layout->addWidget( splitter );
     this->setLayout( layout );
 
-    QSplitter* leftsplitter = new QSplitter(Qt::Vertical);
-    splitter->addWidget(leftsplitter);
+    QVBoxLayout* controlLayout = new QVBoxLayout;
+    controlWidget->setLayout(controlLayout);
     
     frameSelector = new QComboBox();
-    leftsplitter->addWidget(frameSelector);
+    QGroupBox* groupBox = new QGroupBox();
+    QVBoxLayout* groupBoxLayout = new QVBoxLayout;
+    groupBox->setLayout(groupBoxLayout);
+    groupBox->setTitle("Select Vizualisation Frame");
+    QPlastiqueStyle* style = new QPlastiqueStyle;
+    groupBox->setStyle(style);
+    groupBoxLayout->addWidget(frameSelector);
+    controlLayout->addWidget(groupBox);
 
     // create propertyBrowserWidget
     propertyBrowserWidget = new QProperyBrowserWidget( parent );
     propertyBrowserWidget->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
-    leftsplitter->addWidget(propertyBrowserWidget);
-
-    
+    controlLayout->addWidget(propertyBrowserWidget);
+    splitter->addWidget(controlWidget);
     
     view = new ViewQOSG( viewWidget );
     view->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
