@@ -65,8 +65,8 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     property_names.push_back("show_axes");
     propertyBrowserWidget->addGlobalProperties(this, property_names);
     
-    connect(this, SIGNAL(addPlugins(QObject*,QObject*)), this, SLOT(addPluginIntern(QObject*,QObject*)), Qt::QueuedConnection);
-    connect(this, SIGNAL(removePlugins(QObject*)), this, SLOT(removePluginIntern(QObject*)), Qt::QueuedConnection);
+    connect(this, SIGNAL(addPlugins(QObject*,QObject*)), this, SLOT(addPluginIntern(QObject*,QObject*)));
+    connect(this, SIGNAL(removePlugins(QObject*)), this, SLOT(removePluginIntern(QObject*)));
     connect(frameSelector, SIGNAL(currentIndexChanged(QString)), this, SLOT(setVizualisationFrame(QString)));
 }
 
