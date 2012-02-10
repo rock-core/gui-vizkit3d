@@ -8,6 +8,8 @@
 
 class ViewQOSG;
 class QComboBox;
+class QGroupBox;
+
 namespace vizkit 
 {
     class PickHandler;
@@ -109,6 +111,7 @@ protected:
     QProperyBrowserWidget* propertyBrowserWidget;
     transformer::NonAligningTransformer transformer;
     QComboBox *frameSelector;
+    QGroupBox* groupBox;
     
     std::string displayFrame;
     std::vector<VizPluginBase *> plugins;

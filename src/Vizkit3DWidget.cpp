@@ -30,10 +30,11 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     controlWidget->setLayout(controlLayout);
     
     frameSelector = new QComboBox();
-    QGroupBox* groupBox = new QGroupBox();
+    groupBox = new QGroupBox();
     QVBoxLayout* groupBoxLayout = new QVBoxLayout;
     groupBox->setLayout(groupBoxLayout);
     groupBox->setTitle("Select Vizualisation Frame");
+    groupBox->setEnabled(false);
     QPlastiqueStyle* style = new QPlastiqueStyle;
     groupBox->setStyle(style);
     groupBoxLayout->addWidget(frameSelector);
@@ -373,6 +374,11 @@ void Vizkit3DWidget::checkAddFrame(const std::string& frame)
 		frameSelector->setCurrentIndex(index);
 	    }
 	}
+	// enable frame selector groupBox if needed
+	if(!groupBox->isEnabled())
+        {
+            groupBox->setEnabled(true);
+        }
     }
 }
 
