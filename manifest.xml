@@ -16,4 +16,5 @@
     <rosdep name="qt4" />
     <rosdep name="qt-designer" />
     <rosdep name="qtruby" />
+    <rosdep name="tools/port_proxy" />
 </package>
