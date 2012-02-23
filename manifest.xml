@@ -17,4 +17,5 @@
     <rosdep name="qt-designer" />
     <rosdep name="qtruby" />
     <rosdep name="tools/port_proxy" />
+    <rosdep name="gui/rock_widget_collection" />
 </package>
