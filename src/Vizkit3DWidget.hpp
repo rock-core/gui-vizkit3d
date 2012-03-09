@@ -68,6 +68,7 @@ public slots:
     void setPluginDataFrame(const QString &frame, QObject *plugin);
     
     void pushDynamicTransformation(const base::samples::RigidBodyState &tr);
+    void updateTransformations();
 	
     /**
     * Function for adding static Transformations.

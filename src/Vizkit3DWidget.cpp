@@ -323,7 +323,7 @@ void Vizkit3DWidget::setVizualisationFrame(const QString& frame)
             it->second = data;
         }
     }
-    
+    updateTransformations();
 }
 
 void Vizkit3DWidget::pushDynamicTransformation(const base::samples::RigidBodyState& tr)
@@ -336,20 +336,23 @@ void Vizkit3DWidget::pushDynamicTransformation(const base::samples::RigidBodySta
     {
 	;
     }
+    updateTransformations();
+}
 
+void Vizkit3DWidget::updateTransformations()
+{
     for(std::map<vizkit::VizPluginBase *, TransformationData>::iterator it = pluginToTransformData.begin(); it != pluginToTransformData.end(); it++)
     {
         TransformationData &data(it->second);
 	if(data.transformation)
 	{
 	    Eigen::Affine3d pose;
-	    if(data.transformation->get(tr.time, pose, false))
+	    if(data.transformation->get(base::Time(), pose, false))
 	    {
 		it->first->setPose(pose.translation(), Eigen::Quaterniond(pose.rotation()));
 	    }
 	}
     }
-
 }
 
 void Vizkit3DWidget::pushStaticTransformation(const base::samples::RigidBodyState& tr)
