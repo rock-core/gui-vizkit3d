@@ -113,7 +113,10 @@ void QProperyBrowserWidget::addProperties(QObject* obj,QObject* parent)
 
     // do not add property if it is already added to a parent_group
     if(!parent_group)
-        this->addProperty(group);
+    {
+        QtBrowserItem *item = this->addProperty(group);
+        setExpanded(item,false);
+    }
     
     // connect plugin signal, to notice if a property has changed
     if (!this->connect(obj, SIGNAL(propertyChanged(QString)), this, SLOT(propertyChangedInObject(QString))))
