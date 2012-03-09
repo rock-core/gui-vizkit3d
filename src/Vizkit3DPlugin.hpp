@@ -120,6 +120,8 @@ class VizPluginBase : public QObject
     Q_OBJECT
     Q_PROPERTY(QString vizkit3d_plugin_name READ getPluginName)
     Q_PROPERTY(bool enabled READ isPluginEnabled WRITE setPluginEnabled)
+    Q_PROPERTY(bool KeepOldData READ isKeepOldDataEnabled WRITE setKeepOldData)
+    Q_PROPERTY(int MaxOldData READ getMaxOldData WRITE setMaxOldData)
     
     public:
         VizPluginBase(QObject *parent=NULL);
@@ -186,13 +188,8 @@ class VizPluginBase : public QObject
         */
         void deleteOldData();
         
-        int getMaxOldData()const {return max_number_of_old_data;};
-        void setMaxOldData(int value )
-        {
-            if(value < 0)
-                value = 0;
-            max_number_of_old_data= (unsigned int) value;
-        };
+        int getMaxOldData()const {return max_old_data;};
+        void setMaxOldData(int value);
 
     signals:
        /**
@@ -253,7 +250,7 @@ class VizPluginBase : public QObject
 	bool dirty;
         bool plugin_enabled;
         bool keep_old_data;
-        unsigned int max_number_of_old_data;
+        unsigned int max_old_data;
 };
 
 template <typename T> class Vizkit3DPlugin;

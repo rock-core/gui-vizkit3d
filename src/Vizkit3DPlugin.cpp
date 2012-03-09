@@ -21,7 +21,7 @@ struct VizPluginBase::CallbackAdapter : public osg::NodeCallback
 
 VizPluginBase::VizPluginBase(QObject *parent)
     : QObject(parent), oldNodes(NULL), dirty( false ),  plugin_enabled(true),
-    keep_old_data(false),max_number_of_old_data(100)
+    keep_old_data(false),max_old_data(100)
 {
     position.setZero();
     orientation = Eigen::Quaterniond::Identity();
@@ -92,8 +92,8 @@ void VizPluginBase::updateCallback(osg::Node* node)
         if(keep_old_data)
         {
             oldNodes->addChild(cloneCurrentViz());
-            if(oldNodes->getNumChildren() > max_number_of_old_data)
-                oldNodes->removeChild(0,oldNodes->getNumChildren() -max_number_of_old_data);
+            if(oldNodes->getNumChildren() > max_old_data)
+                oldNodes->removeChild(0,oldNodes->getNumChildren() -max_old_data);
         }
 	dirty = false;
     }
@@ -136,6 +136,15 @@ void VizPluginBase::setKeepOldData(bool value)
     keep_old_data = value;
     if(!value)
         deleteOldData();
+    emit propertyChanged("KeepOldData");
+}
+
+void VizPluginBase::setMaxOldData(int value )
+{
+    if(value < 0)
+        value = 0;
+    max_old_data=(unsigned int) value;
+    emit propertyChanged("MaxOldData");
 }
 
 bool VizPluginBase::isKeepOldDataEnabled()
