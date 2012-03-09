@@ -132,6 +132,7 @@ class VizPluginBase : public QObject
 	/** @return a pointer to the internal Group that is used to maintain the
          * plugin's nodes */
 	osg::ref_ptr<osg::Group> getVizNode() const;
+	osg::ref_ptr<osg::Group> getRootNode() const;
 
 	/** @return the name of the plugin */
 	virtual const QString getPluginName() const;
@@ -172,7 +173,27 @@ class VizPluginBase : public QObject
         * @return an instance of the ruby adapter collection.
         */
         QObject* getRubyAdapterCollection();
+
+        /**
+        * clones the current osg graphs and adds it to the root node.
+        * this is usefull to keep visualisation over time 
+        */
+        void setKeepOldData(bool value);
+        bool isKeepOldDataEnabled();
+
+        /**
+        * deletes all copies of the osg graph which were genereted by keepCurrentViz
+        */
+        void deleteOldData();
         
+        int getMaxOldData()const {return max_number_of_old_data;};
+        void setMaxOldData(int value )
+        {
+            if(value < 0)
+                value = 0;
+            max_number_of_old_data= (unsigned int) value;
+        };
+
     signals:
        /**
         * must be emitted if a property of an inherited plugin changes
@@ -200,6 +221,11 @@ class VizPluginBase : public QObject
          */ 
         virtual void createDockWidgets();
 
+        /** override this method to provide your own clone for the current
+         * visualization
+         */ 
+        virtual osg::ref_ptr<osg::Node> cloneCurrentViz();
+
 	/** lock this mutex outside updateMainNode if you update the internal
 	 * state of the visualization.
 	 */ 
@@ -214,8 +240,11 @@ class VizPluginBase : public QObject
 	osg::ref_ptr<osg::NodeCallback> nodeCallback;
 	void updateCallback(osg::Node* node);
 
-        osg::ref_ptr<osg::Node> mainNode;
-        osg::ref_ptr<osg::PositionAttitudeTransform> vizNode;
+        osg::ref_ptr<osg::Node> mainNode;               //node which is used by the child class
+        osg::ref_ptr<osg::Group> rootNode;              //node which is the osg root node of the pluign 
+        osg::ref_ptr<osg::PositionAttitudeTransform> vizNode; //node which describes the transformation between rootNode and mainNode
+        osg::ref_ptr<osg::Group> oldNodes;              //node which is the root node for all old visualization graphs of the plugin  
+        
         //position of the vizNode
         base::Vector3d position;
         //orientation of the viznode
@@ -223,6 +252,8 @@ class VizPluginBase : public QObject
         
 	bool dirty;
         bool plugin_enabled;
+        bool keep_old_data;
+        unsigned int max_number_of_old_data;
 };
 
 template <typename T> class Vizkit3DPlugin;

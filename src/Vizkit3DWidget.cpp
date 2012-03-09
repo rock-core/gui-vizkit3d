@@ -94,7 +94,7 @@ osg::ref_ptr<osg::Group> Vizkit3DWidget::getRootNode() const
 
 void Vizkit3DWidget::setTrackedNode( VizPluginBase* plugin )
 {
-    view->setTrackedNode(plugin->getVizNode());
+    view->setTrackedNode(plugin->getRootNode());
 }
 
 void Vizkit3DWidget::createSceneGraph() 
@@ -143,12 +143,12 @@ void Vizkit3DWidget::createSceneGraph()
 
 void Vizkit3DWidget::addDataHandler(VizPluginBase *viz)
 {
-    root->addChild( viz->getVizNode() );
+    root->addChild( viz->getRootNode() );
 }
 
 void Vizkit3DWidget::removeDataHandler(VizPluginBase *viz)
 {
-    root->removeChild( viz->getVizNode() );
+    root->removeChild( viz->getRootNode() );
 }
 
 void Vizkit3DWidget::changeCameraView(const osg::Vec3& lookAtPos)
@@ -395,7 +395,7 @@ void Vizkit3DWidget::pluginActivityChanged(bool enabled)
     {
         // check if root node has plugin as child
         bool has_child_plugin = false;
-        if(root->getChildIndex(viz_plugin->getVizNode()) < root->getNumChildren())
+        if(root->getChildIndex(viz_plugin->getRootNode()) < root->getNumChildren())
             has_child_plugin = true;
         
         // add or remove plugin from root node
