@@ -171,14 +171,27 @@ void QProperyBrowserWidget::propertyChangedInGUI(QtProperty* property, const QVa
 void QProperyBrowserWidget::propertyChangedInObject(QString property_name)
 {
     QObject* obj = QObject::sender();
-    QHash<QString, QtProperty*>* groupMap = objectToProperties[obj];
-    if (obj && groupMap && groupMap->contains(property_name))
+    if(property_name == "vizkit3d_plugin_name")
     {
-        QtProperty* property = groupMap->value(property_name);
-        QVariant value = obj->property(property_name.toStdString().c_str());
-        if(value.isValid())
+        QtProperty *group = objectToGroup[obj];
+        if (obj && group)
         {
-            variantManager->setValue(property, value);
+            QVariant value = obj->property(property_name.toStdString().c_str());
+            if(value.isValid())
+                group->setPropertyName(value.toString());
+        }
+    }
+    else
+    {
+        QHash<QString, QtProperty*>* groupMap = objectToProperties[obj];
+        if (obj && groupMap && groupMap->contains(property_name))
+        {
+            QtProperty* property = groupMap->value(property_name);
+            QVariant value = obj->property(property_name.toStdString().c_str());
+            if(value.isValid())
+            {
+                variantManager->setValue(property, value);
+            }
         }
     }
 }

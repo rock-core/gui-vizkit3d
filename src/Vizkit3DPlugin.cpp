@@ -54,7 +54,16 @@ void VizPluginBase::setPose(const base::Vector3d& position, const base::Quaterni
 
 const QString VizPluginBase::getPluginName() const 
 {
-    return abi::__cxa_demangle(typeid(*this).name(), 0, 0, 0);
+    if(vizkit3d_plugin_name.isEmpty())
+        return abi::__cxa_demangle(typeid(*this).name(), 0, 0, 0);
+    else
+        return vizkit3d_plugin_name;
+}
+
+void VizPluginBase::setPluginName(const std::string &name)
+{
+    vizkit3d_plugin_name = QString::fromStdString(name);
+    emit propertyChanged("vizkit3d_plugin_name");
 }
 
 osg::ref_ptr<osg::Node> VizPluginBase::createMainNode()

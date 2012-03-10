@@ -136,8 +136,6 @@ class VizPluginBase : public QObject
 	osg::ref_ptr<osg::Group> getVizNode() const;
 	osg::ref_ptr<osg::Group> getRootNode() const;
 
-	/** @return the name of the plugin */
-	virtual const QString getPluginName() const;
     
        /**
         * @return true if plugin is enabled
@@ -171,6 +169,10 @@ class VizPluginBase : public QObject
         void setPose(const base::Vector3d &position, const base::Quaterniond &orientation);
         
     public slots:
+	/** @return the name of the plugin */
+	virtual const QString getPluginName() const;
+        virtual void setPluginName(const std::string &name);
+
         /**
         * @return an instance of the ruby adapter collection.
         */
@@ -229,7 +231,7 @@ class VizPluginBase : public QObject
 	boost::mutex updateMutex;
         
         std::vector<QDockWidget*> dockWidgets;
-        
+        QString vizkit3d_plugin_name;
         VizPluginRubyAdapterCollection adapterCollection;
 
     private:
