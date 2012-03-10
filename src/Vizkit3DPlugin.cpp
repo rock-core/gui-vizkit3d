@@ -60,9 +60,9 @@ const QString VizPluginBase::getPluginName() const
         return vizkit3d_plugin_name;
 }
 
-void VizPluginBase::setPluginName(const std::string &name)
+void VizPluginBase::setPluginName(const QString &name)
 {
-    vizkit3d_plugin_name = QString::fromStdString(name);
+    vizkit3d_plugin_name = name;
     emit propertyChanged("vizkit3d_plugin_name");
 }
 

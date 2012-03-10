@@ -171,7 +171,7 @@ class VizPluginBase : public QObject
     public slots:
 	/** @return the name of the plugin */
 	virtual const QString getPluginName() const;
-        virtual void setPluginName(const std::string &name);
+        virtual void setPluginName(const QString &name);
 
         /**
         * @return an instance of the ruby adapter collection.
