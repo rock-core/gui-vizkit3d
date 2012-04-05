@@ -4,6 +4,7 @@
 #include "MotionCommandVisualization.hpp"
 #include "TrajectoryVisualization.hpp"
 #include "RigidBodyStateVisualization.hpp"
+#include "SonarGroundDistanceVisualization.hpp"
 
 namespace vizkit {
     class QtPluginVizkit : public vizkit::VizkitPluginFactory {
@@ -25,6 +26,7 @@ namespace vizkit {
 	    pluginNames->push_back("MotionCommandVisualization");
 	    pluginNames->push_back("RigidBodyStateVisualization");
 	    pluginNames->push_back("LaserScanVisualization");
+	    pluginNames->push_back("SonarGroundDistanceVisualization");
 	    return pluginNames;
 	}
 	
@@ -50,6 +52,10 @@ namespace vizkit {
 	    else if (pluginName == "LaserScanVisualization")
 	    {
 	        plugin = new vizkit::LaserScanVisualization();
+	    }
+	    else if (pluginName == "SonarGroundDistanceVisualization")
+	    {
+	        plugin = new vizkit::SonarGroundDistanceVisualization();
 	    }
 
 	    if (plugin) 
