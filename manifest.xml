@@ -10,7 +10,6 @@
     <depend package="base/types" />
     <depend package="external/yaml-cpp" />
     <depend package="drivers/transformer" />
-    <depend package="drivers/orogen/transformer" />
     <!-- needed for the vizkit/Ruby parts -->
     <rosdep name="osg" />
     <rosdep name="qt4" />
