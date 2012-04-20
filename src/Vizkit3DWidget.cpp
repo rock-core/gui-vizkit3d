@@ -68,7 +68,7 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     
     pluginNames = new QStringList;
     
-    changeCameraView(osg::Vec3d(0,0,0), osg::Vec3d(0,-5,5));
+    changeCameraView(osg::Vec3d(0,0,0), osg::Vec3d(-5,0,5));
     
     // add some properties of this widget as global properties
     QStringList property_names("show_grid");
