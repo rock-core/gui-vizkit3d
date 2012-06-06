@@ -54,14 +54,17 @@ BOOST_AUTO_TEST_CASE(waypointVisualization_test)
 BOOST_AUTO_TEST_CASE(motionCommandVisualization_test)
 {
     std::cout << "Testing MotionCommandVisualization" << std::endl;
-    QtThreadedWidget<vizkit::QVisualizationTestWidget<vizkit::MotionCommandVisualization, std::pair<double, double> > > app;
+    QtThreadedWidget<vizkit::QVisualizationTestWidget<vizkit::MotionCommandVisualization, base::MotionCommand2D > > app;
     app.start();
     std::cout << "Close the visualization window to abort this test." << std::endl;
     for( int i=0; i<10000 && app.isRunning(); i++ )
     {
         double r = i/1000.0;
         double s = r/10;
-        app.getWidget()->updateData(std::pair<double, double>(s, sin(r) * r));
+	base::MotionCommand2D mc;
+	mc.rotation = sin(r) * r;
+	mc.translation = s;
+        app.getWidget()->updateData(mc);
         
         usleep( 1000 );
     }
