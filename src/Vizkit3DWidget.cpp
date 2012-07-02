@@ -328,6 +328,12 @@ void Vizkit3DWidget::setVizualisationFrame(const QString& frame)
 
 void Vizkit3DWidget::pushDynamicTransformation(const base::samples::RigidBodyState& tr)
 {
+    if(!tr.hasValidPosition() || !tr.hasValidOrientation())
+    {
+        std::cerr << "Vizkit3DWidget ignoring invalid dynamic transformation " << tr.sourceFrame << " --> " << tr.targetFrame << std::endl;
+        return;
+    }
+
     checkAddFrame(tr.sourceFrame);
     checkAddFrame(tr.targetFrame);
 
@@ -357,6 +363,11 @@ void Vizkit3DWidget::updateTransformations()
 
 void Vizkit3DWidget::pushStaticTransformation(const base::samples::RigidBodyState& tr)
 {
+    if(!tr.hasValidPosition() || !tr.hasValidOrientation())
+    {
+        std::cerr << "Vizkit3DWidget ignoring invalid static transformation " << tr.sourceFrame << " --> " << tr.targetFrame << std::endl;
+        return;
+    }
     checkAddFrame(tr.sourceFrame);
     checkAddFrame(tr.targetFrame);
     transformer.pushStaticTransformation(tr);
