@@ -13,6 +13,8 @@ class QtThreadedWidgetBase
     boost::shared_ptr<QApplication> app;
 
     boost::mutex mut;
+    boost::mutex mut_wait_for_destroy;
+    boost::mutex mut_wait_for_deleted;
     boost::condition_variable cond;
     bool running;
 

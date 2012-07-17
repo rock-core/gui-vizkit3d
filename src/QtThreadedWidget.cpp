@@ -5,14 +5,22 @@
 #include <boost/bind.hpp>
     
 QtThreadedWidgetBase::QtThreadedWidgetBase()
-    : argc(0), argv(NULL), running(false)
+    : argc(0), argv(NULL), running(false), widget(NULL)
 {
+    mut_wait_for_destroy.lock();
 }
 
 QtThreadedWidgetBase::~QtThreadedWidgetBase()
 {
     if( isRunning() )
         stop();
+
+    //signalizing that thread should delete all its objects
+    mut_wait_for_destroy.unlock();
+    {
+        //wait until all objects were deleted
+        boost::lock_guard<boost::mutex> lock(mut_wait_for_deleted);
+    }
 }
 
 void QtThreadedWidgetBase::start()
@@ -48,6 +56,9 @@ QWidget* QtThreadedWidgetBase::getWidget()
 
 void QtThreadedWidgetBase::run()
 {
+    //lock mutex until all qt objects were deleted 
+    boost::lock_guard<boost::mutex> lock(mut_wait_for_deleted);
+
     app = boost::shared_ptr<QApplication>( new QApplication( argc, argv ) );
     widget = createWidget();
     app->connect( app.get(), SIGNAL(lastWindowClosed()), app.get(), SLOT(quit()) );    
@@ -58,7 +69,6 @@ void QtThreadedWidgetBase::run()
         running = true;
     }
     cond.notify_one();
-
     app->exec();
 
     {
@@ -66,5 +76,18 @@ void QtThreadedWidgetBase::run()
         running = false;
     }
     cond.notify_one();
+
+    //wait until the main thread is signalizing that the object 
+    //is going to be destroyed
+    //this is for preventing memory corruption due to accessing
+    //the widget after the qt application was quit
+    {
+        boost::lock_guard<boost::mutex> lock(mut_wait_for_destroy);
+    }
+
+    //delete all objects from the same thread they were created
+    delete widget;
+    widget = NULL;
+    app.reset();
 }
 
