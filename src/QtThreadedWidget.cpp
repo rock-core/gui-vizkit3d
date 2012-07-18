@@ -1,41 +1,59 @@
 #include "QtThreadedWidget.hpp"
 #include <QWidget>
 
-#include <boost/thread/thread.hpp>
 #include <boost/bind.hpp>
     
 QtThreadedWidgetBase::QtThreadedWidgetBase()
-    : argc(0), argv(NULL), running(false), widget(NULL)
+    : argc(0), argv(NULL), running(false),restart(true),destroy(false),widget(NULL)
 {
-    mut_wait_for_destroy.lock();
 }
 
 QtThreadedWidgetBase::~QtThreadedWidgetBase()
 {
+    {
+        boost::lock_guard<boost::mutex> lock(mut);
+        destroy = true;
+    }
+
     if( isRunning() )
         stop();
 
-    //signalizing that thread should delete all its objects
-    mut_wait_for_destroy.unlock();
-    {
-        //wait until all objects were deleted
-        boost::lock_guard<boost::mutex> lock(mut_wait_for_deleted);
-    }
+
+    cond.notify_one();
+    gui_thread.join();
 }
 
 void QtThreadedWidgetBase::start()
 {
-    boost::thread( boost::bind( &QtThreadedWidgetBase::run, this ) );
-    boost::mutex::scoped_lock lock(mut);
-    while(!running)
+    if(isRunning())
+        return;
+
+    if(!widget)
     {
-        cond.wait(lock);
+        gui_thread = boost::thread( boost::bind( &QtThreadedWidgetBase::run, this ) );
+        boost::mutex::scoped_lock lock(mut);
+        while(!running)
+        {
+            cond.wait(lock);
+        }
+    }
+    else
+    {
+        boost::mutex::scoped_lock lock(mut);
+        restart = true;
+        cond.notify_one();
+        while(!running)
+        {
+            cond.wait(lock);
+        }
     }
 }
 
 void QtThreadedWidgetBase::stop()
 {
-    app->quit();
+    if(!isRunning())
+        return;
+    app->closeAllWindows();
     boost::mutex::scoped_lock lock(mut);
     while(running)
     {
@@ -56,33 +74,45 @@ QWidget* QtThreadedWidgetBase::getWidget()
 
 void QtThreadedWidgetBase::run()
 {
-    //lock mutex until all qt objects were deleted 
-    boost::lock_guard<boost::mutex> lock(mut_wait_for_deleted);
-
-    app = boost::shared_ptr<QApplication>( new QApplication( argc, argv ) );
-    widget = createWidget();
+    {
+        boost::lock_guard<boost::mutex> lock( mut );
+        app = boost::shared_ptr<QApplication>( new QApplication( argc, argv ) );
+        widget = createWidget();
+    }
     app->connect( app.get(), SIGNAL(lastWindowClosed()), app.get(), SLOT(quit()) );    
-    widget->show();
-    while( app->startingUp() );
-    {
-        boost::lock_guard<boost::mutex> lock( mut );
-        running = true;
-    }
-    cond.notify_one();
-    app->exec();
 
+    while(!destroy)
     {
-        boost::lock_guard<boost::mutex> lock( mut );
-        running = false;
-    }
-    cond.notify_one();
+        while( app->startingUp()){usleep(100);};
+        widget->show();
 
-    //wait until the main thread is signalizing that the object 
-    //is going to be destroyed
-    //this is for preventing memory corruption due to accessing
-    //the widget after the qt application was quit
-    {
-        boost::lock_guard<boost::mutex> lock(mut_wait_for_destroy);
+        {
+            boost::lock_guard<boost::mutex> lock( mut );
+            running = true;
+        }
+
+        cond.notify_one();
+        app->exec();
+
+        //cleanup
+        //in some cases the main loop is exit without 
+        //processing all events
+        //this will result in some strange behaivor if 
+        //the event loop is restarted
+        app->exit(0);
+        while(app->hasPendingEvents())
+        {
+            usleep(200);
+            app->processEvents();
+        }
+        {
+            boost::mutex::scoped_lock lock(mut);
+            running = false;
+            restart = false;
+            cond.notify_one();
+            while(!restart && !destroy)
+                cond.wait(lock);
+        }
     }
 
     //delete all objects from the same thread they were created
