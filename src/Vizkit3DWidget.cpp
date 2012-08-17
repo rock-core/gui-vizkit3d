@@ -78,6 +78,7 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     connect(this, SIGNAL(addPlugins(QObject*,QObject*)), this, SLOT(addPluginIntern(QObject*,QObject*)));
     connect(this, SIGNAL(removePlugins(QObject*)), this, SLOT(removePluginIntern(QObject*)));
     connect(frameSelector, SIGNAL(currentIndexChanged(QString)), this, SLOT(setVizualisationFrame(QString)));
+
 }
 
 Vizkit3DWidget::~Vizkit3DWidget() {}
@@ -182,7 +183,7 @@ void Vizkit3DWidget::changeCameraView(const osg::Vec3* lookAtPos, const osg::Vec
     osgGA::KeySwitchMatrixManipulator* switchMatrixManipulator = dynamic_cast<osgGA::KeySwitchMatrixManipulator*>(view->getCameraManipulator());
     if (!switchMatrixManipulator) return;
     //select TerrainManipulator
-    switchMatrixManipulator->selectMatrixManipulator(3);
+    //switchMatrixManipulator->selectMatrixManipulator(3); //why this switch was needed here?, each manipulator should be able  to do the folliowing steps
     
     //get last values of eye, center and up
     osg::Vec3d eye, center, up;

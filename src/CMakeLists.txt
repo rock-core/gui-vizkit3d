@@ -7,13 +7,13 @@ rock_library(vizkit
     SOURCES
         Uncertainty.cpp Vizkit3DHelper.cpp CoordinateFrame.cpp
         QtThreadedWidget.cpp GridNode.cpp MouseManipulationManipulator.cpp
-        ${PROPERTY_BROWSER_RESOURCES}
+        ${PROPERTY_BROWSER_RESOURCES} 
     MOC
         Vizkit3DPlugin.cpp CompositeViewerQOSG.cpp
         PickHandler.cpp QOSGWidget.cpp
         Vizkit3DWidget.cpp
         QVizkitMainWindow.cpp
-
+        ConnexionHID.cpp
         qtpropertybrowser/qteditorfactory.cpp 
         qtpropertybrowser/qtvariantproperty.cpp
         qtpropertybrowser/qtpropertymanager.cpp
@@ -35,6 +35,7 @@ rock_library(vizkit
         VizPlugin.hpp
         CompositeViewerQOSG.hpp
         PickHandler.hpp
+        ConnexionHID.h
 
     DEPS_PLAIN Boost
     DEPS_PKGCONFIG yaml-cpp transformer openscenegraph base-types)
