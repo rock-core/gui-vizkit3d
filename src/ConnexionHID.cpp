@@ -148,28 +148,34 @@ void ConnexionHID::getValue(double *coordinates, struct connexionValues *rawValu
         rawValues->button2 = events[i].value;
         break;
       }
-    } else if(EV_REL == events[i].type) {
+    } else if(EV_REL == events[i].type || EV_ABS == events[i].type) {
       switch(events[i].code) {
+      //case ABS_X: //Same value as REL_* so because of the check above, this is not needed
       case REL_X:
         rawValues->tx = events[i].value;
         idleFrameCount[0] = 0;
         break;
+      //case ABS_Y:
       case REL_Y:
         rawValues->ty = events[i].value;
         idleFrameCount[1] = 0;
         break;
+      //case ABS_Z:
       case REL_Z:
         rawValues->tz = events[i].value;
         idleFrameCount[2] = 0;
         break;
+      //case ABS_RX:
       case REL_RX:
         rawValues->rx = events[i].value;
         idleFrameCount[3] = 0;
         break;
+      //case ABS_RY:
       case REL_RY:
         rawValues->ry = events[i].value;
         idleFrameCount[4] = 0;
         break;
+      //case ABS_RZ:
       case REL_RZ:
         rawValues->rz = events[i].value;
         idleFrameCount[5] = 0;
