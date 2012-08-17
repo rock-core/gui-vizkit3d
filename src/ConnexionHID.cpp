@@ -19,9 +19,9 @@ ConnexionHID::ConnexionHID(){
     scale[RX] = 5000.0;
     scale[RY] = 5000.0;
     scale[RZ] = 5000.0;
-    scale[TX] = 50.0;
-    scale[TY] = 50.0;
-    scale[TZ] = 50.0;
+    scale[TX] = 10.0;
+    scale[TY] = 10.0;
+    scale[TZ] = 10.0;
     matrix.makeIdentity();
 }
 
@@ -214,8 +214,14 @@ void ConnexionHID::handleMouse(){
   //Getting actual readings
   getValue(motion, &newValues);
 
-  for(int i=0;i<6;i++)
+  bool set = false;
+  for(int i=0;i<6;i++){
+      if(fabs(motion[i])>0.0)
+          set = true;
       motion[i] /= scale[i];
+  }
+  //Save processing power if mouse is not moved
+  if(!set) return;
 
   //Get current Camera matrix
   osg::Matrixd m = manipulator->getMatrix();
