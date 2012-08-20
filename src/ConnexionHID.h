@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include <QTimer>
-#include <osgViewer/View>
 #include <vizkit/osgMatrixManipulator.h>
 
 #define LOGITECH_VENDOR_ID          0x046d
@@ -43,7 +42,7 @@ public:
   /* Scan all devices in /dev/input/ to find the SpaceMouse.
    * Returns the true if an SpaceMouse could be found.
    */
-  bool init(osgGA::CameraManipulator *manipulator);
+  bool init(osgGA::MatrixManipulator *manipulator);
 
   /**
    * Returns the file Decriptor, -1 if no valid FD is there
@@ -93,7 +92,7 @@ protected:
   void getValue(double *coordiantes, struct connexionValues *rawValues);
   void closeConnexionHID();
   int fd;
-  osg::ref_ptr<osgGA::CameraManipulator> manipulator;
+  osg::ref_ptr<osgGA::MatrixManipulator> manipulator;
   QTimer timer;
   osg::Matrixd matrix;
   double scale[6];

@@ -42,7 +42,7 @@ int ConnexionHID::getFileDescriptor() {
     return fd;
 }
 
-bool ConnexionHID::init(osgGA::CameraManipulator *manipulator){
+bool ConnexionHID::init(osgGA::MatrixManipulator *manipulator){
   this->manipulator = manipulator;
   if(!manipulator)
       return false;
