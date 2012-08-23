@@ -136,7 +136,6 @@ class VizPluginBase : public QObject
 	osg::ref_ptr<osg::Group> getVizNode() const;
 	osg::ref_ptr<osg::Group> getRootNode() const;
 
-    
        /**
         * @return true if plugin is enabled
         */
@@ -165,8 +164,6 @@ class VizPluginBase : public QObject
          * @return a vector of QDockWidgets provided by this class.
          */
         std::vector<QDockWidget*> getDockWidgets();
-        
-        void setPose(const base::Vector3d &position, const base::Quaterniond &orientation);
         
     public slots:
 	/** @return the name of the plugin */
@@ -198,6 +195,7 @@ class VizPluginBase : public QObject
         int getMaxOldData()const {return max_old_data;};
         void setMaxOldData(int value);
 
+	void setPose(const base::Vector3d &position, const base::Quaterniond &orientation);
     signals:
        /**
         * must be emitted if a property of an inherited plugin changes
