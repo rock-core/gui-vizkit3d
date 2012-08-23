@@ -185,6 +185,11 @@ class VizPluginBase : public QObject
         void setKeepOldData(bool value);
         bool isKeepOldDataEnabled();
 
+	/**
+	 * Clears the visualization of the plugin
+	 * */
+	virtual void clearVisualization();
+	
         /**
         * deletes all copies of the osg graph which were genereted by keepCurrentViz
         */
@@ -249,6 +254,7 @@ class VizPluginBase : public QObject
         //orientation of the viznode
         base::Quaterniond orientation;
         
+	bool isAttached;
 	bool dirty;
         bool plugin_enabled;
         bool keep_old_data;

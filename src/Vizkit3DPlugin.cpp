@@ -20,7 +20,7 @@ struct VizPluginBase::CallbackAdapter : public osg::NodeCallback
 };
 
 VizPluginBase::VizPluginBase(QObject *parent)
-    : QObject(parent), oldNodes(NULL), dirty( false ),  plugin_enabled(true),
+    : QObject(parent), oldNodes(NULL), isAttached(false), dirty( false ),  plugin_enabled(true),
     keep_old_data(false),max_old_data(100)
 {
     position.setZero();
@@ -82,6 +82,12 @@ void VizPluginBase::createDockWidgets()
 
 }
 
+void VizPluginBase::clearVisualization()
+{
+    vizNode->removeChild(mainNode);
+    isAttached = false;
+}
+
 void VizPluginBase::updateCallback(osg::Node* node)
 {
     boost::mutex::scoped_lock lockit(updateMutex);
@@ -93,6 +99,7 @@ void VizPluginBase::updateCallback(osg::Node* node)
     {
         mainNode = createMainNode();
         vizNode->addChild(mainNode);
+	isAttached = true;
     }
 
     if( isDirty() )
@@ -104,6 +111,11 @@ void VizPluginBase::updateCallback(osg::Node* node)
             if(oldNodes->getNumChildren() > max_old_data)
                 oldNodes->removeChild(0,oldNodes->getNumChildren() -max_old_data);
         }
+        if(!isAttached)
+	{
+	    vizNode->addChild(mainNode);
+	    isAttached = true;
+	}
 	dirty = false;
     }
 }
