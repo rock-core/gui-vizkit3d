@@ -222,6 +222,15 @@ void Vizkit3DWidget::removePlugin(QObject* plugin)
 }
 
 /**
+* Returns the pointer of the instance of the used viewer, 
+* which is also of the ViewerQOSG type.
+*/
+osg::ref_ptr<ViewQOSG> Vizkit3DWidget::getViewer()
+{
+    return view;
+}
+
+/**
  * This slot adds all plugins in the list to the OSG and
  * their properties to the property browser widget.
  */

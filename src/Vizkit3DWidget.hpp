@@ -34,6 +34,7 @@ public:
     ~Vizkit3DWidget();
 
     osg::ref_ptr<osg::Group> getRootNode() const;
+    osg::ref_ptr<ViewQOSG> getViewer();
     void addDataHandler(VizPluginBase *viz);
     void removeDataHandler(VizPluginBase *viz);
     
