@@ -75,6 +75,8 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     property_names.push_back("show_axes");
     propertyBrowserWidget->addGlobalProperties(this, property_names);
     
+    initalDisplayFrame = "";
+    
     connect(this, SIGNAL(addPlugins(QObject*,QObject*)), this, SLOT(addPluginIntern(QObject*,QObject*)));
     connect(this, SIGNAL(removePlugins(QObject*)), this, SLOT(removePluginIntern(QObject*)));
     connect(frameSelector, SIGNAL(currentIndexChanged(QString)), this, SLOT(setVizualisationFrame(QString)));
@@ -319,6 +321,9 @@ void Vizkit3DWidget::setVizualisationFrame(const QString& frame)
 {
     displayFrame = frame.toStdString();
     
+    if(initalDisplayFrame.empty())
+        initalDisplayFrame = displayFrame;
+    
     for(std::map<vizkit::VizPluginBase *, TransformationData>::iterator it = pluginToTransformData.begin(); it != pluginToTransformData.end(); it++)
     {
         TransformationData &data(it->second);
@@ -391,7 +396,7 @@ void Vizkit3DWidget::checkAddFrame(const std::string& frame)
     {
 	availableFrames[frame] = true;
 	frameSelector->addItem(QString::fromStdString(frame));
-	if(frame == "body")
+	if(frame == initalDisplayFrame)
 	{
 	    int index = frameSelector->findText(QString::fromStdString(frame));
 	    if(index != -1) {

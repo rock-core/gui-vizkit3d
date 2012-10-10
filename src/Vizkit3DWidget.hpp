@@ -116,6 +116,7 @@ protected:
     QGroupBox* groupBox;
     
     std::string displayFrame;
+    std::string initalDisplayFrame;
     std::vector<VizPluginBase *> plugins;
  
     std::map<std::string, bool> availableFrames;
