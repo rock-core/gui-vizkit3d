@@ -33,7 +33,7 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     groupBox = new QGroupBox();
     QVBoxLayout* groupBoxLayout = new QVBoxLayout;
     groupBox->setLayout(groupBoxLayout);
-    groupBox->setTitle("Select Vizualisation Frame");
+    groupBox->setTitle("Select Visualization Frame");
     groupBox->setEnabled(false);
     QPlastiqueStyle* style = new QPlastiqueStyle;
     groupBox->setStyle(style);
@@ -79,7 +79,7 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     
     connect(this, SIGNAL(addPlugins(QObject*,QObject*)), this, SLOT(addPluginIntern(QObject*,QObject*)));
     connect(this, SIGNAL(removePlugins(QObject*)), this, SLOT(removePluginIntern(QObject*)));
-    connect(frameSelector, SIGNAL(currentIndexChanged(QString)), this, SLOT(setVizualisationFrame(QString)));
+    connect(frameSelector, SIGNAL(currentIndexChanged(QString)), this, SLOT(setVisualizationFrame(QString)));
 
 }
 
@@ -317,7 +317,7 @@ void Vizkit3DWidget::setPluginDataFrame(const QString& frame, QObject* plugin)
     pluginToTransformData[viz_plugin] = td;
 }
 
-void Vizkit3DWidget::setVizualisationFrame(const QString& frame)
+void Vizkit3DWidget::setVisualizationFrame(const QString& frame)
 {
     displayFrame = frame.toStdString();
     

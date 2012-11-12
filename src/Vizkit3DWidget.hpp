@@ -58,7 +58,7 @@ public slots:
     void removePlugin(QObject* plugin);
     
     ///The frame in which the data should be displayed
-    void setVizualisationFrame(const QString &frame);
+    void setVisualizationFrame(const QString &frame);
     
     /**
      * Sets frame plugin data for a given plugin.
