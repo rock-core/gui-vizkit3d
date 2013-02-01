@@ -20,10 +20,13 @@ public slots:
     const base::samples::frame::Frame getFrame()const;
     base::AUVMotionCommand getMotionCommand() const;
     void callbackMotionCommand(const QString &string);
+    void set2Int(int,int);
 
 signals:
     void frameChanged();
     void valueChanged(int value);
+    void intChanged(int value);
+    void int2Changed(int ,int );
     void motionCommandChanged();
 
 private:

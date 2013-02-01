@@ -25,6 +25,10 @@ void TestVizkitWidget::reachable()
     window.event_list->addItem("task is reachable");
 }
 
+void TestVizkitWidget::set2Int(int i1,int i2)
+{
+}
+
 void TestVizkitWidget::unreachable()
 {
     window.event_list->addItem("task is unreachable");
