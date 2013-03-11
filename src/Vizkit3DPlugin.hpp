@@ -165,6 +165,20 @@ class VizPluginBase : public QObject
          */
         std::vector<QDockWidget*> getDockWidgets();
         
+    void clickRequest(float x, float y)
+    {
+        #include <iostream>
+        std::cout << "About to emit 'clicked()'.";
+        if(vizkit3d_plugin_name == NULL)
+        {
+            std::cout << "vizkit3d_plugin_name is NULL! Setting to empty string." << std::endl;
+            vizkit3d_plugin_name = "";
+        }
+        QString pname = getPluginName();
+        std::cout << "Plugin name: " << (pname != NULL ? pname.toStdString() : "is null!") << std::endl;
+        //emit clicked(x,y);
+    }
+        
     public slots:
 	/** @return the name of the plugin */
 	virtual const QString getPluginName() const;
@@ -206,6 +220,11 @@ class VizPluginBase : public QObject
         * will emitted if the plugin activity changes
         */
         void pluginActivityChanged(bool);
+        
+       /**
+        * Signals when this plugin has been clicked. x and y are viewport coordinates.
+        */
+        void clicked(float x, float y);
 
     protected:
 	/** override this function to update the visualisation.

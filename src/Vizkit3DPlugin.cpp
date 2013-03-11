@@ -1,8 +1,10 @@
 #include <osg/Group>
+//#include <osg/Text>
 #include <typeinfo>
 #include <cxxabi.h>
 #include "Vizkit3DPlugin.hpp"
 #include "Vizkit3DHelper.hpp"
+#include "PickHandler.hpp"
 
 using namespace vizkit;
 
@@ -32,6 +34,10 @@ VizPluginBase::VizPluginBase(QObject *parent)
     rootNode->addChild(vizNode);
     oldNodes = new osg::Group();
     rootNode->addChild(oldNodes);
+    
+    // Add plugin name to root node as custom user text
+    //rootNode->setUserData(new osgText::String("MyNode"));
+    rootNode->setUserData(new osg::Geode);
 }
 
 osg::ref_ptr<osg::Group> VizPluginBase::getVizNode() const 
@@ -68,7 +74,10 @@ void VizPluginBase::setPluginName(const QString &name)
 
 osg::ref_ptr<osg::Node> VizPluginBase::createMainNode()
 {
-    return new osg::Group();
+    osg::Group* main_node = new osg::Group;
+    //rootNode->setUserData(new PickedUserData(this));
+    
+    return main_node;
 }
 
 std::vector< QDockWidget* > VizPluginBase::getDockWidgets()

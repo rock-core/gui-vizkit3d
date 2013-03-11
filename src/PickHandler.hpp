@@ -5,6 +5,7 @@
 #include <osgViewer/Viewer>
 #include <iostream>
 #include <Eigen/Core>
+#include "Vizkit3DPlugin.hpp"
 
 namespace vizkit
 {
@@ -12,6 +13,15 @@ class PickedCallback : public osg::Referenced
 {
 public:
     virtual void picked() = 0;
+};
+
+class PickedUserData : public osg::Referenced
+{
+public:
+    PickedUserData(VizPluginBase* plugin){ this->plugin = plugin; }
+    VizPluginBase* getPlugin() { return plugin; }
+private:
+    VizPluginBase* plugin;
 };
 
 // class to handle events with a pick
