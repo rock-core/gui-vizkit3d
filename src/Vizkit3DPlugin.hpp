@@ -12,15 +12,15 @@
 #include <QtPlugin>
 #include <base/eigen.h>
 
+
 namespace YAML
 {
     class Emitter;
     class Node;
 }
 
-namespace vizkit 
+namespace vizkit
 {
-
 /** 
  * Interface class for all ruby adapters of the visualization plugins
  * Ruby adapters are usefull to get incoming data via ruby.
@@ -165,24 +165,11 @@ class VizPluginBase : public QObject
          */
         std::vector<QDockWidget*> getDockWidgets();
         
-    void clickRequest(float x, float y)
-    {
-        #include <iostream>
-        std::cout << "About to emit 'clicked()'.";
-        if(vizkit3d_plugin_name == NULL)
-        {
-            std::cout << "vizkit3d_plugin_name is NULL! Setting to empty string." << std::endl;
-            vizkit3d_plugin_name = "";
-        }
-        QString pname = getPluginName();
-        std::cout << "Plugin name: " << (pname != NULL ? pname.toStdString() : "is null!") << std::endl;
-        //emit clicked(x,y);
-    }
-        
     public slots:
 	/** @return the name of the plugin */
 	virtual const QString getPluginName() const;
         virtual void setPluginName(const QString &name);
+        virtual void click(float x,float y);
 
         /**
         * @return an instance of the ruby adapter collection.

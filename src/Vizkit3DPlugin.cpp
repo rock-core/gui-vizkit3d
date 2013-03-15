@@ -38,6 +38,9 @@ VizPluginBase::VizPluginBase(QObject *parent)
     // Add plugin name to root node as custom user text
     //rootNode->setUserData(new osgText::String("MyNode"));
     rootNode->setUserData(new osg::Geode);
+    
+    // reference counter we do not have to delete the data
+    vizNode->setUserData(new PickedUserData(this));
 }
 
 osg::ref_ptr<osg::Group> VizPluginBase::getVizNode() const 
@@ -48,6 +51,11 @@ osg::ref_ptr<osg::Group> VizPluginBase::getVizNode() const
 osg::ref_ptr<osg::Group> VizPluginBase::getRootNode() const 
 {
     return rootNode;
+}
+
+void VizPluginBase::click(float x,float y)
+{
+    emit clicked(x,y);
 }
 
 void VizPluginBase::setPose(const base::Vector3d& position, const base::Quaterniond& orientation)
@@ -75,8 +83,6 @@ void VizPluginBase::setPluginName(const QString &name)
 osg::ref_ptr<osg::Node> VizPluginBase::createMainNode()
 {
     osg::Group* main_node = new osg::Group;
-    //rootNode->setUserData(new PickedUserData(this));
-    
     return main_node;
 }
 

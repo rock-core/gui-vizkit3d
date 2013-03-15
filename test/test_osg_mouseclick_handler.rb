@@ -9,7 +9,7 @@ view3d.show()
 
 ## load and add the 3d plugin for the rock
 rbs_plugin = Vizkit.default_loader.RigidBodyStateVisualization
-rbs_plugin.connect(SIGNAL :mouseDownAt) do |x, y|
+rbs_plugin.connect(SIGNAL "clicked(float,float)") do |x, y|
     puts "Ruby Script: Received mouseDownAt #{x},#{y}"
 end
 

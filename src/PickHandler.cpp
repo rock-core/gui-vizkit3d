@@ -167,56 +167,29 @@ void PickHandler::pick(const osgGA::GUIEventAdapter& ea, osgViewer::View* viewer
 	if (picker->containsIntersections())
 	{
 	    osgUtil::LineSegmentIntersector::Intersection intersection = picker->getFirstIntersection();
-	    osg::notify(osg::NOTICE)<<"Picked "<<intersection.localIntersectionPoint<<std::endl;
-        std::cout << "myNotification: Picked " << intersection.localIntersectionPoint << std::endl;
  
 	    osg::NodePath& nodePath = intersection.nodePath;
 	    node = (nodePath.size()>=1)?nodePath[nodePath.size()-1]:0;
 	    parent = (nodePath.size()>=2)?dynamic_cast<osg::Group*>(nodePath[nodePath.size()-2]):0;
-	    
-	    // my print: node path
-	    std::cout << "MyNodePath:" << std::endl;
-	    bool no_emission = true;
-	    for(int i = nodePath.size()-1; i >= 0; i--)
-	    {
-	        osg::Node *node = nodePath[i];
-	        std::cout << "    " << node->className() << " ";
-	        
-	        osg::Referenced *user_data = node->getUserData();
-	        if (!user_data)
-	        {
-	            std::cout << "no user_data! continue." << std::endl;
-	            continue;
-	        }
-	        PickedUserData *plugin_data = static_cast<PickedUserData*>(user_data);
-	        if(plugin_data)
-	        {
-	            plugin_data->getPlugin()->clickRequest(_mx, _my); // TODO check whether these are viewport coords.
-	            no_emission = false;
-	        }
-	        else
-	        {
-	            std::cout << "Wrong type... No Emission!";
-	            if(user_data)
-	            {
-                    std::cout << "But it was not null!";
-	            }
-	        }
-	        
-	        std::cout << std::endl;
-	    }
-	    if(no_emission)
-	    {
-	        // TODO exception?
-	        std::cout << "No Emission after object click" << std::endl;
-	    }
 
 	    // see if the object has a user object which is derived from pickcallback
 	    PickedCallback *pc = dynamic_cast<PickedCallback*>(node->getUserData());
 	    if( pc )
 		pc->picked();
-        
-        setTrackedNode(viewer, node);
+	    
+	    for(int i = nodePath.size()-1; i >= 0; i--)
+	    {
+	        osg::Node *node = nodePath[i];
+	        osg::Referenced *user_data = node->getUserData();
+	        if (!user_data)
+	            continue;
+	        PickedUserData *plugin_data = dynamic_cast<PickedUserData*>(user_data);
+	        if(!plugin_data)
+	            continue;
+                plugin_data->getPlugin()->click(_mx, _my); // TODO check whether these are viewport coords.
+                break;
+	    }
+            // setTrackedNode(viewer, node);
 	}
     }        
 }
