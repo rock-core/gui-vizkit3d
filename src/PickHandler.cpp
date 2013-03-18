@@ -186,8 +186,13 @@ void PickHandler::pick(const osgGA::GUIEventAdapter& ea, osgViewer::View* viewer
 	        PickedUserData *plugin_data = dynamic_cast<PickedUserData*>(user_data);
 	        if(!plugin_data)
 	            continue;
-                plugin_data->getPlugin()->click(_mx, _my); // TODO check whether these are viewport coords.
-                break;
+            
+            // Transform OSG viewport coordinates to QWidget coordinates (invert y axis)
+            float wy = (float)viewer->getCamera()->getViewport()->height() - _my;
+            float wx = _mx;
+                
+            plugin_data->getPlugin()->click(wx, wy);
+            break;
 	    }
             // setTrackedNode(viewer, node);
 	}

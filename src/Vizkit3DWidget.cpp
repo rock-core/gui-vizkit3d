@@ -20,6 +20,7 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     createSceneGraph();
 
     QWidget* viewWidget = new QWidget;
+    viewWidget->setObjectName(QString("View Widget"));
     QWidget* controlWidget = new QWidget;
     QVBoxLayout* layout = new QVBoxLayout;
     QSplitter* splitter = new QSplitter(Qt::Horizontal);
@@ -244,7 +245,7 @@ void Vizkit3DWidget::addPluginIntern(QObject* plugin,QObject *parent)
         //pass ownership to c++
         //QT-Ruby honors the parent pointer
         //if it is set, the Object will not get autodeleted
-        viz_plugin->setParent(this);
+        viz_plugin->setParent(view);
         
         plugins.push_back(viz_plugin);
 	

@@ -35,10 +35,6 @@ VizPluginBase::VizPluginBase(QObject *parent)
     oldNodes = new osg::Group();
     rootNode->addChild(oldNodes);
     
-    // Add plugin name to root node as custom user text
-    //rootNode->setUserData(new osgText::String("MyNode"));
-    rootNode->setUserData(new osg::Geode);
-    
     // reference counter we do not have to delete the data
     vizNode->setUserData(new PickedUserData(this));
 }
@@ -55,7 +51,32 @@ osg::ref_ptr<osg::Group> VizPluginBase::getRootNode() const
 
 void VizPluginBase::click(float x,float y)
 {
-    emit clicked(x,y);
+    QWidget *osg_widget = dynamic_cast<QWidget*>(parent()); // widget displaying the osg scene.
+    
+    if(!osg_widget)
+        return;
+    
+    QWidget *container = osg_widget; // will point to Vizkit3DWidget if there is one. contains property browser and osg widget.
+
+    // Find the container widget in the plugin's parents.
+    while(container)
+    {
+        if(container->objectName().toStdString().compare("vizkit::Vizkit3DWidget") == 0)
+        {
+            // Container found.
+            //std::cout << "grandparent: " << container->objectName().toStdString() << std::endl;
+            QPoint container_coords = osg_widget->mapTo(container, QPoint(x,y));
+            //std::cout << "grandparent coords: (" << container_coords.x() << "," << container_coords.y() << ")" << std::endl;
+            emit clicked(container_coords.x(), container_coords.y());
+            break;
+        }
+        else
+        {
+            // Try next parent.
+            container = container->parentWidget();
+        }
+    }
+
 }
 
 void VizPluginBase::setPose(const base::Vector3d& position, const base::Quaterniond& orientation)
