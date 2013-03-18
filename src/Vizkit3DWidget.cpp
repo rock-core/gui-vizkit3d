@@ -244,7 +244,7 @@ void Vizkit3DWidget::addPluginIntern(QObject* plugin,QObject *parent)
         //pass ownership to c++
         //QT-Ruby honors the parent pointer
         //if it is set, the Object will not get autodeleted
-        plugin->setParent(this);
+        viz_plugin->setParent(this);
         
         plugins.push_back(viz_plugin);
 	
