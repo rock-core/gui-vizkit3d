@@ -18,6 +18,5 @@
     <depend package="drivers/orogen/transformer" optional="1"/>
     <depend package="tools/orocos.rb" optional="1" />
     <depend package="qtruby" optional="1"/>
-    <depend package="tools/port_proxy" optional="1"/>
     <depend package="gui/rock_widget_collection"  optional="1"/>
 </package>
