@@ -1,58 +1,25 @@
-#ifndef _CONNEXIONHID_H_
-#define _CONNEXIONHID_H_
+#ifndef _CONNEXIONPLUGIN_H_
+#define _CONNEXIONPLUGIN_H_
 
 #include <QObject>
 #include <QTimer>
+#include <controldev/ConnexionHID.hpp>
 #include <vizkit/osgMatrixManipulator.h>
-
-#define LOGITECH_VENDOR_ID          0x046d
-#define LOGITECH_SPACE_TRAVELLER_DEVICE_ID 0xc623
-#define LOGITECH_SPACE_PILOT_DEVICE_ID     0xc625
-#define LOGITECH_SPACE_NAVIGATOR_DEVICE_ID 0xc626
-#define LOGITECH_SPACE_EXPLORER_DEVICE_ID  0xc627
 
 namespace vizkit{
 
-  struct connexionValues {
-    double tx;
-    double ty;
-    double tz;
-    double rx;
-    double ry;
-    double rz;
-    int button1;
-    int button2;
-  };
 
-class ConnexionHID : public QObject, public osgGA::MatrixManipulator{
+class ConnexionPlugin : public QObject,public controldev::ConnexionHID,  public osgGA::MatrixManipulator{
     Q_OBJECT
 public:
-  enum Mapping{
-    TX = 0,
-    TY,
-    TZ,
-    RX,
-    RY,
-    RZ
-  };
   
-  ConnexionHID();
-  ~ConnexionHID();
+    ConnexionPlugin();
+    ~ConnexionPlugin();
 
   /* Scan all devices in /dev/input/ to find the SpaceMouse.
    * Returns the true if an SpaceMouse could be found.
    */
   bool init(osgGA::MatrixManipulator *manipulator);
-
-  /**
-   * Returns the file Decriptor, -1 if no valid FD is there
-   */
-  int getFileDescriptor();
-
-  /** 
-   * Refrence getter for axis scalinig, modifications are allowed via this reference member
-   */
-  double& axisScalinig(Mapping id);
 
   /**
    * Needed functions for osgGA::MatrixManipulator
@@ -89,13 +56,9 @@ public:
   virtual bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us);
 
 protected:
-  void getValue(double *coordiantes, struct connexionValues *rawValues);
-  void closeConnexionHID();
-  int fd;
   osg::ref_ptr<osgGA::MatrixManipulator> manipulator;
   QTimer timer;
   osg::Matrixd matrix;
-  double scale[6];
 
 public slots:
     /**

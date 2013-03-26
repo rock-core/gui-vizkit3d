@@ -2,6 +2,15 @@ find_package(Boost COMPONENTS thread)
 rock_find_qt4()
 include(RockRuby)
 
+
+pkg_check_modules(CONTROLDEV "controldev")
+if(CONTROLDEV_FOUND)
+    SET(DEPS_EXTRA "controldev")
+    ADD_DEFINITIONS(-DUSE_3DMOUSE)
+    SET(MOC_EXTRA "ConnexionPlugin.cpp")
+    SET(HEADERS_EXTRA "ConnexionPlugin.h")
+endif()
+
 QT4_ADD_RESOURCES(PROPERTY_BROWSER_RESOURCES qtpropertybrowser/qtpropertybrowser.qrc)
 rock_library(vizkit
     SOURCES
@@ -13,7 +22,6 @@ rock_library(vizkit
         PickHandler.cpp QOSGWidget.cpp
         Vizkit3DWidget.cpp
         QVizkitMainWindow.cpp
-        ConnexionHID.cpp
         qtpropertybrowser/qteditorfactory.cpp 
         qtpropertybrowser/qtvariantproperty.cpp
         qtpropertybrowser/qtpropertymanager.cpp
@@ -23,7 +31,7 @@ rock_library(vizkit
         qtpropertybrowser/qttreepropertybrowser.cpp
         qtpropertybrowser/qtgroupboxpropertybrowser.cpp
         QPropertyBrowserWidget.cpp
-
+        ${MOC_EXTRA}
     HEADERS
         Uncertainty.hpp Vizkit3DHelper.hpp
         QtThreadedWidget.hpp
@@ -35,10 +43,12 @@ rock_library(vizkit
         VizPlugin.hpp
         CompositeViewerQOSG.hpp
         PickHandler.hpp
-        ConnexionHID.h
+        ${HEADERS_EXTRA}
 
     DEPS_PLAIN Boost
-    DEPS_PKGCONFIG yaml-cpp transformer openscenegraph base-types)
+    DEPS_PKGCONFIG yaml-cpp transformer openscenegraph base-types ${DEPS_EXTRA}
+)
+
 
 rock_library(vizkitwidgetloader
     MOC QVizkitWidgetLoader.cpp
@@ -55,6 +65,8 @@ install(TARGETS vizkitwidgetloader vizkitmainwindowloader
 find_package(Gem COMPONENTS rice)
 pkg_check_modules(TYPELIB "rtt_typelib-${OROCOS_TARGET}")
 pkg_check_modules(TYPELIBRUBY "typelib_ruby")
+
+
 
 if (TYPELIB_FOUND AND TYPELIBRUBY_FOUND AND GEM_FOUND)
     rock_ruby_rice_extension(vizkittypelib
