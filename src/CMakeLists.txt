@@ -1,7 +1,5 @@
-find_package(Boost COMPONENTS thread)
 rock_find_qt4()
 include(RockRuby)
-
 
 pkg_check_modules(CONTROLDEV "controldev")
 if(CONTROLDEV_FOUND)
@@ -45,7 +43,7 @@ rock_library(vizkit
         PickHandler.hpp
         ${HEADERS_EXTRA}
 
-    DEPS_PLAIN Boost
+    DEPS_CMAKE Boost
     DEPS_PKGCONFIG yaml-cpp transformer openscenegraph base-types ${DEPS_EXTRA}
 )
 
