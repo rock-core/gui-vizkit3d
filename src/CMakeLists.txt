@@ -43,7 +43,7 @@ rock_library(vizkit
         PickHandler.hpp
         ${HEADERS_EXTRA}
 
-    DEPS_CMAKE Boost
+    LIBS ${Boost_THREAD_LIBRARY}
     DEPS_PKGCONFIG yaml-cpp transformer openscenegraph base-types ${DEPS_EXTRA}
 )
 
