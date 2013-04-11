@@ -5,9 +5,7 @@ find_package(Rock)
 rock_init(vizkit 1.0)
  
 # Need to be defined here, otherwise I got header/lib version mixing (Ubuntu 10.04).
-rock_find_cmake(Boost REQUIRED COMPONENTS thread)
-message (Boost_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
-message (Boost_LIBRARY_DIRS ${Boost_LIBRARY_DIRS})
+rock_find_cmake(Boost REQUIRED COMPONENTS thread system)
 
 include(RockRuby)
 rock_standard_layout()
