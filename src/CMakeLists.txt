@@ -14,6 +14,7 @@ rock_library(vizkit
     SOURCES
         Uncertainty.cpp Vizkit3DHelper.cpp CoordinateFrame.cpp
         QtThreadedWidget.cpp GridNode.cpp MouseManipulationManipulator.cpp
+        ColorConversionHelper.cpp
         ${PROPERTY_BROWSER_RESOURCES} 
     MOC
         Vizkit3DPlugin.cpp CompositeViewerQOSG.cpp
@@ -41,6 +42,7 @@ rock_library(vizkit
         VizPlugin.hpp
         CompositeViewerQOSG.hpp
         PickHandler.hpp
+        ColorConversionHelper.hpp
         ${HEADERS_EXTRA}
 
     LIBS ${Boost_THREAD_LIBRARY}
