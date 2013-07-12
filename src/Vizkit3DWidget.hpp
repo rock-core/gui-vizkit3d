@@ -9,6 +9,7 @@
 class ViewQOSG;
 class QComboBox;
 class QGroupBox;
+class QSplitter;
 
 namespace vizkit 
 {
@@ -81,6 +82,8 @@ public slots:
     void setCameraLookAt(double x, double y, double z);
     void setCameraEye(double x, double y, double z);
     void setCameraUp(double x, double y, double z);
+
+    void collapsePropertyBrowser();
         
 signals:
     void addPlugins(QObject* plugin,QObject* parent);
@@ -114,6 +117,7 @@ protected:
     transformer::NonAligningTransformer transformer;
     QComboBox *frameSelector;
     QGroupBox* groupBox;
+    QSplitter* splitter;
     
     std::string displayFrame;
     std::string initalDisplayFrame;

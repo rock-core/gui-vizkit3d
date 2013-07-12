@@ -23,7 +23,7 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     viewWidget->setObjectName(QString("View Widget"));
     QWidget* controlWidget = new QWidget;
     QVBoxLayout* layout = new QVBoxLayout;
-    QSplitter* splitter = new QSplitter(Qt::Horizontal);
+    splitter = new QSplitter(Qt::Horizontal);
     layout->addWidget( splitter );
     this->setLayout( layout );
 
@@ -179,6 +179,12 @@ void Vizkit3DWidget::setCameraUp(double x, double y, double z)
 {
     osg::Vec3 up(x, y, z);
     changeCameraView(0, 0, &up);
+}
+void Vizkit3DWidget::collapsePropertyBrowser()
+{
+    QList<int> sizes;
+    sizes.push_front(0);
+    splitter->setSizes(sizes);
 }
 
 void Vizkit3DWidget::changeCameraView(const osg::Vec3* lookAtPos, const osg::Vec3* eyePos, const osg::Vec3* upVector)
