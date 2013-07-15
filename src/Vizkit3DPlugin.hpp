@@ -136,16 +136,6 @@ class VizPluginBase : public QObject
 	osg::ref_ptr<osg::Group> getVizNode() const;
 	osg::ref_ptr<osg::Group> getRootNode() const;
 
-       /**
-        * @return true if plugin is enabled
-        */
-        virtual bool isPluginEnabled();
-        
-       /**
-        * @param enabled set plugin enabled or disabled
-        */
-        virtual void setPluginEnabled(bool enabled);
-
 	/** override this method to save configuration data. Always call the
 	 * superclass as well.
 	 * @param[out] emitter object which can be used to emit yaml structure
@@ -166,6 +156,16 @@ class VizPluginBase : public QObject
         std::vector<QDockWidget*> getDockWidgets();
         
     public slots:
+       /**
+        * @return true if plugin is enabled
+        */
+        virtual bool isPluginEnabled();
+        
+       /**
+        * @param enabled set plugin enabled or disabled
+        */
+        virtual void setPluginEnabled(bool enabled);
+
 	/** @return the name of the plugin */
 	virtual const QString getPluginName() const;
         virtual void setPluginName(const QString &name);
