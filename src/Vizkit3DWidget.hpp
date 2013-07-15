@@ -36,8 +36,6 @@ public:
 
     osg::ref_ptr<osg::Group> getRootNode() const;
     osg::ref_ptr<ViewQOSG> getViewer();
-    void addDataHandler(VizPluginBase *viz);
-    void removeDataHandler(VizPluginBase *viz);
     
     /**
      * Sets the camera focus to specific position.
@@ -94,6 +92,7 @@ private slots:
     void addPluginIntern(QObject* plugin,QObject *parent=NULL);
     void removePluginIntern(QObject* plugin);
     void pluginActivityChanged(bool enabled);
+    void pluginChildrenChanged();
 
 protected:
     void changeCameraView(const osg::Vec3* lookAtPos,
@@ -103,8 +102,14 @@ protected:
     void setGridEnabled(bool enabled);
     bool areAxesEnabled();
     void setAxesEnabled(bool enabled);
+    void setPluginEnabled(QObject* plugin, bool enabled);
     
     void checkAddFrame(const std::string &frame);
+
+    void registerDataHandler(VizPluginBase *viz);
+    void deregisterDataHandler(VizPluginBase *viz);
+    void enableDataHandler(VizPluginBase *viz);
+    void disableDataHandler(VizPluginBase *viz);
 
     osg::ref_ptr<osg::Group> root;
     void createSceneGraph();
@@ -121,7 +126,13 @@ protected:
     
     std::string displayFrame;
     std::string initalDisplayFrame;
-    std::vector<VizPluginBase *> plugins;
+
+    typedef std::map<VizPluginBase*, osg::ref_ptr<osg::Group> > PluginMap;
+
+    /** The set of known plugins, as a mapping from the plugin to the osg::Node
+     * to which it should be attached.
+     */
+    PluginMap plugins;
  
     std::map<std::string, bool> availableFrames;
     

@@ -11,8 +11,10 @@
 #include <vizkit/CoordinateFrame.hpp>
 #include <vizkit/PickHandler.hpp>
 #include <vizkit/QPropertyBrowserWidget.hpp>
+#include <algorithm>
 
 using namespace vizkit;
+using namespace std;
 
 Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     : CompositeViewerQOSG( parent, f )
@@ -145,14 +147,67 @@ void Vizkit3DWidget::createSceneGraph()
     }
 }
 
-void Vizkit3DWidget::addDataHandler(VizPluginBase *viz)
+void Vizkit3DWidget::registerDataHandler(VizPluginBase* viz)
 {
-    root->addChild( viz->getRootNode() );
+    osg::Node::ParentList current_parents =
+        viz->getRootNode()->getParents();
+    osg::Group* initial_parent = root;
+    if (!current_parents.empty())
+    {
+        initial_parent = current_parents.front()->asGroup();
+        if (!initial_parent)
+            throw std::logic_error("the parent OSG node of the given vizkit plugin's root node is not an osg::Group. This is required");
+    }
+    plugins.insert(make_pair(viz, initial_parent));
 }
 
-void Vizkit3DWidget::removeDataHandler(VizPluginBase *viz)
+void Vizkit3DWidget::deregisterDataHandler(VizPluginBase* viz)
 {
-    root->removeChild( viz->getRootNode() );
+    PluginMap::iterator it = plugins.find(viz);
+    if (it == plugins.end())
+        throw std::runtime_error("trying to deregister a plugin that is not registered on this widget");
+
+    disableDataHandler(viz);
+    plugins.erase(it);
+}
+
+void Vizkit3DWidget::enableDataHandler(VizPluginBase *viz)
+{
+    PluginMap::iterator it = plugins.find(viz);
+    if (it != plugins.end())
+        it->second->addChild( viz->getRootNode() );
+}
+
+void Vizkit3DWidget::disableDataHandler(VizPluginBase *viz)
+{
+    PluginMap::iterator it = plugins.find(viz);
+    if (it != plugins.end())
+        it->second->removeChild( viz->getRootNode() );
+}
+
+void Vizkit3DWidget::setPluginEnabled(QObject* plugin, bool enabled)
+{
+    vizkit::VizPluginBase* viz_plugin = dynamic_cast<vizkit::VizPluginBase*>(plugin);
+    if (!viz_plugin)
+        return;
+
+    PluginMap::const_iterator plugin_it = plugins.find(viz_plugin);
+    if (plugin_it == plugins.end())
+        return;
+
+    // Check the current state
+    osg::Node::ParentList const& list = viz_plugin->getRootNode()->getParents();
+    bool is_enabled = std::find(list.begin(), list.end(), plugin_it->second) != list.end();
+
+    if (enabled && !is_enabled)
+        enableDataHandler(viz_plugin);
+    else if (!enabled && is_enabled)
+        disableDataHandler(viz_plugin);
+}
+
+void Vizkit3DWidget::pluginActivityChanged(bool enabled)
+{
+    return setPluginEnabled(QObject::sender(), enabled);
 }
 
 void Vizkit3DWidget::changeCameraView(const osg::Vec3& lookAtPos)
@@ -246,29 +301,36 @@ osg::ref_ptr<ViewQOSG> Vizkit3DWidget::getViewer()
 void Vizkit3DWidget::addPluginIntern(QObject* plugin,QObject *parent)
 {
     vizkit::VizPluginBase* viz_plugin = dynamic_cast<vizkit::VizPluginBase*>(plugin);
-    if (viz_plugin)
+    bool has_plugin = plugins.find(viz_plugin) != plugins.end();
+    if (viz_plugin && !has_plugin)
     {
-        //pass ownership to c++
-        //QT-Ruby honors the parent pointer
-        //if it is set, the Object will not get autodeleted
-        viz_plugin->setParent(view);
+        // Make sure that the plugins do have a parent.
+        //
+        // Do NOT reset the parent flag if it already has one !
+        if (!viz_plugin->parent())
+            viz_plugin->setParent(view);
         
-        plugins.push_back(viz_plugin);
-	
 	if(pluginToTransformData.count(viz_plugin))
 	    throw std::runtime_error("Error added same plugin twice");
 	
 	pluginToTransformData[viz_plugin] = TransformationData();
 
-        addDataHandler(viz_plugin);
+        registerDataHandler(viz_plugin);
+        setPluginEnabled(viz_plugin, viz_plugin->isPluginEnabled());
         propertyBrowserWidget->addProperties(viz_plugin,parent);
         connect(viz_plugin, SIGNAL(pluginActivityChanged(bool)), this, SLOT(pluginActivityChanged(bool)));
+        connect(viz_plugin, SIGNAL(childrenChanged()), this, SLOT(pluginChildrenChanged()));
     }
 
     // add sub plugins if object has some
     QList<QObject*> object_list = plugin->findChildren<QObject *>();
     for(QList<QObject*>::const_iterator it =object_list.begin(); it != object_list.end(); it++)
         addPluginIntern(*it,plugin);
+}
+
+void Vizkit3DWidget::pluginChildrenChanged()
+{
+    addPluginIntern(QObject::sender());
 }
 
 /**
@@ -280,17 +342,11 @@ void Vizkit3DWidget::removePluginIntern(QObject* plugin)
     vizkit::VizPluginBase* viz_plugin = dynamic_cast<vizkit::VizPluginBase*>(plugin);
     if (viz_plugin)
     {
-        removeDataHandler(viz_plugin);
+        deregisterDataHandler(viz_plugin);
         propertyBrowserWidget->removeProperties(viz_plugin);
         disconnect(viz_plugin, SIGNAL(pluginActivityChanged(bool)), this, SLOT(pluginActivityChanged(bool)));
-        
-        std::vector<vizkit::VizPluginBase *>::iterator it = std::find(plugins.begin(), plugins.end(), viz_plugin);
-        if(it == plugins.end())
-            throw std::runtime_error("Tried to remove an vizkit3d plugin that was not registered before");
-
+        disconnect(viz_plugin, SIGNAL(childrenChanged()), this, SLOT(pluginChildrenChanged()));
 	pluginToTransformData.erase(viz_plugin);
-	
-        plugins.erase(it);
     }
 }
 
@@ -414,34 +470,6 @@ void Vizkit3DWidget::checkAddFrame(const std::string& frame)
 	if(!groupBox->isEnabled())
         {
             groupBox->setEnabled(true);
-        }
-    }
-}
-
-/**
- * Adds or removes a plugin if the plugin activity 
- * has changed.
- * @param enabled 
- */
-void Vizkit3DWidget::pluginActivityChanged(bool enabled)
-{
-    QObject* obj = QObject::sender();
-    vizkit::VizPluginBase* viz_plugin = dynamic_cast<vizkit::VizPluginBase*>(obj);
-    if(viz_plugin)
-    {
-        // check if root node has plugin as child
-        bool has_child_plugin = false;
-        if(root->getChildIndex(viz_plugin->getRootNode()) < root->getNumChildren())
-            has_child_plugin = true;
-        
-        // add or remove plugin from root node
-        if(enabled && !has_child_plugin)
-        {
-            addDataHandler(viz_plugin);
-        }
-        else if (!enabled && has_child_plugin)
-        {
-            removeDataHandler(viz_plugin);
         }
     }
 }

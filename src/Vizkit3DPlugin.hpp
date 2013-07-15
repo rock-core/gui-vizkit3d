@@ -206,6 +206,11 @@ class VizPluginBase : public QObject
         * must be emitted if a property of an inherited plugin changes
         */
         void propertyChanged(QString property_name);
+
+       /**
+        * Must be emitted when children are added/removed from this plugin
+        */
+        void childrenChanged();
         
        /**
         * will emitted if the plugin activity changes
@@ -312,6 +317,9 @@ class Vizkit3DPlugin : public VizPluginBase,
     public VizPluginAddType< T >
 {
     public:
+        Vizkit3DPlugin(QObject* parent = NULL)
+            : VizPluginBase(parent) {}
+
 	/** updates the data to be visualised and marks the visualisation dirty
 	 * @param data const ref to data that is visualised
 	 */
