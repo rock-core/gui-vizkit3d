@@ -125,6 +125,7 @@ class VizPluginBase : public QObject
     
     public:
         VizPluginBase(QObject *parent=NULL);
+        ~VizPluginBase();
 
 	/** @return true if the plugins internal state has been updated */
 	virtual bool isDirty() const;

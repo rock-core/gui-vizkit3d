@@ -185,6 +185,14 @@ void Vizkit3DWidget::disableDataHandler(VizPluginBase *viz)
         it->second->removeChild( viz->getRootNode() );
 }
 
+void Vizkit3DWidget::pluginDeleted(QObject* plugin)
+{
+    PluginMap::iterator it = plugins.find(static_cast<VizPluginBase*>(plugin));
+    if (it != plugins.end())
+        plugins.erase(it);
+    pluginToTransformData.erase(static_cast<VizPluginBase*>(plugin));
+}
+
 void Vizkit3DWidget::setPluginEnabled(QObject* plugin, bool enabled)
 {
     vizkit::VizPluginBase* viz_plugin = dynamic_cast<vizkit::VizPluginBase*>(plugin);
@@ -320,6 +328,7 @@ void Vizkit3DWidget::addPluginIntern(QObject* plugin,QObject *parent)
         propertyBrowserWidget->addProperties(viz_plugin,parent);
         connect(viz_plugin, SIGNAL(pluginActivityChanged(bool)), this, SLOT(pluginActivityChanged(bool)));
         connect(viz_plugin, SIGNAL(childrenChanged()), this, SLOT(pluginChildrenChanged()));
+        connect(viz_plugin, SIGNAL(destroyed(QObject*)), this, SLOT(pluginDeleted(QObject*)));
     }
 
     // add sub plugins if object has some

@@ -39,6 +39,13 @@ VizPluginBase::VizPluginBase(QObject *parent)
     vizNode->setUserData(new PickedUserData(this));
 }
 
+VizPluginBase::~VizPluginBase()
+{
+    osg::Node::ParentList parents = rootNode->getParents();
+    for (std::size_t i = 0; i < parents.size(); ++i)
+        parents[i]->removeChild(rootNode);
+}
+
 osg::ref_ptr<osg::Group> VizPluginBase::getVizNode() const 
 {
     return vizNode;

@@ -93,6 +93,7 @@ private slots:
     void removePluginIntern(QObject* plugin);
     void pluginActivityChanged(bool enabled);
     void pluginChildrenChanged();
+    void pluginDeleted(QObject* plugin);
 
 protected:
     void changeCameraView(const osg::Vec3* lookAtPos,
