@@ -250,6 +250,22 @@ void Vizkit3DWidget::collapsePropertyBrowser()
     splitter->setSizes(sizes);
 }
 
+void Vizkit3DWidget::getCameraView(QVector3D& lookAtPos, QVector3D& eyePos, QVector3D& upVector)
+{
+    osg::Vec3d eye, lookAt, up;
+    view->getCamera()->getViewMatrixAsLookAt(eye, lookAt, up);
+
+    eyePos.setX(eye.x());
+    eyePos.setY(eye.y());
+    eyePos.setZ(eye.z());
+    lookAtPos.setX(lookAt.x());
+    lookAtPos.setY(lookAt.y());
+    lookAtPos.setZ(lookAt.z());
+    upVector.setX(up.x());
+    upVector.setY(up.y());
+    upVector.setZ(up.z());
+}
+
 void Vizkit3DWidget::changeCameraView(const osg::Vec3* lookAtPos, const osg::Vec3* eyePos, const osg::Vec3* upVector)
 {
     osgGA::KeySwitchMatrixManipulator* switchMatrixManipulator = dynamic_cast<osgGA::KeySwitchMatrixManipulator*>(view->getCameraManipulator());

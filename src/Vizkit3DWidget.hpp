@@ -5,6 +5,7 @@
 #include <QtDesigner/QDesignerExportWidget>
 #include <transformer/NonAligningTransformer.hpp>
 #include <vizkit/Vizkit3DPlugin.hpp>
+#include <QVector3D>
 
 class ViewQOSG;
 class QComboBox;
@@ -80,6 +81,7 @@ public slots:
     void setCameraLookAt(double x, double y, double z);
     void setCameraEye(double x, double y, double z);
     void setCameraUp(double x, double y, double z);
+    void getCameraView(QVector3D& eye, QVector3D& lookAt, QVector3D& up);
 
     void collapsePropertyBrowser();
         
