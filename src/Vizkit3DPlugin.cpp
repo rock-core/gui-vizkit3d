@@ -89,9 +89,9 @@ void VizPluginBase::click(float x,float y)
 void VizPluginBase::setPose(const base::Vector3d& position, const base::Quaterniond& orientation)
 {
     boost::mutex::scoped_lock lock(updateMutex);
-    
     this->position = position;
-    this->orientation = orientation;    
+    this->orientation = orientation;
+    setDirty();
 }
 
 const QString VizPluginBase::getPluginName() const 
@@ -133,11 +133,6 @@ void VizPluginBase::clearVisualization()
 
 void VizPluginBase::updateCallback(osg::Node* node)
 {
-    boost::mutex::scoped_lock lockit(updateMutex);
-
-    vizNode->setPosition(eigenVectorToOsgVec3(position));
-    vizNode->setAttitude(eigenQuatToOsgQuat(orientation));
-    
     if (!mainNode)
     {
         mainNode = createMainNode();
@@ -145,8 +140,12 @@ void VizPluginBase::updateCallback(osg::Node* node)
 	isAttached = true;
     }
 
-    if( isDirty() )
+    if(isDirty())
     {
+        boost::mutex::scoped_lock lockit(updateMutex);
+        vizNode->setPosition(eigenVectorToOsgVec3(position));
+        vizNode->setAttitude(eigenQuatToOsgQuat(orientation));
+
 	updateMainNode(mainNode);
         if(keep_old_data)
         {
@@ -168,7 +167,7 @@ bool VizPluginBase::isDirty() const
     return dirty;
 }
 
-void VizPluginBase::setDirty() 
+void VizPluginBase::setDirty()
 {
     dirty = true;
 }
