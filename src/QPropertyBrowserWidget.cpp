@@ -70,23 +70,28 @@ void QProperyBrowserWidget::addProperties(QObject* obj,QObject* parent)
     QList<QtVariantProperty*> properties;
     for(int i = 1 ; i < metaObj->propertyCount(); i++)
     {
-        if(strcmp(metaObj->property(i).name(),"vizkit3d_plugin_name") == 0)
+        QMetaProperty prop = metaObj->property(i);
+        if(!prop.isValid())
+            continue;
+        QVariant var = obj->property(prop.name());
+        if(!var.isValid())
+            continue;
+        if(strcmp(prop.name(),"vizkit3d_plugin_name") == 0)
         {
-            QVariant var = metaObj->property(i).read(obj);
             group = groupManager->addProperty(var.toString());
             if(parent_group)
                 parent_group->addSubProperty(group);
         }
         else
         {
-            QtVariantProperty* property = variantManager->addProperty(metaObj->property(i).type(), metaObj->property(i).name());
+            QtVariantProperty* property = variantManager->addProperty(prop.type(), prop.name());
             if(property == 0)
             {
                 std::cerr << "QVariant type " << metaObj->property(i).type() << " with name " << metaObj->property(i).name() 
-                        << " is not supported by the QtPropertyBrowser." << std::endl;
+                    << " is not supported by the QtPropertyBrowser." << std::endl;
                 continue;
             }
-            property->setValue(metaObj->property(i).read(obj));
+            property->setValue(var);
             properties.push_back(property);
         }
     }
