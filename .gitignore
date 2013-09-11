@@ -2,3 +2,4 @@ build
 doc/Doxyfile
 ruby/coverage
 ruby/doc
+*.swp
