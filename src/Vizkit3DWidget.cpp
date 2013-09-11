@@ -7,7 +7,6 @@
 
 #include <vizkit/QOSGWidget.hpp>
 #include <vizkit/Vizkit3DPlugin.hpp>
-#include <vizkit/GridNode.hpp>
 #include <vizkit/CoordinateFrame.hpp>
 #include <vizkit/PickHandler.hpp>
 #include <vizkit/QPropertyBrowserWidget.hpp>
@@ -63,8 +62,7 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     view->setTrackedNode(getRootNode());
     
     // add visualization of ground grid 
-    groundGrid = new GridNode();
-    root->addChild(groundGrid);
+
     
     // create visualization of the coordinate axes
     coordinateFrame = new CoordinateFrame();
@@ -74,10 +72,9 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
     changeCameraView(osg::Vec3d(0,0,0), osg::Vec3d(-5,0,5));
     
     // add some properties of this widget as global properties
-    QStringList property_names("show_grid");
+    QStringList property_names;
     property_names.push_back("show_axes");
     propertyBrowserWidget->addGlobalProperties(this, property_names);
-    
     initalDisplayFrame = "";
     
     connect(this, SIGNAL(addPlugins(QObject*,QObject*)), this, SLOT(addPluginIntern(QObject*,QObject*)));
@@ -324,6 +321,8 @@ osg::ref_ptr<ViewQOSG> Vizkit3DWidget::getViewer()
  */
 void Vizkit3DWidget::addPluginIntern(QObject* plugin,QObject *parent)
 {
+    assert(plugin);
+
     vizkit::VizPluginBase* viz_plugin = dynamic_cast<vizkit::VizPluginBase*>(plugin);
     bool has_plugin = plugins.find(viz_plugin) != plugins.end();
     if (viz_plugin && !has_plugin)
@@ -507,30 +506,6 @@ QWidget* Vizkit3DWidget::getPropertyWidget()
     return propertyBrowserWidget;
 }
 
-/**
- * @return true if ground grid is enabled
- */
-bool Vizkit3DWidget::isGridEnabled()
-{
-    return (root->getChildIndex(groundGrid) < root->getNumChildren());
-}
-
-/**
- * Enable or disable ground grid.
- * @param enabled
- */
-void Vizkit3DWidget::setGridEnabled(bool enabled)
-{
-    if(!enabled && isGridEnabled())
-    {
-        root->removeChild(groundGrid);
-    }
-    else if(enabled && !isGridEnabled())
-    {
-        root->addChild(groundGrid);
-    }
-    emit propertyChanged("show_grid");
-}
 
 /**
  * @return true if axes coordinates are enabled
