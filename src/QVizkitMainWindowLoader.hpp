@@ -1,19 +1,19 @@
-#ifndef QVIZKITWIDGETLOADER_HPP
-#define QVIZKITWIDGETLOADER_HPP
+#ifndef QVIZKITMAINWINDOWLOADER_HPP
+#define QVIZKITMAINWINDOWLOADER_HPP
 
 #include <QtDesigner/QDesignerCustomWidgetInterface>
-#include <vizkit/QVizkitWidget.hpp>
+#include <vizkit/QVizkitMainWindow.hpp>
 
 /**
  * This class is used to create an instance of QVizkitWidget in ruby.
  */
-class QVizkitWidgetLoader : public QObject, public QDesignerCustomWidgetInterface
+class QVizkitMainWindowLoader : public QObject, public QDesignerCustomWidgetInterface
 {
      Q_OBJECT
      Q_INTERFACES(QDesignerCustomWidgetInterface)
 
  public:
-     QVizkitWidgetLoader(QObject *parent = 0);
+     QVizkitMainWindowLoader(QObject *parent = 0);
 
      bool isContainer() const;
      bool isInitialized() const;
@@ -31,4 +31,4 @@ class QVizkitWidgetLoader : public QObject, public QDesignerCustomWidgetInterfac
      bool initialized;
 };
 
-#endif // QVIZKITWIDGETLOADER_HPP
+#endif // QVIZKITMAINWINDOWLOADER_HPP
