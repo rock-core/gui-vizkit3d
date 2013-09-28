@@ -56,42 +56,19 @@ pkg_check_modules(TYPELIB "rtt-typelib")
 pkg_check_modules(TYPELIBRUBY "typelib_ruby")
 
 if (TYPELIB_FOUND AND TYPELIBRUBY_FOUND AND GEM_FOUND)
-	include_directories(${GEM_INCLUDE_DIRS})
+    rock_ruby_rice_extension(vizkittypelib
+	MOC TypelibToQVariant.cpp
+        DEPS_PKGCONFIG rtt-typelib typelib_ruby)
+    target_link_libraries(vizkittypelib
+        ${QT_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} 
+        ${GEM_LIBRARIES}) 
 
-	include_directories(${TYPELIB_INCLUDE_DIRS})
-	link_directories(${TYPELIB_LIBRARY_DIRS})
-	add_definitions(${TYPELIB_CFLAGS_OTHER})
-
-	include_directories(${TYPELIBRUBY_INCLUDE_DIRS})
-	link_directories(${TYPELIBRUBY_LIBRARY_DIRS})
-
-	QT4_WRAP_CPP(rqt_MOC_SRCS TypelibToQVariant.hpp)
-	ROCK_RUBY_EXTENSION(${TYPELIB_TO_QVARIANT} SHARED
-			TypelibToQVariant.cpp ${rqt_MOC_SRCS})
-	target_link_libraries(${TYPELIB_TO_QVARIANT} 
-		                          ${QT_LIBRARIES}
-		                          ${QT_QTCORE_LIBRARY} 
-		                          ${QT_QTGUI_LIBRARY} 
-		                          ${GEM_LIBRARIES}
-		                          ${TYPELIB_LIBRARIES}
-		                          ${TYPELIBRUBY_LIBRARIES}) 
-
-	install(TARGETS ${TYPELIB_TO_QVARIANT}
-		  LIBRARY DESTINATION ${RUBY_EXTENSIONS_INSTALL_DIR})
-
-	QT4_WRAP_CPP(rqta_MOC_SRCS TypelibQtAdapter.h)
-	ROCK_RUBY_EXTENSION(TypelibQtAdapter SHARED
-			TypelibQtAdapter.cpp  ${rqta_MOC_SRCS})
-	target_link_libraries(TypelibQtAdapter 
-				${QT_LIBRARIES}
-				${QT_QTCORE_LIBRARY} 
-				${QT_QTGUI_LIBRARY} 
-				${GEM_LIBRARIES}
-				${TYPELIB_LIBRARIES}
-				${TYPELIBRUBY_LIBRARIES}) 
-
-	install(TARGETS TypelibQtAdapter
-		  LIBRARY DESTINATION ${RUBY_EXTENSIONS_INSTALL_DIR})
+    rock_ruby_rice_extension(TypelibQtAdapter SHARED
+	MOC TypelibQtAdapter.cpp
+        DEPS_PKGCONFIG rtt-typelib typelib_ruby)
+    target_link_libraries(TypelibQtAdapter
+        ${QT_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} 
+        ${GEM_LIBRARIES}) 
 else()
     if (NOT TYPELIB_FOUND)
         message(STATUS "cannot find typelib, the vizkit-ruby bridge is disabled")
