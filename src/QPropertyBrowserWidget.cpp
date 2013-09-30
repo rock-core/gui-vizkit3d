@@ -6,7 +6,7 @@
 namespace vizkit
 {
 
-QProperyBrowserWidget::QProperyBrowserWidget(QWidget* parent) 
+QPropertyBrowserWidget::QPropertyBrowserWidget(QWidget* parent) 
                       : QtTreePropertyBrowser(parent),
                         variantManager(0),
                         factory(0),
@@ -23,7 +23,7 @@ QProperyBrowserWidget::QProperyBrowserWidget(QWidget* parent)
 /**
  * Adds all properties of a QObject to the property browser widget as ungrouped global properties.
  */
-void QProperyBrowserWidget::addGlobalProperties(QObject* obj, const QStringList& property_list)
+void QPropertyBrowserWidget::addGlobalProperties(QObject* obj, const QStringList& property_list)
 {
     const QMetaObject* metaObj = obj->metaObject();
     QHash<QString, QtProperty*>* groupMap = new QHash<QString, QtProperty*>();
@@ -58,7 +58,7 @@ void QProperyBrowserWidget::addGlobalProperties(QObject* obj, const QStringList&
  * Adds all properties of a QObject to the property browser widget,
  * grouped by the name of the vizkit plugin.
  */
-void QProperyBrowserWidget::addProperties(QObject* obj,QObject* parent)
+void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
 {
     const QMetaObject* metaObj = obj->metaObject();
     QtProperty *group = NULL;
@@ -134,7 +134,7 @@ void QProperyBrowserWidget::addProperties(QObject* obj,QObject* parent)
 /**
  * Removes all properies of a QObject from the property browser widget.
  */
-void QProperyBrowserWidget::removeProperties(QObject* obj)
+void QPropertyBrowserWidget::removeProperties(QObject* obj)
 {
     // disconnect signal
     this->disconnect(obj, SIGNAL(propertyChanged(QString)), this, SLOT(propertyChangedInObject(QString)));
@@ -162,7 +162,7 @@ void QProperyBrowserWidget::removeProperties(QObject* obj)
 /**
  * Slot, to handle updates from the GUI
  */
-void QProperyBrowserWidget::propertyChangedInGUI(QtProperty* property, const QVariant& val)
+void QPropertyBrowserWidget::propertyChangedInGUI(QtProperty* property, const QVariant& val)
 {
     if (propertyToObject[property] != 0)
     {
@@ -173,7 +173,7 @@ void QProperyBrowserWidget::propertyChangedInGUI(QtProperty* property, const QVa
 /**
  * Slot, to handle updates from the QObjects
  */
-void QProperyBrowserWidget::propertyChangedInObject(QString property_name)
+void QPropertyBrowserWidget::propertyChangedInObject(QString property_name)
 {
     QObject* obj = QObject::sender();
     if(property_name == "vizkit3d_plugin_name")
@@ -206,7 +206,7 @@ void QProperyBrowserWidget::propertyChangedInObject(QString property_name)
  * Here the method has no information which property has changed,
  * so it'll update all of them.
  */
-void QProperyBrowserWidget::propertyChangedInObject()
+void QPropertyBrowserWidget::propertyChangedInObject()
 {
     QObject* obj = QObject::sender();
     if (obj && objectToProperties[obj])

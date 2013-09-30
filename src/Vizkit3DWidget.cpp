@@ -1,110 +1,148 @@
-#include "Vizkit3DWidget.hpp"
 #include <QVBoxLayout>
 #include <QSplitter>
 #include <QComboBox>
 #include <QGroupBox>
 #include <QPlastiqueStyle>
-
-#include <vizkit/QOSGWidget.hpp>
-#include <vizkit/Vizkit3DPlugin.hpp>
-#include <vizkit/CoordinateFrame.hpp>
-#include <vizkit/PickHandler.hpp>
-#include <vizkit/QPropertyBrowserWidget.hpp>
 #include <algorithm>
+
+#include "Vizkit3DWidget.hpp"
+#include "Vizkit3DPlugin.hpp"
+#include "PickHandler.hpp"
+#include "QPropertyBrowserWidget.hpp"
+
+#include <osgViewer/ViewerEventHandlers>
+#include <osgGA/TrackballManipulator>
+#include <osgGA/TerrainManipulator>
+#include <osgGA/KeySwitchMatrixManipulator>
+#include <osg/PositionAttitudeTransform>
+#include <osgDB/ReadFile>
+#include <osgQt/GraphicsWindowQt>
 
 using namespace vizkit;
 using namespace std;
 
-Vizkit3DWidget::Vizkit3DWidget( QWidget* parent, Qt::WindowFlags f )
-    : CompositeViewerQOSG( parent, f )
+Vizkit3DWidget::Vizkit3DWidget( QWidget* parent)
+    : QWidget(parent)
 {
-    createSceneGraph();
-
-    QWidget* viewWidget = new QWidget;
-    viewWidget->setObjectName(QString("View Widget"));
-    QWidget* controlWidget = new QWidget;
-    QVBoxLayout* layout = new QVBoxLayout;
-    splitter = new QSplitter(Qt::Horizontal);
-    layout->addWidget( splitter );
-    this->setLayout( layout );
-
+    //create layout
+    //objects will be owned by the parent widget (this)
     QVBoxLayout* controlLayout = new QVBoxLayout;
+    QVBoxLayout* layout = new QVBoxLayout;
+    QSplitter* splitter = new QSplitter(Qt::Horizontal);
+    QWidget* controlWidget = new QWidget;
+
+    layout->addWidget(splitter);
+    this->setLayout(layout);
     controlWidget->setLayout(controlLayout);
-    
-    frameSelector = new QComboBox();
-    groupBox = new QGroupBox();
-    QVBoxLayout* groupBoxLayout = new QVBoxLayout;
-    groupBox->setLayout(groupBoxLayout);
-    groupBox->setTitle("Select Visualization Frame");
-    groupBox->setEnabled(false);
-    QPlastiqueStyle* style = new QPlastiqueStyle;
-    groupBox->setStyle(style);
-    groupBoxLayout->addWidget(frameSelector);
-    controlLayout->addWidget(groupBox);
+    splitter->addWidget(controlWidget);
+
+    // set threading model
+    setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
+
+    // disable the default setting of viewer.done() by pressing Escape.
+    setKeyEventSetsDone(0);
+
+    // create root scene node
+    root = createSceneGraph();
+
+    // create osg widget
+    QWidget* widget = addViewWidget(createGraphicsWindow(0,0,100,100), root);
+    widget->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
+    widget->setObjectName(QString("View Widget"));
+    splitter->addWidget(widget);
 
     // create propertyBrowserWidget
-    propertyBrowserWidget = new QProperyBrowserWidget( parent );
+    QPropertyBrowserWidget *propertyBrowserWidget = new QPropertyBrowserWidget( parent );
+    propertyBrowserWidget->setObjectName("PropertyBrowser");
     propertyBrowserWidget->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
     controlLayout->addWidget(propertyBrowserWidget);
-    splitter->addWidget(controlWidget);
-    
-    view = new ViewQOSG( viewWidget );
-    view->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
-    view->setData( root );
-    addView( view );
-    splitter->addWidget(viewWidget);
 
-    // pickhandler is for selecting objects in the opengl view
-    pickHandler = new PickHandler();
-    view->addEventHandler( pickHandler );
-    
-    // set root node as default tracked node
-    view->setTrackedNode(getRootNode());
-    
-    // add visualization of ground grid 
-
-    
     // create visualization of the coordinate axes
-    coordinateFrame = new CoordinateFrame();
-    
-    pluginNames = new QStringList;
-    
-    changeCameraView(osg::Vec3d(0,0,0), osg::Vec3d(-5,0,5));
-    
-    // add some properties of this widget as global properties
-    QStringList property_names;
-    property_names.push_back("show_axes");
-    propertyBrowserWidget->addGlobalProperties(this, property_names);
-    initalDisplayFrame = "";
-    
+    // TODO
+    // changeCameraView(osg::Vec3d(0,0,0), osg::Vec3d(-5,0,5));
+
+    //connect signals and slots
     connect(this, SIGNAL(addPlugins(QObject*,QObject*)), this, SLOT(addPluginIntern(QObject*,QObject*)));
     connect(this, SIGNAL(removePlugins(QObject*)), this, SLOT(removePluginIntern(QObject*)));
-    connect(frameSelector, SIGNAL(currentIndexChanged(QString)), this, SLOT(setVisualizationFrame(QString)));
+    connect( &_timer, SIGNAL(timeout()), this, SLOT(update()) );
 
+    //start timer responsible for updating osg viewer
+    _timer.start(10);
 }
 
 Vizkit3DWidget::~Vizkit3DWidget() {}
+
+QWidget* Vizkit3DWidget::addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node* scene )
+{
+    osgViewer::View* view = new osgViewer::View;
+    addView(view);
+
+    ::osg::Camera* camera = view->getCamera();
+    camera->setGraphicsContext( gw );
+
+    const ::osg::GraphicsContext::Traits* traits = gw->getTraits();
+
+    camera->setClearColor(::osg::Vec4(0.2, 0.2, 0.6, 1.0) );
+    camera->setViewport( new ::osg::Viewport(0, 0, traits->width, traits->height) );
+    camera->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(traits->width)/static_cast<double>(traits->height), 1.0f, 10000.0f );
+
+    view->setSceneData(scene);
+    view->addEventHandler( new osgViewer::StatsHandler );
+    // view->setCameraManipulator( new osgGA::TrackballManipulator );
+    view->setCameraManipulator( new osgGA::TerrainManipulator);
+
+    // pickhandler is for selecting objects in the opengl view
+    PickHandler* pickHandler = new PickHandler();
+    view->addEventHandler(pickHandler);
+
+    return gw->getGLWidget();
+}
+
+osgQt::GraphicsWindowQt* Vizkit3DWidget::createGraphicsWindow( int x, int y, int w, int h, const std::string& name, bool windowDecoration)
+{
+    ::osg::DisplaySettings* ds = ::osg::DisplaySettings::instance().get();
+    ::osg::ref_ptr< ::osg::GraphicsContext::Traits> traits = new ::osg::GraphicsContext::Traits;
+    traits->windowName = name;
+    traits->windowDecoration = windowDecoration;
+    traits->x = x;
+    traits->y = y;
+    traits->width = w;
+    traits->height = h;
+    traits->doubleBuffer = true;
+    traits->alpha = ds->getMinimumNumAlphaBits();
+    traits->stencil = ds->getMinimumNumStencilBits();
+    traits->sampleBuffers = ds->getMultiSamples();
+    traits->samples = ds->getNumMultiSamples();
+    return new osgQt::GraphicsWindowQt(traits.get());
+}
+
+void Vizkit3DWidget::paintEvent( QPaintEvent* event )
+{
+    frame();
+}
 
 QSize Vizkit3DWidget::sizeHint() const
 {
     return QSize( 1000, 600 );
 }
 
-osg::ref_ptr<osg::Group> Vizkit3DWidget::getRootNode() const
+osg::Group* Vizkit3DWidget::getRootNode() const
 {
     return root;
 }
 
 void Vizkit3DWidget::setTrackedNode( VizPluginBase* plugin )
 {
-    view->setTrackedNode(plugin->getRootNode());
+    osgViewer::View *view = getView(0);
+    assert(view);
+    //TODO 
 }
 
-void Vizkit3DWidget::createSceneGraph() 
+osg::Group *Vizkit3DWidget::createSceneGraph()
 {
     //create root node that holds all other nodes
-    root = new osg::Group;
-    
+    osg::Group *root = new osg::Group;
+
     osg::ref_ptr<osg::StateSet> state = root->getOrCreateStateSet();
     state->setGlobalDefaults();
     state->setMode( GL_LINE_SMOOTH, osg::StateAttribute::ON );
@@ -114,34 +152,34 @@ void Vizkit3DWidget::createSceneGraph()
     state->setMode( GL_LIGHTING, osg::StateAttribute::ON );
     state->setMode( GL_LIGHT0, osg::StateAttribute::ON );
     state->setMode( GL_LIGHT1, osg::StateAttribute::ON );
-	
+
     root->setDataVariance(osg::Object::DYNAMIC);
 
     // Add the Light to a LightSource. Add the LightSource and
-    //   MatrixTransform to the scene graph.
+    // MatrixTransform to the scene graph.
     for(size_t i=0;i<2;i++)
     {
-	osg::ref_ptr<osg::Light> light = new osg::Light;
-	light->setLightNum(i);
-	switch(i) {
-	    case 0:
-		light->setAmbient( osg::Vec4( .1f, .1f, .1f, 1.f ));
-		light->setDiffuse( osg::Vec4( .8f, .8f, .8f, 1.f ));
-		light->setSpecular( osg::Vec4( .8f, .8f, .8f, 1.f ));
-		light->setPosition( osg::Vec4( 1.f, 1.5f, 2.f, 0.f ));
-		break;
-	    case 1:
-		light->setAmbient( osg::Vec4( .1f, .1f, .1f, 1.f ));
-		light->setDiffuse( osg::Vec4( .1f, .3f, .1f, 1.f ));
-		light->setSpecular( osg::Vec4( .1f, .3f, .1f, 1.f ));
-		light->setPosition( osg::Vec4( -1.f, -3.f, 1.f, 0.f ));
-	}
+        osg::ref_ptr<osg::Light> light = new osg::Light;
+        light->setLightNum(i);
+        switch(i) {
+        case 0:
+            light->setAmbient( osg::Vec4( .1f, .1f, .1f, 1.f ));
+            light->setDiffuse( osg::Vec4( .8f, .8f, .8f, 1.f ));
+            light->setSpecular( osg::Vec4( .8f, .8f, .8f, 1.f ));
+            light->setPosition( osg::Vec4( 1.f, 1.5f, 2.f, 0.f ));
+            break;
+        case 1:
+            light->setAmbient( osg::Vec4( .1f, .1f, .1f, 1.f ));
+            light->setDiffuse( osg::Vec4( .1f, .3f, .1f, 1.f ));
+            light->setSpecular( osg::Vec4( .1f, .3f, .1f, 1.f ));
+            light->setPosition( osg::Vec4( -1.f, -3.f, 1.f, 0.f ));
+        }
 
-	osg::ref_ptr<osg::LightSource> ls = new osg::LightSource;
-	ls->setLight( light.get() );
-	//ls->setStateSetModes(*state, osg::StateAttribute::ON);
-	root->addChild( ls.get() );
+        osg::ref_ptr<osg::LightSource> ls = new osg::LightSource;
+        ls->setLight( light.get() );
+        root->addChild( ls.get() );
     }
+    return root;
 }
 
 void Vizkit3DWidget::registerDataHandler(VizPluginBase* viz)
@@ -182,14 +220,6 @@ void Vizkit3DWidget::disableDataHandler(VizPluginBase *viz)
         it->second->removeChild( viz->getRootNode() );
 }
 
-void Vizkit3DWidget::pluginDeleted(QObject* plugin)
-{
-    PluginMap::iterator it = plugins.find(static_cast<VizPluginBase*>(plugin));
-    if (it != plugins.end())
-        plugins.erase(it);
-    pluginToTransformData.erase(static_cast<VizPluginBase*>(plugin));
-}
-
 void Vizkit3DWidget::setPluginEnabled(QObject* plugin, bool enabled)
 {
     vizkit::VizPluginBase* viz_plugin = dynamic_cast<vizkit::VizPluginBase*>(plugin);
@@ -215,41 +245,35 @@ void Vizkit3DWidget::pluginActivityChanged(bool enabled)
     return setPluginEnabled(QObject::sender(), enabled);
 }
 
-void Vizkit3DWidget::changeCameraView(const osg::Vec3& lookAtPos)
-{
-    changeCameraView(&lookAtPos, 0, 0);
-}
-
-void Vizkit3DWidget::changeCameraView(const osg::Vec3& lookAtPos, const osg::Vec3& eyePos)
-{
-    changeCameraView(&lookAtPos, &eyePos, 0);
-}
-
 void Vizkit3DWidget::setCameraLookAt(double x, double y, double z)
 {
     osg::Vec3 lookAt(x, y, z);
     changeCameraView(&lookAt, 0, 0);
 }
+
 void Vizkit3DWidget::setCameraEye(double x, double y, double z)
 {
     osg::Vec3 eye(x, y, z);
     changeCameraView(0, &eye, 0);
 }
+
 void Vizkit3DWidget::setCameraUp(double x, double y, double z)
 {
     osg::Vec3 up(x, y, z);
     changeCameraView(0, 0, &up);
 }
+
 void Vizkit3DWidget::collapsePropertyBrowser()
 {
-    QList<int> sizes;
-    sizes.push_front(0);
-    splitter->setSizes(sizes);
+    //TODO (disable property browser)
 }
 
 void Vizkit3DWidget::getCameraView(QVector3D& lookAtPos, QVector3D& eyePos, QVector3D& upVector)
 {
     osg::Vec3d eye, lookAt, up;
+
+    osgViewer::View *view = getView(0);
+    assert(view);
     view->getCamera()->getViewMatrixAsLookAt(eye, lookAt, up);
 
     eyePos.setX(eye.x());
@@ -265,11 +289,14 @@ void Vizkit3DWidget::getCameraView(QVector3D& lookAtPos, QVector3D& eyePos, QVec
 
 void Vizkit3DWidget::changeCameraView(const osg::Vec3* lookAtPos, const osg::Vec3* eyePos, const osg::Vec3* upVector)
 {
+    osgViewer::View *view = getView(0);
+    assert(view);
+
     osgGA::KeySwitchMatrixManipulator* switchMatrixManipulator = dynamic_cast<osgGA::KeySwitchMatrixManipulator*>(view->getCameraManipulator());
     if (!switchMatrixManipulator) return;
     //select TerrainManipulator
     //switchMatrixManipulator->selectMatrixManipulator(3); //why this switch was needed here?, each manipulator should be able  to do the folliowing steps
-    
+
     //get last values of eye, center and up
     osg::Vec3d eye, center, up;
     switchMatrixManipulator->getHomePosition(eye, center, up);
@@ -307,15 +334,6 @@ void Vizkit3DWidget::removePlugin(QObject* plugin)
 }
 
 /**
-* Returns the pointer of the instance of the used viewer, 
-* which is also of the ViewerQOSG type.
-*/
-osg::ref_ptr<ViewQOSG> Vizkit3DWidget::getViewer()
-{
-    return view;
-}
-
-/**
  * This slot adds all plugins in the list to the OSG and
  * their properties to the property browser widget.
  */
@@ -328,22 +346,19 @@ void Vizkit3DWidget::addPluginIntern(QObject* plugin,QObject *parent)
     if (viz_plugin && !has_plugin)
     {
         // Make sure that the plugins do have a parent.
-        //
-        // Do NOT reset the parent flag if it already has one !
         if (!viz_plugin->parent())
-            viz_plugin->setParent(view);
-        
-	if(pluginToTransformData.count(viz_plugin))
-	    throw std::runtime_error("Error added same plugin twice");
-	
-	pluginToTransformData[viz_plugin] = TransformationData();
+            viz_plugin->setParent(this);
 
         registerDataHandler(viz_plugin);
         setPluginEnabled(viz_plugin, viz_plugin->isPluginEnabled());
-        propertyBrowserWidget->addProperties(viz_plugin,parent);
+
+        QPropertyBrowserWidget *propertyBrowserWidget = dynamic_cast<QPropertyBrowserWidget*>(getPropertyWidget());
+        if(propertyBrowserWidget)
+            propertyBrowserWidget->addProperties(viz_plugin,parent);
+
         connect(viz_plugin, SIGNAL(pluginActivityChanged(bool)), this, SLOT(pluginActivityChanged(bool)));
         connect(viz_plugin, SIGNAL(childrenChanged()), this, SLOT(pluginChildrenChanged()));
-        connect(viz_plugin, SIGNAL(destroyed(QObject*)), this, SLOT(pluginDeleted(QObject*)));
+        connect(viz_plugin, SIGNAL(destroyed(QObject*)), this, SLOT(removePluginIntern(QObject*)));
     }
 
     // add sub plugins if object has some
@@ -367,167 +382,33 @@ void Vizkit3DWidget::removePluginIntern(QObject* plugin)
     if (viz_plugin)
     {
         deregisterDataHandler(viz_plugin);
-        propertyBrowserWidget->removeProperties(viz_plugin);
+        QPropertyBrowserWidget *propertyBrowserWidget = dynamic_cast<QPropertyBrowserWidget*>(getPropertyWidget());
+        if(propertyBrowserWidget)
+            propertyBrowserWidget->removeProperties(viz_plugin);
         disconnect(viz_plugin, SIGNAL(pluginActivityChanged(bool)), this, SLOT(pluginActivityChanged(bool)));
         disconnect(viz_plugin, SIGNAL(childrenChanged()), this, SLOT(pluginChildrenChanged()));
-	pluginToTransformData.erase(viz_plugin);
     }
 }
 
+QWidget* Vizkit3DWidget::getPropertyWidget()
+{
+    return findChild<QPropertyBrowserWidget*>("PropertyBrowser");
+}
 
 void Vizkit3DWidget::setPluginDataFrame(const QString& frame, QObject* plugin)
 {
     vizkit::VizPluginBase* viz_plugin = dynamic_cast<vizkit::VizPluginBase*>(plugin);
     if(!viz_plugin)
-	throw std::runtime_error("setPluginDataFrame called with something that is no vizkit plugin");
-    
-    if(pluginToTransformData.count(viz_plugin) == 0)
-        throw std::runtime_error("Tried to set frame for unknown plugin");
-    
-    TransformationData td = pluginToTransformData[viz_plugin]; 
-    
-    if(td.dataFrame == frame.toStdString())
-	return;
-
-    if(!td.dataFrame.empty())
-    {
-        transformer.unregisterTransformation(td.transformation);
-    }
-    
-    td.dataFrame = frame.toStdString();
-    
-    if(!displayFrame.empty())
-        td.transformation = &transformer.registerTransformation(td.dataFrame, displayFrame);
-    else
-        td.transformation = NULL;
-    
-    pluginToTransformData[viz_plugin] = td;
+        throw std::runtime_error("setPluginDataFrame called with something that is no vizkit plugin");
 }
 
 void Vizkit3DWidget::setVisualizationFrame(const QString& frame)
 {
-    displayFrame = frame.toStdString();
-    
-    if(initalDisplayFrame.empty())
-        initalDisplayFrame = displayFrame;
-    
-    for(std::map<vizkit::VizPluginBase *, TransformationData>::iterator it = pluginToTransformData.begin(); it != pluginToTransformData.end(); it++)
-    {
-        TransformationData &data(it->second);
-        
-        if(!data.dataFrame.empty())
-        {
-            if(data.transformation)
-                transformer.unregisterTransformation(data.transformation);
-            
-            data.transformation = &transformer.registerTransformation(data.dataFrame, displayFrame);
-            
-            it->second = data;
-        }
-    }
-    updateTransformations();
+
 }
 
-void Vizkit3DWidget::pushDynamicTransformation(const base::samples::RigidBodyState& tr)
+void Vizkit3DWidget::setTransformation(const QString &source_frame,const QString &target_frame,
+        const QVector3D &position, const QQuaternion &orientation)
 {
-    if(!tr.hasValidPosition() || !tr.hasValidOrientation())
-    {
-        std::cerr << "Vizkit3DWidget ignoring invalid dynamic transformation " << tr.sourceFrame << " --> " << tr.targetFrame << std::endl;
-        return;
-    }
 
-    checkAddFrame(tr.sourceFrame);
-    checkAddFrame(tr.targetFrame);
-
-    transformer.pushDynamicTransformation(tr);
-    while(transformer.step())
-    {
-	;
-    }
-    updateTransformations();
-}
-
-void Vizkit3DWidget::updateTransformations()
-{
-    for(std::map<vizkit::VizPluginBase *, TransformationData>::iterator it = pluginToTransformData.begin(); it != pluginToTransformData.end(); it++)
-    {
-        TransformationData &data(it->second);
-	if(data.transformation)
-	{
-	    Eigen::Affine3d pose;
-	    if(data.transformation->get(base::Time(), pose, false))
-	    {
-		it->first->setPose(pose.translation(), Eigen::Quaterniond(pose.rotation()));
-	    }
-	}
-    }
-}
-
-void Vizkit3DWidget::pushStaticTransformation(const base::samples::RigidBodyState& tr)
-{
-    if(!tr.hasValidPosition() || !tr.hasValidOrientation())
-    {
-        std::cerr << "Vizkit3DWidget ignoring invalid static transformation " << tr.sourceFrame << " --> " << tr.targetFrame << std::endl;
-        return;
-    }
-    checkAddFrame(tr.sourceFrame);
-    checkAddFrame(tr.targetFrame);
-    transformer.pushStaticTransformation(tr);
-}
-
-void Vizkit3DWidget::checkAddFrame(const std::string& frame)
-{
-    std::map<std::string, bool>::iterator it;
-    it = availableFrames.find(frame);
-    if(it == availableFrames.end())
-    {
-	availableFrames[frame] = true;
-	frameSelector->addItem(QString::fromStdString(frame));
-	if(frame == initalDisplayFrame)
-	{
-	    int index = frameSelector->findText(QString::fromStdString(frame));
-	    if(index != -1) {
-		frameSelector->setCurrentIndex(index);
-	    }
-	}
-	// enable frame selector groupBox if needed
-	if(!groupBox->isEnabled())
-        {
-            groupBox->setEnabled(true);
-        }
-    }
-}
-
-/**
- * @return property browser widget
- */
-QWidget* Vizkit3DWidget::getPropertyWidget()
-{
-    return propertyBrowserWidget;
-}
-
-
-/**
- * @return true if axes coordinates are enabled
- */
-bool Vizkit3DWidget::areAxesEnabled()
-{
-    return (root->getChildIndex(coordinateFrame) < root->getNumChildren());
-}
-
-/**
- * Enable or disable axes of the coordinate system.
- * @param enabled
- */
-void Vizkit3DWidget::setAxesEnabled(bool enabled)
-{
-    if(!enabled && areAxesEnabled())
-    {
-        root->removeChild(coordinateFrame);
-    }
-    else if(enabled && !areAxesEnabled())
-    {
-        root->addChild(coordinateFrame);
-    }
-    emit propertyChanged("show_axes");
 }

@@ -1,6 +1,7 @@
+#include "Vizkit3DWidget.hpp"
 #include "QVizkitWidgetLoader.hpp"
+
 #include <QtPlugin>
-#include <vizkit/Vizkit3DWidget.hpp>
 
 QVizkitWidgetLoader::QVizkitWidgetLoader(QObject* parent): QObject(parent)
 {
@@ -21,7 +22,7 @@ bool QVizkitWidgetLoader::isInitialized() const
 
 QWidget* QVizkitWidgetLoader::createWidget(QWidget* parent)
 {
-    return new vizkit::Vizkit3DWidget(parent, Qt::Widget);
+    return new vizkit::Vizkit3DWidget(parent);
 }
 
 QString QVizkitWidgetLoader::domXml() const

@@ -2,9 +2,10 @@
 #define __VIZKIT_PICKHANDLER_HPP__
 
 #include <QObject>
+#include <QVector3D>
 #include <osgViewer/Viewer>
 #include <iostream>
-#include <Eigen/Core>
+
 #include "Vizkit3DPlugin.hpp"
 
 namespace vizkit
@@ -37,7 +38,7 @@ public:
     void pick(const osgGA::GUIEventAdapter& ea, osgViewer::View* viewer);
 
 signals:
-    void picked(const Eigen::Vector3d& coord);
+    void picked(const QVector3D& coord);
 
 protected:
     void setTrackedNode(osgViewer::View* viewer, osg::ref_ptr< osg::Node > node);

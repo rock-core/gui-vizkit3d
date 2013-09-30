@@ -6,7 +6,7 @@ namespace vizkit {
 QVizkitMainWindow::QVizkitMainWindow(QWidget* parent, Qt::WindowFlags flags) 
     : QMainWindow(parent, flags)
 {
-    vizKitWidget = new vizkit::Vizkit3DWidget(parent, flags);
+    vizKitWidget = new vizkit::Vizkit3DWidget(parent);
     this->setCentralWidget(vizKitWidget);
 }
 

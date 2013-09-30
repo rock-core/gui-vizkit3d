@@ -1,4 +1,4 @@
-#include <vizkit/ColorConversionHelper.hpp>
+#include "ColorConversionHelper.hpp"
 
 namespace vizkit {
 

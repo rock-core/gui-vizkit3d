@@ -135,15 +135,10 @@ void PickHandler::pick(const osgGA::GUIEventAdapter& ea, osgViewer::View* viewer
 		//osg::Vec3 global = *intersection.matrix.get() * intersection.localIntersectionPoint;
 		osg::Vec3 global = intersection.localIntersectionPoint * *intersection.matrix.get();
 
-		Eigen::Vector3d globalPoint( 
-			    global.x(),
-			    global.y(),
-			    global.z() );
-		
-		emit picked( globalPoint );
+		QVector3D globalPoint( global.x(), global.y(), global.z());
+		emit picked(globalPoint);
 	    }
 	}
-
     }
     else
     {

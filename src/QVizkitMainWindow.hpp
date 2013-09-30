@@ -1,8 +1,9 @@
 #ifndef QVIZKITMAINWINDOW_H
 #define QVIZKITMAINWINDOW_H
+#include "Vizkit3DPlugin.hpp"
+#include "Vizkit3DWidget.hpp"
+
 #include <QMainWindow>
-#include <vizkit/Vizkit3DPlugin.hpp>
-#include <vizkit/Vizkit3DWidget.hpp>
 #include <QtDesigner/QDesignerExportWidget>
 
 namespace vizkit {
@@ -15,7 +16,7 @@ class QDESIGNER_WIDGET_EXPORT QVizkitMainWindow : public QMainWindow
         QVizkitMainWindow(QWidget * parent = 0, Qt::WindowFlags flags = 0);
         Vizkit3DWidget* getVizkitWidget();
         
-    public slots:    
+    public slots:
         void addPlugin(QObject* plugin);
         void removePlugin(QObject* plugin);
     private:

@@ -7,18 +7,9 @@
     <copyright>
 	DFKI/robotik@dfki.de
     </copyright>
-    <depend package="base/types" />
-    <depend package="base/scripts" />
-    <depend package="external/yaml-cpp" />
-    <depend package="drivers/transformer" />
-    <!-- needed for the vizkit/Ruby parts -->
     <rosdep name="osg" />
     <rosdep name="qt4" />
-    <rosdep name="qt-designer" />
-
-    <depend package="drivers/orogen/transformer" optional="1"/>
-    <depend package="tools/orocos.rb" optional="1" />
-    <depend package="qtruby" optional="1"/>
-    <depend package="gui/rock_widget_collection"  optional="1"/>
-    <depend package="drivers/controldev"  optional="1"/>
+    <rosdep name="boost" />
+    <rosdep name="base/cmake" />
+    <!--    <rosdep name="qt-designer" /> !-->
 </package>

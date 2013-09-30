@@ -1,9 +1,8 @@
 #include <osg/Group>
-//#include <osg/Text>
 #include <typeinfo>
 #include <cxxabi.h>
+
 #include "Vizkit3DPlugin.hpp"
-#include "Vizkit3DHelper.hpp"
 #include "PickHandler.hpp"
 
 using namespace vizkit;
@@ -25,8 +24,6 @@ VizPluginBase::VizPluginBase(QObject *parent)
     : QObject(parent), oldNodes(NULL), isAttached(false), dirty( false ),  plugin_enabled(true),
     keep_old_data(false),max_old_data(100)
 {
-    position.setZero();
-    orientation = Eigen::Quaterniond::Identity();
     rootNode = new osg::Group();
     nodeCallback = new CallbackAdapter(this);
     rootNode->setUpdateCallback(nodeCallback);
@@ -34,7 +31,7 @@ VizPluginBase::VizPluginBase(QObject *parent)
     rootNode->addChild(vizNode);
     oldNodes = new osg::Group();
     rootNode->addChild(oldNodes);
-    
+
     // reference counter we do not have to delete the data
     vizNode->setUserData(new PickedUserData(this));
 }
@@ -86,7 +83,15 @@ void VizPluginBase::click(float x,float y)
 
 }
 
+// deprecated !!!
+// use qt version
 void VizPluginBase::setPose(const base::Vector3d& position, const base::Quaterniond& orientation)
+{
+    setPose(QVector3D(position.x(),position.y(),position.z()),
+            QQuaternion(orientation.w(),orientation.x(),orientation.y(),orientation.z()));
+}
+
+void VizPluginBase::setPose(const QVector3D &position, const QQuaternion &orientation)
 {
     boost::mutex::scoped_lock lock(updateMutex);
     this->position = position;
@@ -94,7 +99,7 @@ void VizPluginBase::setPose(const base::Vector3d& position, const base::Quaterni
     setDirty();
 }
 
-const QString VizPluginBase::getPluginName() const 
+const QString VizPluginBase::getPluginName() const
 {
     if(vizkit3d_plugin_name.isEmpty())
         return abi::__cxa_demangle(typeid(*this).name(), 0, 0, 0);
@@ -143,8 +148,8 @@ void VizPluginBase::updateCallback(osg::Node* node)
     if(isDirty())
     {
         boost::mutex::scoped_lock lockit(updateMutex);
-        vizNode->setPosition(eigenVectorToOsgVec3(position));
-        vizNode->setAttitude(eigenQuatToOsgQuat(orientation));
+        vizNode->setPosition(osg::Vec3d(position.x(), position.y(), position.z()));
+        vizNode->setAttitude(osg::Quat(orientation.x(), orientation.y(), orientation.z(), orientation.scalar()));
 
 	updateMainNode(mainNode);
         if(keep_old_data)

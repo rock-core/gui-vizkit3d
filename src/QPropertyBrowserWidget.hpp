@@ -1,20 +1,21 @@
 #ifndef QPROPERTYBROWSERWIDGET_HPP
 #define QPROPERTYBROWSERWIDGET_HPP
 
-#include <vizkit/qtpropertybrowser/qttreepropertybrowser.h>
-#include <vizkit/qtpropertybrowser/qtvariantproperty.h>
-#include <vizkit/qtpropertybrowser/qtpropertymanager.h>
+#include "qtpropertybrowser/qttreepropertybrowser.h"
+#include "qtpropertybrowser/qtvariantproperty.h"
+#include "qtpropertybrowser/qtpropertymanager.h"
+
 #include <QWidget>
 #include <QHash>
 
 namespace vizkit {
-    
-class QProperyBrowserWidget : public QtTreePropertyBrowser
+
+class QPropertyBrowserWidget : public QtTreePropertyBrowser
 {
     Q_OBJECT
     
 public:
-    QProperyBrowserWidget(QWidget* parent = 0);
+    QPropertyBrowserWidget(QWidget* parent = 0);
     void addProperties(QObject* obj,QObject* parent = NULL);
     void removeProperties(QObject* obj);
     void addGlobalProperties(QObject* obj, const QStringList &property_list);

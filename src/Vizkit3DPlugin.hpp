@@ -1,5 +1,5 @@
-#ifndef __VIZKIT3D_VIZPLUGIN_HPP__ 
-#define __VIZKIT3D_VIZPLUGIN_HPP__ 
+#ifndef __VIZKIT3D_VIZPLUGIN_HPP__
+#define __VIZKIT3D_VIZPLUGIN_HPP__
 
 #include <osg/NodeCallback>
 #include <osg/Group>
@@ -10,14 +10,25 @@
 #include <QDockWidget>
 #include <QVariant>
 #include <QtPlugin>
-#include <base/eigen.h>
+#include <QVector3D>
+#include <QQuaternion>
 
-
+// Deprecated
+// This will be removed
+//////////////////////////////////////////////////////
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+namespace base
+{
+    typedef Eigen::Matrix<double, 3, 1, Eigen::DontAlign>     Vector3d;
+    typedef Eigen::Quaternion<double, Eigen::DontAlign>    Quaterniond;
+}
 namespace YAML
 {
     class Emitter;
     class Node;
 }
+//////////////////////////////////////////////////////
 
 namespace vizkit
 {
@@ -41,7 +52,7 @@ class VizPluginRubyAdapterBase : public QObject
 class VizPluginRubyAdapterCollection : public QObject
 {
     Q_OBJECT
-    
+
     public:
         /**
          * adds an adapter to the list of ruby adapters.
@@ -50,7 +61,7 @@ class VizPluginRubyAdapterCollection : public QObject
         {
             adapterList.push_back(adapter);
         };
-        
+
         /**
          * removes an adapter from the list if available.
          */
@@ -59,12 +70,12 @@ class VizPluginRubyAdapterCollection : public QObject
             std::vector<VizPluginRubyAdapterBase*>::iterator it = std::find(adapterList.begin(), adapterList.end(), adapter);
             if (it != adapterList.end()) adapterList.erase(it);
         };
-        
+
         const std::vector<VizPluginRubyAdapterBase*> &getAdapterList() const
         {
             return adapterList;
         }
-        
+
     public slots:
         /**
          * The method names of all available adapers will be returned.
@@ -79,7 +90,7 @@ class VizPluginRubyAdapterCollection : public QObject
             }
             return adapterStringList;
         };
-        
+
         /**
          * Retruns the ruby adapter given by its ruby method name.
          * It will be returnd as QObject, so ruby can get it.
@@ -95,7 +106,7 @@ class VizPluginRubyAdapterCollection : public QObject
             }
             return NULL;
         };
-        
+
     protected:
         std::vector<VizPluginRubyAdapterBase*> adapterList;
 };
@@ -122,7 +133,7 @@ class VizPluginBase : public QObject
     Q_PROPERTY(bool enabled READ isPluginEnabled WRITE setPluginEnabled)
     Q_PROPERTY(bool KeepOldData READ isKeepOldDataEnabled WRITE setKeepOldData)
     Q_PROPERTY(int MaxOldData READ getMaxOldData WRITE setMaxOldData)
-    
+
     public:
         VizPluginBase(QObject *parent=NULL);
         ~VizPluginBase();
@@ -137,6 +148,15 @@ class VizPluginBase : public QObject
 	osg::ref_ptr<osg::Group> getVizNode() const;
 	osg::ref_ptr<osg::Group> getRootNode() const;
 
+        /**
+         * @return a vector of QDockWidgets provided by this class.
+         */
+        std::vector<QDockWidget*> getDockWidgets();
+
+
+        // TODO 
+        // deprecated
+        //////////////////////////////////////////////////////////////////
 	/** override this method to save configuration data. Always call the
 	 * superclass as well.
 	 * @param[out] emitter object which can be used to emit yaml structure
@@ -150,18 +170,14 @@ class VizPluginBase : public QObject
 	 *  configuration options
 	 */
 	virtual void loadData(const YAML::Node& yamlNode) {};
-        
-        /**
-         * @return a vector of QDockWidgets provided by this class.
-         */
-        std::vector<QDockWidget*> getDockWidgets();
-        
+        //////////////////////////////////////////////////////////////////
+
     public slots:
        /**
         * @return true if plugin is enabled
         */
         virtual bool isPluginEnabled();
-        
+
        /**
         * @param enabled set plugin enabled or disabled
         */
@@ -170,7 +186,7 @@ class VizPluginBase : public QObject
 	/** @return the name of the plugin */
 	virtual const QString getPluginName() const;
         virtual void setPluginName(const QString &name);
-        
+
         /**
          * Emits signal 'clicked(float, float)' if the plugin has a Vizkit3DWidget as an ancestor.
          */
@@ -197,11 +213,14 @@ class VizPluginBase : public QObject
         * deletes all copies of the osg graph which were genereted by keepCurrentViz
         */
         void deleteOldData();
-        
+
         int getMaxOldData()const {return max_old_data;};
         void setMaxOldData(int value);
 
+        // deprecated
 	void setPose(const base::Vector3d &position, const base::Quaterniond &orientation);
+
+	void setPose(const QVector3D &position, const QQuaternion &orientation);
     signals:
        /**
         * must be emitted if a property of an inherited plugin changes
@@ -212,12 +231,12 @@ class VizPluginBase : public QObject
         * Must be emitted when children are added/removed from this plugin
         */
         void childrenChanged();
-        
+
        /**
         * will emitted if the plugin activity changes
         */
         void pluginActivityChanged(bool);
-        
+
        /**
         * Signals when this plugin has been clicked. x and y are in Vizkit3DWidget coordinates. 
         * That is the container widget of the OSG viewer and the property browser.
@@ -234,7 +253,7 @@ class VizPluginBase : public QObject
 	 * @return node derived from osg::Group
 	 */ 
 	virtual osg::ref_ptr<osg::Node> createMainNode();
-        
+
         /** override this method to provide your own QDockWidgets.
          * The QDockWidgets will automatically attached to the main window.
          */ 
@@ -249,7 +268,7 @@ class VizPluginBase : public QObject
 	 * state of the visualization.
 	 */ 
 	boost::mutex updateMutex;
-        
+
         std::vector<QDockWidget*> dockWidgets;
         QString vizkit3d_plugin_name;
         VizPluginRubyAdapterCollection adapterCollection;
@@ -263,12 +282,13 @@ class VizPluginBase : public QObject
         osg::ref_ptr<osg::Group> rootNode;              //node which is the osg root node of the pluign 
         osg::ref_ptr<osg::PositionAttitudeTransform> vizNode; //node which describes the transformation between rootNode and mainNode
         osg::ref_ptr<osg::Group> oldNodes;              //node which is the root node for all old visualization graphs of the plugin  
-        
+
         //position of the vizNode
-        base::Vector3d position;
+        QVector3D position;
+
         //orientation of the viznode
-        base::Quaterniond orientation;
-        
+        QQuaternion orientation;
+
 	bool isAttached;
 	bool dirty;
         bool plugin_enabled;
