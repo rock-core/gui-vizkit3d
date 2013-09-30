@@ -84,15 +84,26 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
         }
         else
         {
-            QtVariantProperty* property = variantManager->addProperty(prop.type(), prop.name());
-            if(property == 0)
+            // emulate string list by using enum factory
+            if(prop.type() == QVariant::StringList)
             {
-                std::cerr << "QVariant type " << metaObj->property(i).type() << " with name " << metaObj->property(i).name() 
-                    << " is not supported by the QtPropertyBrowser." << std::endl;
-                continue;
+                QtVariantProperty* property = variantManager->addProperty(QtVariantPropertyManager::enumTypeId(),prop.name());
+                property->setValue(var.toStringList().front());
+                property->setAttribute("enumNames",var);
+                properties.push_back(property);
             }
-            property->setValue(var);
-            properties.push_back(property);
+            else
+            {
+                QtVariantProperty* property = variantManager->addProperty(prop.type(), prop.name());
+                if(property == 0)
+                {
+                    std::cerr << "QVariant type " << metaObj->property(i).type() << " with name " << metaObj->property(i).name() 
+                        << " is not supported by the QtPropertyBrowser." << std::endl;
+                    continue;
+                }
+                property->setValue(var);
+                properties.push_back(property);
+            }
         }
     }
     // add default plugin name if plugin name property is missing 
@@ -166,7 +177,17 @@ void QPropertyBrowserWidget::propertyChangedInGUI(QtProperty* property, const QV
 {
     if (propertyToObject[property] != 0)
     {
-        propertyToObject[property]->setProperty(property->propertyName().toStdString().c_str(), val);
+
+        QtVariantProperty* prop = dynamic_cast<QtVariantProperty*>(property);
+        if(prop && prop->propertyType() == QtVariantPropertyManager::enumTypeId())
+        {
+            // emulate string list by using enums
+            QStringList list;
+            list << prop->attributeValue("enumNames").toStringList().at(val.toInt());
+            propertyToObject[property]->setProperty(property->propertyName().toStdString().c_str(), QVariant(list));
+        }
+        else
+            propertyToObject[property]->setProperty(property->propertyName().toStdString().c_str(), val);
     }
 }
 
