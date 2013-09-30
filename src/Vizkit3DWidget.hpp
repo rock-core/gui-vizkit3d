@@ -8,16 +8,34 @@
 #include <QVector3D>
 #include <QTimer>
 
-namespace osgQt
-{
-    class GraphicsWindowQt;
-}
-
+namespace osgQt { class GraphicsWindowQt;}
 namespace vizkit
 {
+    // configuration class
+    class Vizkit3DConfig :public QObject
+    {
+        Q_OBJECT
+        Q_PROPERTY( bool axes READ isAxes WRITE setAxes)
+        Q_PROPERTY( QStringList frame READ getVisualizationFrames WRITE setVisualizationFrame)
+
+        public:
+            Vizkit3DConfig(QObject *parent);
+
+        signals:
+            void propertyChanged(QString);
+
+        public slots:
+            bool isAxes() const;
+            void setAxes(bool value);
+
+            QStringList getVisualizationFrames() const;
+            void setVisualizationFrame(const QStringList &frames);
+    };
+
     class QDESIGNER_WIDGET_EXPORT Vizkit3DWidget : public QWidget, public osgViewer::CompositeViewer
     {
         Q_OBJECT
+
         public:
             Vizkit3DWidget( QWidget* parent = 0);
 
@@ -70,6 +88,7 @@ namespace vizkit
             void removePluginIntern(QObject* plugin);
             void pluginActivityChanged(bool enabled);
             void pluginChildrenChanged();
+            void addProperties(QObject* plugin,QObject *parent=NULL);
 
         private:
             void changeCameraView(const osg::Vec3* lookAtPos,

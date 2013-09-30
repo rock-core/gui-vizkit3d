@@ -9,6 +9,8 @@
 #include "Vizkit3DPlugin.hpp"
 #include "PickHandler.hpp"
 #include "QPropertyBrowserWidget.hpp"
+#include "AxesNode.hpp"
+#include "OsgVisitors.hpp"
 
 #include <osgViewer/ViewerEventHandlers>
 #include <osgGA/TrackballManipulator>
@@ -21,9 +23,57 @@
 using namespace vizkit;
 using namespace std;
 
+Vizkit3DConfig::Vizkit3DConfig(QObject *parent):QObject(parent)
+{
+    setObjectName("Viewer");
+};
+
+bool Vizkit3DConfig::isAxes() const
+{
+    Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
+    if(!parent)
+        return false;
+
+    osg::Node *node = FindNode::find(*parent->getRootNode(),"axes_node");
+    if(node && node->asSwitch())
+        return node->asSwitch()->getValue(0);
+    return false;
+}
+
+void Vizkit3DConfig::setAxes(bool value)
+{
+    Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
+    if(!parent)
+        return;
+
+    osg::Node *node = FindNode::find(*parent->getRootNode(),"axes_node");
+    if(node && node->asSwitch())
+    {
+        if(value)
+            node->asSwitch()->setAllChildrenOn();
+        else
+            node->asSwitch()->setAllChildrenOff();
+    }
+}
+
+QStringList Vizkit3DConfig::getVisualizationFrames() const
+{
+    QStringList list;
+    list << "World";
+    list << "Camera";
+    return list;
+}
+
+void Vizkit3DConfig::setVisualizationFrame(const QStringList &frames)
+{
+    std::cout << frames.front().toStdString() << std::endl;
+}
+
+
 Vizkit3DWidget::Vizkit3DWidget( QWidget* parent)
     : QWidget(parent)
 {
+
     //create layout
     //objects will be owned by the parent widget (this)
     QVBoxLayout* controlLayout = new QVBoxLayout;
@@ -56,6 +106,10 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent)
     propertyBrowserWidget->setObjectName("PropertyBrowser");
     propertyBrowserWidget->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
     controlLayout->addWidget(propertyBrowserWidget);
+
+    // add config object to the property browser
+    QObject *config =  new Vizkit3DConfig(this);
+    addProperties(config,NULL);
 
     // create visualization of the coordinate axes
     // TODO
@@ -179,6 +233,14 @@ osg::Group *Vizkit3DWidget::createSceneGraph()
         ls->setLight( light.get() );
         root->addChild( ls.get() );
     }
+
+    // add coordinate axes
+    osg::Switch *switch_node = new osg::Switch();
+    switch_node->addChild(AxesNode::create());
+    switch_node->setAllChildrenOn();
+    switch_node->setName("axes_node");
+    root->addChild(switch_node);
+
     return root;
 }
 
@@ -333,6 +395,13 @@ void Vizkit3DWidget::removePlugin(QObject* plugin)
     emit removePlugins(plugin);
 }
 
+void Vizkit3DWidget::addProperties(QObject* plugin,QObject *parent)
+{
+    QPropertyBrowserWidget *propertyBrowserWidget = dynamic_cast<QPropertyBrowserWidget*>(getPropertyWidget());
+    if(propertyBrowserWidget)
+        propertyBrowserWidget->addProperties(plugin,parent);
+}
+
 /**
  * This slot adds all plugins in the list to the OSG and
  * their properties to the property browser widget.
@@ -351,10 +420,7 @@ void Vizkit3DWidget::addPluginIntern(QObject* plugin,QObject *parent)
 
         registerDataHandler(viz_plugin);
         setPluginEnabled(viz_plugin, viz_plugin->isPluginEnabled());
-
-        QPropertyBrowserWidget *propertyBrowserWidget = dynamic_cast<QPropertyBrowserWidget*>(getPropertyWidget());
-        if(propertyBrowserWidget)
-            propertyBrowserWidget->addProperties(viz_plugin,parent);
+        addProperties(viz_plugin,parent);
 
         connect(viz_plugin, SIGNAL(pluginActivityChanged(bool)), this, SLOT(pluginActivityChanged(bool)));
         connect(viz_plugin, SIGNAL(childrenChanged()), this, SLOT(pluginChildrenChanged()));
@@ -412,3 +478,5 @@ void Vizkit3DWidget::setTransformation(const QString &source_frame,const QString
 {
 
 }
+
+

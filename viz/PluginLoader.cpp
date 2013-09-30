@@ -1,12 +1,5 @@
-#include <vizkit/Vizkit3DPlugin.hpp>
-#include "LaserScanVisualization.hpp"
-#include "WaypointVisualization.hpp"
-#include "MotionCommandVisualization.hpp"
-#include "TrajectoryVisualization.hpp"
-#include "RigidBodyStateVisualization.hpp"
-#include "SonarGroundDistanceVisualization.hpp"
+#include "../src/Vizkit3DPlugin.hpp"
 #include "GridVisualization.hpp"
-#include "PointcloudVisualization.hpp"
 
 namespace vizkit {
     class QtPluginVizkit : public vizkit::VizkitPluginFactory {
@@ -23,58 +16,17 @@ namespace vizkit {
         virtual QStringList* getAvailablePlugins() const
 	{
 	    QStringList *pluginNames = new QStringList();
-	    pluginNames->push_back("WaypointVisualization");
-	    pluginNames->push_back("TrajectoryVisualization");
-	    pluginNames->push_back("MotionCommandVisualization");
-	    pluginNames->push_back("RigidBodyStateVisualization");
-	    pluginNames->push_back("LaserScanVisualization");
-	    pluginNames->push_back("SonarGroundDistanceVisualization");
 	    pluginNames->push_back("GridVisualization");
-	    pluginNames->push_back("PointcloudVisualization");
 	    return pluginNames;
 	}
 	
         virtual QObject* createPlugin(QString const& pluginName)
         {
 	    vizkit::VizPluginBase* plugin = 0;
-	    if (pluginName == "WaypointVisualization")
-	    {
-		plugin = new vizkit::WaypointVisualization();
-	    }
-	    else if (pluginName == "MotionCommandVisualization")
-	    {
-		plugin = new vizkit::MotionCommandVisualization();
-	    }
-	    else if (pluginName == "TrajectoryVisualization")
-	    {
-		plugin = new vizkit::TrajectoryVisualization();
-	    }
-	    else if (pluginName == "RigidBodyStateVisualization")
-	    {
-		plugin = new vizkit::RigidBodyStateVisualization();
-	    }
-	    else if (pluginName == "LaserScanVisualization")
-	    {
-	        plugin = new vizkit::LaserScanVisualization();
-	    }
-	    else if (pluginName == "SonarGroundDistanceVisualization")
-	    {
-	        plugin = new vizkit::SonarGroundDistanceVisualization();
-	    }
-	    else if (pluginName == "GridVisualization")
-	    {
+	    if (pluginName == "GridVisualization")
 	        plugin = new vizkit::GridVisualization();
-	    }
-	    else if (pluginName == "PointcloudVisualization")
-	    {
-	        plugin = new vizkit::PointcloudVisualization();
-	    }
 
-	    if (plugin) 
-	    {
-		return plugin;
-	    }
-	    return NULL;
+	    return plugin;
         };
     };
     Q_EXPORT_PLUGIN2(QtPluginVizkit, QtPluginVizkit)

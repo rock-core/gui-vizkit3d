@@ -1,4 +1,4 @@
-#include "vizkit/GridNode.hpp"
+#include "../src/GridNode.hpp"
 #include "GridVisualization.hpp"
 
 namespace vizkit

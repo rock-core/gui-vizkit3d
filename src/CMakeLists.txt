@@ -1,11 +1,16 @@
 rock_find_qt4()
 include(RockRuby)
 
+rock_find_cmake(Boost REQUIRED COMPONENTS thread system)
 QT4_ADD_RESOURCES(PROPERTY_BROWSER_RESOURCES qtpropertybrowser/qtpropertybrowser.qrc)
+
 rock_library(vizkit3d
     SOURCES
         QtThreadedWidget.cpp
         ColorConversionHelper.cpp
+        GridNode.cpp
+        AxesNode.cpp
+        OsgVisitors.cpp
         ${PROPERTY_BROWSER_RESOURCES} 
     MOC
         Vizkit3DPlugin.cpp 
@@ -23,25 +28,27 @@ rock_library(vizkit3d
         QPropertyBrowserWidget.cpp
         ${MOC_EXTRA}
     HEADERS
+        GridNode.hpp
+        AxesNode.hpp
+        OsgVisitors.hpp
         QtThreadedWidget.hpp
         Vizkit3DPlugin.hpp
         Vizkit3DWidget.hpp
         QVizkitMainWindow.hpp
-        VizPlugin.hpp
         PickHandler.hpp
         ColorConversionHelper.hpp
         ${HEADERS_EXTRA}
-        LIBS ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY}
+    LIBS ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY}
     DEPS_PKGCONFIG openscenegraph eigen3 openscenegraph-osgQt ${DEPS_EXTRA})
 
 rock_library(vizkitwidgetloader
     MOC QVizkitWidgetLoader.cpp
     DEPS vizkit3d
     NOINSTALL) # installs in a non-standard location
-rock_library(vizkitmainwindowloader
-    MOC QVizkitMainWindowLoader.cpp
-    DEPS vizkit3d
-    NOINSTALL) # installs in a non-standard location
-install(TARGETS vizkitwidgetloader vizkitmainwindowloader
+#rock_library(vizkitmainwindowloader
+#    MOC QVizkitMainWindowLoader.cpp
+#    DEPS vizkit3d
+#    NOINSTALL) # installs in a non-standard location
+install(TARGETS vizkitwidgetloader #vizkitmainwindowloader
     LIBRARY DESTINATION lib/qt/designer
     ARCHIVE DESTINATION lib/qt/designer)

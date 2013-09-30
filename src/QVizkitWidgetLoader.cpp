@@ -1,7 +1,8 @@
 #include "Vizkit3DWidget.hpp"
 #include "QVizkitWidgetLoader.hpp"
-
 #include <QtPlugin>
+
+Q_EXPORT_PLUGIN2(QVizkitWidgetLoader, QVizkitWidgetLoader)
 
 QVizkitWidgetLoader::QVizkitWidgetLoader(QObject* parent): QObject(parent)
 {
@@ -48,7 +49,7 @@ bool QVizkitWidgetLoader::isContainer() const
 
 QIcon QVizkitWidgetLoader::icon() const
 {
-    return QIcon();
+    return QIcon("");
 }
 
 QString QVizkitWidgetLoader::includeFile() const
@@ -63,7 +64,7 @@ QString QVizkitWidgetLoader::name() const
 
 QString QVizkitWidgetLoader::group() const
 {
-    return "Vizkit Widgets";
+    return "Rock-Robotics";
 }
 
 QString QVizkitWidgetLoader::toolTip() const
@@ -76,4 +77,3 @@ QString QVizkitWidgetLoader::whatsThis() const
     return "";
 }
 
-Q_EXPORT_PLUGIN2(QVizkitWidgetLoader, QVizkitWidgetLoader)

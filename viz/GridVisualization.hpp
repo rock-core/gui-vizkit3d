@@ -1,7 +1,7 @@
 #ifndef __VIZKIT_GRIDVISUALIZATON_HPP
 #define __VIZKIT_GRIDVISUALIZATON_HPP
 
-#include "vizkit/Vizkit3DPlugin.hpp"
+#include "../src/Vizkit3DPlugin.hpp"
 #include <QVector3D>
 #include <QVector2D>
 #include <QGenericMatrix>
