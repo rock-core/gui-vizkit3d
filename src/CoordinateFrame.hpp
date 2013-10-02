@@ -2,7 +2,7 @@
 #define COORDINATEFRAMENODE_HPP
 #include <osg/Geode>
 
-namespace vizkit 
+namespace vizkit3d 
 {
 
 class CoordinateFrame : public osg::Geode

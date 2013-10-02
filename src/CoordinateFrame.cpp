@@ -3,7 +3,7 @@
 #include <osg/ShapeDrawable>
 #include <osg/LineWidth>
 
-namespace vizkit {
+namespace vizkit3d {
 
 CoordinateFrame::CoordinateFrame()
 {

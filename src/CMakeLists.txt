@@ -7,10 +7,12 @@ QT4_ADD_RESOURCES(PROPERTY_BROWSER_RESOURCES qtpropertybrowser/qtpropertybrowser
 rock_library(vizkit3d
     SOURCES
         QtThreadedWidget.cpp
+        NodeLink.cpp
         ColorConversionHelper.cpp
         GridNode.cpp
         AxesNode.cpp
         OsgVisitors.cpp
+        TransformerGraph.cpp
         ${PROPERTY_BROWSER_RESOURCES} 
     MOC
         Vizkit3DPlugin.cpp 
@@ -28,7 +30,9 @@ rock_library(vizkit3d
         QPropertyBrowserWidget.cpp
         ${MOC_EXTRA}
     HEADERS
+        TransformerGraph.hpp
         GridNode.hpp
+        NodeLink.hpp
         AxesNode.hpp
         OsgVisitors.hpp
         QtThreadedWidget.hpp
@@ -39,7 +43,7 @@ rock_library(vizkit3d
         ColorConversionHelper.hpp
         ${HEADERS_EXTRA}
     LIBS ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY}
-    DEPS_PKGCONFIG openscenegraph eigen3 openscenegraph-osgQt ${DEPS_EXTRA})
+    DEPS_PKGCONFIG openscenegraph openscenegraph-osgQt ${DEPS_EXTRA})
 
 rock_library(vizkitwidgetloader
     MOC QVizkitWidgetLoader.cpp

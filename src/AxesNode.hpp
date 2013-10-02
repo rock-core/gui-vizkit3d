@@ -9,7 +9,7 @@
 #include <QGenericMatrix>
 #include <string>
 
-namespace vizkit
+namespace vizkit3d
 {
     class AxesNode
     {

@@ -4,9 +4,9 @@
 #include <QObject>
 #include <QTimer>
 #include <controldev/ConnexionHID.hpp>
-#include <vizkit/osgMatrixManipulator.h>
+#include <vizkit3d/osgMatrixManipulator.h>
 
-namespace vizkit{
+namespace vizkit3d{
 
 
 class ConnexionPlugin : public QObject,public controldev::ConnexionHID,  public osgGA::MatrixManipulator{

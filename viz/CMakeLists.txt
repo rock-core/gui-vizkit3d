@@ -1,4 +1,4 @@
-rock_vizkit_plugin(vizkit-base-viz
+rock_vizkit_plugin(vizkit3d-viz
     PluginLoader.cpp
     MOC GridVisualization.cpp
     DEPS vizkit3d

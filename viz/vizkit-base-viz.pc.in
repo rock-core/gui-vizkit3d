@@ -6,7 +6,7 @@ includedir=${prefix}/include
 Name: @PROJECT_NAME@-base-viz
 Description: Vizkit3D plugins from Vizkit itself
 Version: @PROJECT_VERSION@
-Requires: vizkit
+Requires: vizkit3d
 Libs: -L${libdir} -l@PROJECT_NAME@-base-viz
 Cflags: -I${includedir}
 

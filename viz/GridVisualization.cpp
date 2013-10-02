@@ -1,10 +1,10 @@
 #include "../src/GridNode.hpp"
 #include "GridVisualization.hpp"
 
-namespace vizkit
+namespace vizkit3d
 {
     GridVisualization::GridVisualization(QObject *parent):
-        vizkit::VizPluginBase(parent),
+        vizkit3d::VizPluginBase(parent),
             grid_color(120,120,120,255),
             grid_rows(20),
             grid_cols(20),

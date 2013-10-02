@@ -1,8 +1,8 @@
 #include "../src/Vizkit3DPlugin.hpp"
 #include "GridVisualization.hpp"
 
-namespace vizkit {
-    class QtPluginVizkit : public vizkit::VizkitPluginFactory {
+namespace vizkit3d {
+    class QtPluginVizkit : public vizkit3d::VizkitPluginFactory {
     private:
     public:
 	
@@ -22,9 +22,9 @@ namespace vizkit {
 	
         virtual QObject* createPlugin(QString const& pluginName)
         {
-	    vizkit::VizPluginBase* plugin = 0;
+	    vizkit3d::VizPluginBase* plugin = 0;
 	    if (pluginName == "GridVisualization")
-	        plugin = new vizkit::GridVisualization();
+	        plugin = new vizkit3d::GridVisualization();
 
 	    return plugin;
         };

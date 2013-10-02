@@ -3,9 +3,10 @@
 #include <cxxabi.h>
 
 #include "Vizkit3DPlugin.hpp"
+#include "Vizkit3DWidget.hpp"
 #include "PickHandler.hpp"
 
-using namespace vizkit;
+using namespace vizkit3d;
 
 /** this adapter is used to forward the update call to the plugin
  */
@@ -65,7 +66,7 @@ void VizPluginBase::click(float x,float y)
     // Find the container widget in the plugin's parents.
     while(container)
     {
-        if(container->objectName().toStdString().compare("vizkit::Vizkit3DWidget") == 0)
+        if(container->objectName().toStdString().compare("vizkit3d::Vizkit3DWidget") == 0)
         {
             // Container found.
             //std::cout << "grandparent: " << container->objectName().toStdString() << std::endl;
@@ -81,14 +82,6 @@ void VizPluginBase::click(float x,float y)
         }
     }
 
-}
-
-// deprecated !!!
-// use qt version
-void VizPluginBase::setPose(const base::Vector3d& position, const base::Quaterniond& orientation)
-{
-    setPose(QVector3D(position.x(),position.y(),position.z()),
-            QQuaternion(orientation.w(),orientation.x(),orientation.y(),orientation.z()));
 }
 
 void VizPluginBase::setPose(const QVector3D &position, const QQuaternion &orientation)
@@ -177,7 +170,7 @@ void VizPluginBase::setDirty()
     dirty = true;
 }
 
-QObject* vizkit::VizPluginBase::getRubyAdapterCollection()
+QObject* vizkit3d::VizPluginBase::getRubyAdapterCollection()
 {
     return &adapterCollection;
 }
@@ -223,4 +216,39 @@ bool VizPluginBase::isKeepOldDataEnabled()
 void VizPluginBase::deleteOldData()
 {
     oldNodes->removeChild(0,oldNodes->getNumChildren());
+}
+
+QStringList VizPluginBase::getVisualizationFrames() const
+{
+    Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
+    if(!parent)
+        return QStringList();
+    QStringList list = parent->getVisualizationFrames();
+    if(!current_frame.isEmpty() && !list.isEmpty())
+    {
+        list.removeOne(current_frame);
+        list.prepend(current_frame);
+    }
+    return list;
+}
+
+QString VizPluginBase::getVisualizationFrame() const
+{
+    return current_frame;
+}
+
+void VizPluginBase::setVisualizationFrame(const QStringList &frames)
+{
+    if(!frames.isEmpty())
+        setVisualizationFrame(frames.front());
+}
+
+void VizPluginBase::setVisualizationFrame(const QString &frame)
+{
+    Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
+    if(!parent)
+        return;
+    parent->setPluginDataFrameIntern(frame,this);
+    current_frame = frame;
+    emit propertyChanged("frame");
 }

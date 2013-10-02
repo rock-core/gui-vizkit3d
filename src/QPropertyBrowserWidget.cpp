@@ -3,7 +3,7 @@
 #include <QString>
 #include <iostream>
 
-namespace vizkit
+namespace vizkit3d
 {
 
 QPropertyBrowserWidget::QPropertyBrowserWidget(QWidget* parent) 
@@ -56,7 +56,7 @@ void QPropertyBrowserWidget::addGlobalProperties(QObject* obj, const QStringList
 
 /**
  * Adds all properties of a QObject to the property browser widget,
- * grouped by the name of the vizkit plugin.
+ * grouped by the name of the vizkit3d plugin.
  */
 void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
 {
@@ -214,7 +214,18 @@ void QPropertyBrowserWidget::propertyChangedInObject(QString property_name)
         {
             QtProperty* property = groupMap->value(property_name);
             QVariant value = obj->property(property_name.toStdString().c_str());
-            if(value.isValid())
+
+            if(!value.isValid())
+                return;
+
+            // emulate string list by using enum factory
+            if(value.type() == QVariant::StringList)
+            {
+                QtVariantProperty* prop = dynamic_cast<QtVariantProperty*>(property);
+                prop->setValue(value.toStringList().front());
+                prop->setAttribute("enumNames",value);
+            }
+            else
             {
                 variantManager->setValue(property, value);
             }

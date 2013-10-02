@@ -2,7 +2,7 @@
 
 #include <Eigen/Geometry>
 
-namespace vizkit{
+namespace vizkit3d{
 
 
 ConnexionPlugin::ConnexionPlugin(){

@@ -5,7 +5,7 @@
 #include <osg/Geometry>
 #include <string>
 
-namespace vizkit
+namespace vizkit3d
 {
     class FindNode : public ::osg::NodeVisitor
     {

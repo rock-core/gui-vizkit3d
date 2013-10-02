@@ -6,7 +6,7 @@
 #include <QVector2D>
 #include <QGenericMatrix>
 
-namespace vizkit
+namespace vizkit3d
 {
     class GridVisualization : public VizPluginBase
     {

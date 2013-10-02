@@ -6,7 +6,7 @@
 #include <assert.h>
 #include <iostream>
 
-namespace vizkit
+namespace vizkit3d
 {
     ::osg::Node* AxesNode::create(float scale)
     {

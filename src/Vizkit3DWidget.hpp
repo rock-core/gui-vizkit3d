@@ -9,13 +9,14 @@
 #include <QTimer>
 
 namespace osgQt { class GraphicsWindowQt;}
-namespace vizkit
+namespace vizkit3d
 {
     // configuration class
     class Vizkit3DConfig :public QObject
     {
         Q_OBJECT
         Q_PROPERTY( bool axes READ isAxes WRITE setAxes)
+        Q_PROPERTY( bool transformer READ isTransformer WRITE setTransformer)
         Q_PROPERTY( QStringList frame READ getVisualizationFrames WRITE setVisualizationFrame)
 
         public:
@@ -30,13 +31,17 @@ namespace vizkit
 
             QStringList getVisualizationFrames() const;
             void setVisualizationFrame(const QStringList &frames);
+
+            bool isTransformer() const;
+            void setTransformer(bool value);
+            void updateProperty(const QString &name);
     };
 
     class QDESIGNER_WIDGET_EXPORT Vizkit3DWidget : public QWidget, public osgViewer::CompositeViewer
     {
         Q_OBJECT
-
         public:
+            friend class VizPluginBase;
             Vizkit3DWidget( QWidget* parent = 0);
 
             /** Defined to avoid unnecessary dependencies in the headers
@@ -47,7 +52,7 @@ namespace vizkit
             ~Vizkit3DWidget();
 
             osg::Group* getRootNode() const;
-            void setTrackedNode(vizkit::VizPluginBase* plugin);
+            void setTrackedNode(vizkit3d::VizPluginBase* plugin);
             QSize sizeHint() const;
 
         public slots:
@@ -56,6 +61,9 @@ namespace vizkit
 
             ///The frame in which the data should be displayed
             void setVisualizationFrame(const QString &frame);
+
+            QStringList getVisualizationFrames() const;
+            QString getVisualizationFrame() const;
 
             /**
              * Sets frame plugin data for a given plugin.
@@ -73,7 +81,10 @@ namespace vizkit
             void getCameraView(QVector3D& eye, QVector3D& lookAt, QVector3D& up);
 
             void collapsePropertyBrowser();
-            QWidget* getPropertyWidget();
+            QWidget* getPropertyWidget()const;
+
+            bool isTransformer() const;
+            void setTransformer(bool value);
 
         signals:
             void addPlugins(QObject* plugin,QObject* parent);
@@ -84,6 +95,7 @@ namespace vizkit
             virtual void paintEvent( QPaintEvent* event );
 
         private slots:
+            void setPluginDataFrameIntern(const QString &frame, QObject *plugin);
             void addPluginIntern(QObject* plugin,QObject *parent=NULL);
             void removePluginIntern(QObject* plugin);
             void pluginActivityChanged(bool enabled);
@@ -91,9 +103,7 @@ namespace vizkit
             void addProperties(QObject* plugin,QObject *parent=NULL);
 
         private:
-            void changeCameraView(const osg::Vec3* lookAtPos,
-                    const osg::Vec3* eyePos,
-                    const osg::Vec3* upVector);
+            void changeCameraView(const osg::Vec3* lookAtPos, const osg::Vec3* eyePos, const osg::Vec3* upVector);
             void setPluginEnabled(QObject* plugin, bool enabled);
 
             void registerDataHandler(VizPluginBase *viz);
@@ -116,6 +126,7 @@ namespace vizkit
             PluginMap plugins;
 
             QTimer _timer;
+            QString current_frame;
     };
 }
 #endif

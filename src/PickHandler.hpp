@@ -8,7 +8,7 @@
 
 #include "Vizkit3DPlugin.hpp"
 
-namespace vizkit
+namespace vizkit3d
 {
 class PickedCallback : public osg::Referenced
 {

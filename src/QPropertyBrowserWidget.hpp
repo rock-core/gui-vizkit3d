@@ -8,7 +8,7 @@
 #include <QWidget>
 #include <QHash>
 
-namespace vizkit {
+namespace vizkit3d {
 
 class QPropertyBrowserWidget : public QtTreePropertyBrowser
 {

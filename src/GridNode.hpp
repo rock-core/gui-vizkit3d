@@ -4,7 +4,7 @@
 #include <osg/Geode>
 #include <osg/Geometry>
 
-namespace vizkit
+namespace vizkit3d
 {
     class GridNode
     {

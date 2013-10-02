@@ -20,13 +20,13 @@ bool QVizkitMainWindowLoader::isInitialized() const
 
 QWidget* QVizkitMainWindowLoader::createWidget(QWidget* parent)
 {
-    return new vizkit::QVizkitMainWindow(parent, Qt::Widget);
+    return new vizkit3d::QVizkitMainWindow(parent, Qt::Widget);
 }
 
 QString QVizkitMainWindowLoader::domXml() const
 {
     return  "<ui language=\"c++\">\n"
-            " <widget class=\"vizkit::QVizkitMainWindow\" name=\"QVizkitMainWindow\">\n"
+            " <widget class=\"vizkit3d::QVizkitMainWindow\" name=\"QVizkitMainWindow\">\n"
             "  <property name=\"geometry\">\n"
             "   <rect>\n"
             "    <x>0</x>\n"
@@ -56,7 +56,7 @@ QString QVizkitMainWindowLoader::includeFile() const
 
 QString QVizkitMainWindowLoader::name() const
 {
-    return "vizkit::QVizkitMainWindow";
+    return "vizkit3d::QVizkitMainWindow";
 }
 
 QString QVizkitMainWindowLoader::group() const

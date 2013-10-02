@@ -1,7 +1,7 @@
 #include "OsgVisitors.hpp"
 #include <osgDB/ReadFile>
 
-namespace vizkit
+namespace vizkit3d
 {
     ::osg::Node * FindNode::find(::osg::Node &node,std::string name)
     {

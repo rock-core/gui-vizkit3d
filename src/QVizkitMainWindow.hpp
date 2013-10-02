@@ -6,7 +6,7 @@
 #include <QMainWindow>
 #include <QtDesigner/QDesignerExportWidget>
 
-namespace vizkit {
+namespace vizkit3d {
 
 class QDESIGNER_WIDGET_EXPORT QVizkitMainWindow : public QMainWindow
 {

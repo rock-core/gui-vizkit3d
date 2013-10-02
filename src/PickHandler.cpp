@@ -13,7 +13,7 @@
 
 #include "PickHandler.hpp"
 
-using namespace vizkit;
+using namespace vizkit3d;
 
 PickHandler::PickHandler():
     _mx(0.0),_my(0.0),

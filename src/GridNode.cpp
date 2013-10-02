@@ -3,7 +3,7 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/Point>
 
-namespace vizkit
+namespace vizkit3d
 {
     ::osg::Node* GridNode::create(int rows,int cols,float dx, float dy,const ::osg::Vec4 &color)
     {

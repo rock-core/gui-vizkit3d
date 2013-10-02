@@ -13,24 +13,7 @@
 #include <QVector3D>
 #include <QQuaternion>
 
-// Deprecated
-// This will be removed
-//////////////////////////////////////////////////////
-#include <Eigen/Core>
-#include <Eigen/Geometry>
-namespace base
-{
-    typedef Eigen::Matrix<double, 3, 1, Eigen::DontAlign>     Vector3d;
-    typedef Eigen::Quaternion<double, Eigen::DontAlign>    Quaterniond;
-}
-namespace YAML
-{
-    class Emitter;
-    class Node;
-}
-//////////////////////////////////////////////////////
-
-namespace vizkit
+namespace vizkit3d
 {
 /** 
  * Interface class for all ruby adapters of the visualization plugins
@@ -112,7 +95,7 @@ class VizPluginRubyAdapterCollection : public QObject
 };
 
 /** 
- * Interface class for all visualization plugins based on vizkit. All plugins
+ * Interface class for all visualization plugins based on vizkit3d. All plugins
  * provide an osg::Group() node, which can be added to an osg render tree for
  * visualisation using getMainNode().
  *
@@ -133,6 +116,7 @@ class VizPluginBase : public QObject
     Q_PROPERTY(bool enabled READ isPluginEnabled WRITE setPluginEnabled)
     Q_PROPERTY(bool KeepOldData READ isKeepOldDataEnabled WRITE setKeepOldData)
     Q_PROPERTY(int MaxOldData READ getMaxOldData WRITE setMaxOldData)
+    Q_PROPERTY( QStringList frame READ getVisualizationFrames WRITE setVisualizationFrame)
 
     public:
         VizPluginBase(QObject *parent=NULL);
@@ -152,25 +136,6 @@ class VizPluginBase : public QObject
          * @return a vector of QDockWidgets provided by this class.
          */
         std::vector<QDockWidget*> getDockWidgets();
-
-
-        // TODO 
-        // deprecated
-        //////////////////////////////////////////////////////////////////
-	/** override this method to save configuration data. Always call the
-	 * superclass as well.
-	 * @param[out] emitter object which can be used to emit yaml structure
-	 *  containing configuration options
-	 */
-	virtual void saveData(YAML::Emitter& emitter) const {};
-
-	/** override this method to load configuration data. Always call the
-	 * superclass as well.
-	 * @param[in] yamlNode object which contains previously saved
-	 *  configuration options
-	 */
-	virtual void loadData(const YAML::Node& yamlNode) {};
-        //////////////////////////////////////////////////////////////////
 
     public slots:
        /**
@@ -217,10 +182,12 @@ class VizPluginBase : public QObject
         int getMaxOldData()const {return max_old_data;};
         void setMaxOldData(int value);
 
-        // deprecated
-	void setPose(const base::Vector3d &position, const base::Quaterniond &orientation);
-
 	void setPose(const QVector3D &position, const QQuaternion &orientation);
+
+        QStringList getVisualizationFrames() const;
+        QString getVisualizationFrame() const;
+        void setVisualizationFrame(const QStringList &frames);
+        void setVisualizationFrame(const QString &frame);
     signals:
        /**
         * must be emitted if a property of an inherited plugin changes
@@ -294,6 +261,7 @@ class VizPluginBase : public QObject
         bool plugin_enabled;
         bool keep_old_data;
         unsigned int max_old_data;
+        QString current_frame;
 };
 
 template <typename T> class Vizkit3DPlugin;
@@ -359,7 +327,7 @@ class Vizkit3DPlugin : public VizPluginBase,
 };
 
 /** 
- * Interface class to create multiple vizkit plugins.
+ * Interface class to create multiple vizkit3d plugins.
  */
 class VizkitPluginFactory : public QObject
 {
@@ -426,17 +394,17 @@ class VizkitPluginFactory : public QObject
 
 
 /**
- * Macro that exports a Vizkit3D plugin so that it can be dynamically loaded by vizkit
+ * Macro that exports a Vizkit3D plugin so that it can be dynamically loaded by vizkit3d
  * 
  * Example:
  *
  * <code>
- *     class WaypointVisualization : public vizkit::Vizkit3DPlugin {..};
+ *     class WaypointVisualization : public vizkit3d::Vizkit3DPlugin {..};
  *     VizkitQtPlugin(WaypointVisualization)
  * </code>
  *
  * This works if your shared library exports only one plugin. To export multiple
- * plugins, you need to create a subclass of vizkit::VizkitPluginFactory which
+ * plugins, you need to create a subclass of vizkit3d::VizkitPluginFactory which
  * handles the plugins, and export it with
  *
  * <code>
@@ -444,7 +412,7 @@ class VizkitPluginFactory : public QObject
  * </code>
  */
 #define VizkitQtPlugin(pluginName)\
-    class QtPlugin##pluginName : public vizkit::VizkitPluginFactory {\
+    class QtPlugin##pluginName : public vizkit3d::VizkitPluginFactory {\
         public:\
         virtual QStringList* getAvailablePlugins() const\
         {\
