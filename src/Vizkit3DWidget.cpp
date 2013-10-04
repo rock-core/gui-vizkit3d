@@ -28,11 +28,7 @@ using namespace std;
 Vizkit3DConfig::Vizkit3DConfig(QObject *parent):QObject(parent)
 {
     setObjectName("Viewer");
-}
-
-void Vizkit3DConfig::updateProperty(const QString &name)
-{
-    emit propertyChanged(name);
+    connect(parent, SIGNAL(propertyChanged(QString)),this,SIGNAL(propertyChanged(QString)));
 }
 
 bool Vizkit3DConfig::isAxes() const
@@ -76,7 +72,7 @@ void Vizkit3DConfig::setVisualizationFrame(const QStringList &frames)
     Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
     if(!parent && frames.isEmpty())
         return;
-    return parent->setVisualizationFrame(frames.front());
+    return parent->setVisualizationFrame(frames.front(),false);
 }
 
 bool Vizkit3DConfig::isTransformer() const
@@ -144,10 +140,6 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent)
     connect( &_timer, SIGNAL(timeout()), this, SLOT(update()) );
 
     current_frame = QString(root->getName().c_str());
-    TransformerGraph::setTransformation(*getRootNode(),current_frame.toStdString(),"bla",osg::Quat(),osg::Vec3d(3,0,0));
-    TransformerGraph::setTransformation(*getRootNode(),"bla","bla2",osg::Quat(),osg::Vec3d(0,0,2));
-    TransformerGraph::setTransformation(*getRootNode(),"bla2","bla3",osg::Quat(),osg::Vec3d(0,-2,0));
-    config->updateProperty("frame");
 
     //start timer responsible for updating osg viewer
     _timer.start(10);
@@ -539,7 +531,7 @@ void Vizkit3DWidget::setPluginDataFrameIntern(const QString& frame, QObject* plu
     }
 }
 
-void Vizkit3DWidget::setVisualizationFrame(const QString& frame)
+void Vizkit3DWidget::setVisualizationFrame(const QString& frame,bool update)
 {
     osgViewer::View *view = getView(0);
     assert(view);
@@ -562,15 +554,26 @@ void Vizkit3DWidget::setVisualizationFrame(const QString& frame)
     }
     current_frame = frame;
     view->home();
+
+    if(update)
+        emit propertyChanged("frame");
 }
 
 void Vizkit3DWidget::setTransformation(const QString &source_frame,const QString &target_frame,
         const QVector3D &position, const QQuaternion &quat)
 {
+    int count = getVisualizationFrames().size();
     TransformerGraph::setTransformation(*getRootNode(),source_frame.toStdString(),target_frame.toStdString(),
                                          osg::Quat(quat.x(),quat.y(),quat.z(),quat.scalar()),
                                          osg::Vec3d(position.x(),position.y(),position.z()));
 
+    if(count != getVisualizationFrames().size())
+    {
+        emit propertyChanged("frame");
+        PluginMap::iterator it = plugins.begin();
+        for(;it != plugins.end();++it)
+            it->first->setVisualizationFrame(it->first->getVisualizationFrame());
+    }
 }
 
 bool Vizkit3DWidget::isTransformer() const
@@ -580,6 +583,7 @@ bool Vizkit3DWidget::isTransformer() const
 
 void Vizkit3DWidget::setTransformer(bool value)
 {
+    emit propertyChanged("transformer");
     TransformerGraph::showFrameAnnotation(*getRootNode(),value);
 }
 

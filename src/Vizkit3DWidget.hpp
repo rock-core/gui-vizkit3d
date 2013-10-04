@@ -34,7 +34,6 @@ namespace vizkit3d
 
             bool isTransformer() const;
             void setTransformer(bool value);
-            void updateProperty(const QString &name);
     };
 
     class QDESIGNER_WIDGET_EXPORT Vizkit3DWidget : public QWidget, public osgViewer::CompositeViewer
@@ -60,7 +59,7 @@ namespace vizkit3d
             void removePlugin(QObject* plugin);
 
             ///The frame in which the data should be displayed
-            void setVisualizationFrame(const QString &frame);
+            void setVisualizationFrame(const QString &frame,bool update=true);
 
             QStringList getVisualizationFrames() const;
             QString getVisualizationFrame() const;

@@ -237,10 +237,18 @@ QString VizPluginBase::getVisualizationFrame() const
     return current_frame;
 }
 
+// same as setVisualizationFrame but is not emitting a signal because
+// this is called from the property browser
 void VizPluginBase::setVisualizationFrame(const QStringList &frames)
 {
-    if(!frames.isEmpty())
-        setVisualizationFrame(frames.front());
+    if(frames.isEmpty())
+        return;
+
+    Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
+    if(!parent)
+        return;
+    parent->setPluginDataFrameIntern(frames.front(),this);
+    current_frame = frames.front();
 }
 
 void VizPluginBase::setVisualizationFrame(const QString &frame)
