@@ -3,6 +3,10 @@
 #include <QComboBox>
 #include <QGroupBox>
 #include <QPlastiqueStyle>
+#include <QProcessEnvironment>
+#include <QPluginLoader>
+#include <QDir>
+#include <QRegExp>
 #include <algorithm>
 
 #include "Vizkit3DWidget.hpp"
@@ -99,14 +103,12 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent)
     QVBoxLayout* controlLayout = new QVBoxLayout;
     QVBoxLayout* layout = new QVBoxLayout;
     layout->setObjectName("main_layout");
+    layout->setContentsMargins(2,2,2,2);
     QSplitter* splitter = new QSplitter(Qt::Horizontal);
     splitter->setObjectName("splitter");
-    QWidget* controlWidget = new QWidget;
 
     layout->addWidget(splitter);
     this->setLayout(layout);
-    controlWidget->setLayout(controlLayout);
-    splitter->addWidget(controlWidget);
 
     // set threading model
     setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
@@ -127,8 +129,8 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent)
     QPropertyBrowserWidget *propertyBrowserWidget = new QPropertyBrowserWidget( parent );
     propertyBrowserWidget->setObjectName("PropertyBrowser");
     propertyBrowserWidget->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
-    controlLayout->addWidget(propertyBrowserWidget);
     propertyBrowserWidget->resize(200,600);
+    splitter->addWidget(propertyBrowserWidget);
 
     // add config object to the property browser
     Vizkit3DConfig *config =  new Vizkit3DConfig(this);
@@ -583,7 +585,139 @@ bool Vizkit3DWidget::isTransformer() const
 
 void Vizkit3DWidget::setTransformer(bool value)
 {
-    emit propertyChanged("transformer");
     TransformerGraph::showFrameAnnotation(*getRootNode(),value);
+    emit propertyChanged("transformer");
+}
+
+QString Vizkit3DWidget::findPluginPath(QString plugin_name)
+{
+    QStringList *list = getAvailablePlugins();
+    QStringList::iterator iter = list->begin();
+    for(;iter != list->end();++iter)
+    {
+        QStringList plugin = iter->split("@");
+        if(plugin.at(0) == plugin_name)
+            return plugin.at(1);
+    }
+    return QString();
+}
+
+QString Vizkit3DWidget::findLibPath(QString lib_name)
+{
+    QStringList *list = getAvailablePlugins();
+    QStringList::iterator iter = list->begin();
+    for(;iter != list->end();++iter)
+    {
+        QStringList plugin = iter->split("@");
+        QRegExp rx(".*lib"+lib_name+"-viz\\..{2,5}$");
+        if(0 <= rx.indexIn(plugin.at(1)))
+            return plugin.at(1);
+    }
+    return QString();
+}
+
+QObject* Vizkit3DWidget::loadLib(QString file_path)
+{
+    QPluginLoader loader(file_path);
+    loader.load();
+    if(!loader.isLoaded())
+        throw std::runtime_error("Cannot load " + file_path.toStdString() + ". Last error is :" + loader.errorString().toStdString());
+    QObject* plugin_instance = loader.instance();
+    if(!plugin_instance)
+        throw std::runtime_error("Cannot load " + file_path.toStdString() + ". Last error is :" + loader.errorString().toStdString());
+    return plugin_instance;
+}
+
+QStringList* Vizkit3DWidget::getAvailablePlugins()
+{
+    // qt ruby is crashing if not a pointer is returned
+    QStringList *plugins = new QStringList;
+
+    QStringList name_filters;
+    name_filters << "lib*-viz.so" << "lib*-viz.dylib" << "lib*-viz.dll";
+
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    QString path_string = env.value("VIZKIT_PLUGIN_RUBY_PATH","/usr/local/lib:/usr/lib");
+    QStringList paths = path_string.split(":");
+    QStringList::iterator iter = paths.begin();
+    for(;iter != paths.end();++iter)
+    {
+        QDir dir(*iter);
+        if(!dir.exists())
+            continue;
+        QStringList files = dir.entryList(name_filters,QDir::Files);
+        QStringList::iterator iter2 = files.begin();
+        for(;iter2 != files.end();++iter2)
+        {
+            QFileInfo::QFileInfo file_info(dir, *iter2);
+            try
+            {
+                QObject * qt_plugin = loadLib(file_info.absoluteFilePath());
+                VizkitPluginFactory *factory = dynamic_cast<VizkitPluginFactory*>(qt_plugin);
+                if(!factory)
+                    throw std::runtime_error((file_info.absoluteFilePath() + " is not a VizkitPluginFactory!").toStdString());
+                QStringList* lib_plugins  = factory->getAvailablePlugins();
+                QStringList::iterator iter3 = lib_plugins->begin();
+                for(;iter3 != lib_plugins->end();++iter3)
+                    *plugins << QString(*iter3 + "@" + file_info.absoluteFilePath());
+            }
+            catch(std::runtime_error e)
+            {
+                std::cerr << "WARN: cannot load vizkit plugin library " << e.what() << std::endl;
+            }
+        }
+    }
+    return plugins;
+}
+
+QObject* Vizkit3DWidget::loadPlugin(QString lib_name,QString plugin_name)
+{
+    //check if the plugin name is encoded into the lib_name
+    QStringList plugin_strings = lib_name.split("@");
+    if(plugin_strings.size() == 2)
+    {
+        lib_name = plugin_strings.at(0);
+        plugin_name = plugin_strings.at(1);
+    }
+
+    //if no lib_name is given try to find it from plugin_name
+    if(lib_name.isEmpty() && !plugin_name.isEmpty())
+        lib_name = findPluginPath(plugin_name);
+
+    //check if the lib name is a path
+    QFileInfo::QFileInfo file_info(lib_name);
+    QString path;
+    if(file_info.isFile())
+        path = file_info.absolutePath();
+    else
+        path = findLibPath(lib_name);
+
+    if(path.isEmpty())
+    {
+        std::cerr << "cannot find lib" + lib_name.toStdString()+"-viz in VIZKIT_PLUGIN_RUBY_PATH." << std::endl;
+        return NULL;
+    }
+
+    VizkitPluginFactory *lib= dynamic_cast<VizkitPluginFactory*>(loadLib(path));
+    if(plugin_name.isEmpty())
+    {
+        if(lib->getAvailablePlugins()->size() > 1)
+        {
+            std::cerr << lib_name.toStdString()+" defines multiple plugins (and you must select one explicitly)" << std::endl;
+            return NULL;
+        }
+        else
+            plugin_name = lib->getAvailablePlugins()->front();
+    }
+    QObject *plugin = lib->createPlugin(plugin_name);
+    if(plugin == NULL)
+    {
+        std::cerr << "library " << lib_name.toStdString() << " does not have any vizkit plugin called " << 
+                      plugin_name.toStdString() << ", available plugins are: " << 
+                      lib->getAvailablePlugins()->join(", ").toStdString() << std::endl;
+        return NULL;
+    }
+    addPlugin(plugin);
+    return plugin;
 }
 

@@ -85,6 +85,11 @@ namespace vizkit3d
             bool isTransformer() const;
             void setTransformer(bool value);
 
+            QString findPluginPath(QString plugin_name);
+            QString findLibPath(QString lib_name);
+            QObject* loadPlugin(QString lib_name,QString plugin_name);
+            QStringList* getAvailablePlugins();
+
         signals:
             void addPlugins(QObject* plugin,QObject* parent);
             void removePlugins(QObject* plugin);
@@ -104,6 +109,7 @@ namespace vizkit3d
         private:
             void changeCameraView(const osg::Vec3* lookAtPos, const osg::Vec3* eyePos, const osg::Vec3* upVector);
             void setPluginEnabled(QObject* plugin, bool enabled);
+            QObject* loadLib(QString file_path);
 
             void registerDataHandler(VizPluginBase *viz);
             void deregisterDataHandler(VizPluginBase *viz);
