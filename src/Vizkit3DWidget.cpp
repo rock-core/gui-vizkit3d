@@ -40,11 +40,7 @@ bool Vizkit3DConfig::isAxes() const
     Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
     if(!parent)
         return false;
-
-    osg::Node *node = FindNode::find(*parent->getRootNode(),"axes_node");
-    if(node && node->asSwitch())
-        return node->asSwitch()->getValue(0);
-    return false;
+    return parent->isAxes();
 }
 
 void Vizkit3DConfig::setAxes(bool value)
@@ -52,15 +48,7 @@ void Vizkit3DConfig::setAxes(bool value)
     Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
     if(!parent)
         return;
-
-    osg::Node *node = FindNode::find(*parent->getRootNode(),"axes_node");
-    if(node && node->asSwitch())
-    {
-        if(value)
-            node->asSwitch()->setAllChildrenOn();
-        else
-            node->asSwitch()->setAllChildrenOff();
-    }
+    parent->setAxes(value);
 }
 
 QStringList Vizkit3DConfig::getVisualizationFrames() const
@@ -68,7 +56,7 @@ QStringList Vizkit3DConfig::getVisualizationFrames() const
     Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
     if(!parent)
         return QStringList();
-    return parent->getVisualizationFrames();
+    return *parent->getVisualizationFrames();
 }
 
 void Vizkit3DConfig::setVisualizationFrame(const QStringList &frames)
@@ -235,6 +223,7 @@ void Vizkit3DWidget::setTrackedNode( VizPluginBase* plugin )
     assert(view);
     //TODO 
 }
+
 
 osg::Group *Vizkit3DWidget::createSceneGraph()
 {
@@ -565,12 +554,12 @@ void Vizkit3DWidget::setVisualizationFrame(const QString& frame,bool update)
 void Vizkit3DWidget::setTransformation(const QString &source_frame,const QString &target_frame,
         const QVector3D &position, const QQuaternion &quat)
 {
-    int count = getVisualizationFrames().size();
+    int count = getVisualizationFrames()->size();
     TransformerGraph::setTransformation(*getRootNode(),source_frame.toStdString(),target_frame.toStdString(),
                                          osg::Quat(quat.x(),quat.y(),quat.z(),quat.scalar()),
                                          osg::Vec3d(position.x(),position.y(),position.z()));
 
-    if(count != getVisualizationFrames().size())
+    if(count != getVisualizationFrames()->size())
     {
         emit propertyChanged("frame");
         PluginMap::iterator it = plugins.begin();
@@ -588,6 +577,27 @@ void Vizkit3DWidget::setTransformer(bool value)
 {
     TransformerGraph::showFrameAnnotation(*getRootNode(),value);
     emit propertyChanged("transformer");
+}
+
+bool Vizkit3DWidget::isAxes() const
+{
+    osg::Node *node = FindNode::find(*getRootNode(),"axes_node");
+    if(node && node->asSwitch())
+        return node->asSwitch()->getValue(0);
+    return false;
+}
+
+void Vizkit3DWidget::setAxes(bool value)
+{
+    osg::Node *node = FindNode::find(*getRootNode(),"axes_node");
+    if(node && node->asSwitch())
+    {
+        if(value)
+            node->asSwitch()->setAllChildrenOn();
+        else
+            node->asSwitch()->setAllChildrenOff();
+    }
+    emit propertyChanged("axes");
 }
 
 QString Vizkit3DWidget::findPluginPath(QString plugin_name)

@@ -85,6 +85,8 @@ namespace vizkit3d
 
             bool isTransformer() const;
             void setTransformer(bool value);
+            bool isAxes() const;
+            void setAxes(bool value);
 
             QString findPluginPath(QString plugin_name);
             QString findLibPath(QString lib_name);
