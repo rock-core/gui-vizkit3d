@@ -5,6 +5,7 @@
 #include <QPlastiqueStyle>
 #include <QProcessEnvironment>
 #include <QPluginLoader>
+#include <QFileInfo>
 #include <QDir>
 #include <QRegExp>
 #include <algorithm>
@@ -88,7 +89,6 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent)
 {
     //create layout
     //objects will be owned by the parent widget (this)
-    QVBoxLayout* controlLayout = new QVBoxLayout;
     QVBoxLayout* layout = new QVBoxLayout;
     layout->setObjectName("main_layout");
     layout->setContentsMargins(2,2,2,2);
@@ -660,7 +660,7 @@ QStringList* Vizkit3DWidget::getAvailablePlugins()
         QStringList::iterator iter2 = files.begin();
         for(;iter2 != files.end();++iter2)
         {
-            QFileInfo::QFileInfo file_info(dir, *iter2);
+            QFileInfo file_info(dir, *iter2);
             try
             {
                 QObject * qt_plugin = loadLib(file_info.absoluteFilePath());
@@ -696,7 +696,7 @@ QObject* Vizkit3DWidget::loadPlugin(QString lib_name,QString plugin_name)
         lib_name = findPluginPath(plugin_name);
 
     //check if the lib name is a path
-    QFileInfo::QFileInfo file_info(lib_name);
+    QFileInfo file_info(lib_name);
     QString path;
     if(file_info.isFile())
         path = file_info.absolutePath();
