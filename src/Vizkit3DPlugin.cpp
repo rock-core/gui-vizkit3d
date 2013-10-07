@@ -223,13 +223,13 @@ QStringList VizPluginBase::getVisualizationFrames() const
     Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
     if(!parent)
         return QStringList();
-    QStringList list = parent->getVisualizationFrames();
-    if(!current_frame.isEmpty() && !list.isEmpty())
+    QStringList *list = parent->getVisualizationFrames();
+    if(!current_frame.isEmpty() && !list->isEmpty())
     {
-        list.removeOne(current_frame);
-        list.prepend(current_frame);
+        list->removeOne(current_frame);
+        list->prepend(current_frame);
     }
-    return list;
+    return QStringList(*list);
 }
 
 QString VizPluginBase::getVisualizationFrame() const

@@ -61,7 +61,8 @@ namespace vizkit3d
             ///The frame in which the data should be displayed
             void setVisualizationFrame(const QString &frame,bool update=true);
 
-            QStringList getVisualizationFrames() const;
+            // we have to use a pointer here otherwise qt ruby is crashing
+            QStringList* getVisualizationFrames() const;
             QString getVisualizationFrame() const;
 
             /**

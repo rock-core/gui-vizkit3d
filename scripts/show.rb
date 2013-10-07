@@ -12,6 +12,9 @@ app = Qt::Application.new(ARGV)
 loader = Qt::UiLoader.new()
 widget = loader.createWidget("vizkit3d::Vizkit3DWidget")
 plugin = widget.loadPlugin("vizkit3d","GridVisualization")
+plugin2 = widget.loadPlugin("sfm","")
+
+
 widget.show
 
 pp widget.getAvailablePlugins

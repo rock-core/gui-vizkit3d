@@ -149,17 +149,18 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent)
 
 Vizkit3DWidget::~Vizkit3DWidget() {}
 
-QStringList Vizkit3DWidget::getVisualizationFrames() const
+//qt ruby is crashing if we use none pointer here
+QStringList* Vizkit3DWidget::getVisualizationFrames() const
 {
-    QStringList list;
+    QStringList *list = new QStringList;
     std::vector<std::string> std_list = TransformerGraph::getFrameNames(*getRootNode());
     std::vector<std::string>::iterator iter = std_list.begin();
     for(;iter != std_list.end();++iter)
-        list << QString(iter->c_str());
+       *list << QString(iter->c_str());
     if(!current_frame.isEmpty())
     {
-        list.removeOne(current_frame);
-        list.prepend(current_frame);
+        list->removeOne(current_frame);
+        list->prepend(current_frame);
     }
     return list;
 }
