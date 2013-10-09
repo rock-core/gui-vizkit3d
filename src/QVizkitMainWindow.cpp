@@ -8,6 +8,7 @@ QVizkitMainWindow::QVizkitMainWindow(QWidget* parent, Qt::WindowFlags flags)
 {
     vizKitWidget = new vizkit3d::Vizkit3DWidget(parent);
     this->setCentralWidget(vizKitWidget);
+    setObjectName("Vizkit3DMainWindow");
 }
 
 /**
