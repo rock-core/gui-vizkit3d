@@ -34,7 +34,7 @@ osg::PositionAttitudeTransform *getTransform(osg::Node *node,bool raise=true)
     return pos;
 }
 
-osg::PositionAttitudeTransform *createFrame(const std::string &name)
+osg::PositionAttitudeTransform *createFrame(const std::string &name,bool root=false)
 {
     osg::PositionAttitudeTransform* node = new osg::PositionAttitudeTransform();
     node->setName(name.c_str());
@@ -51,7 +51,10 @@ osg::PositionAttitudeTransform *createFrame(const std::string &name)
     osgText::Text *text= new osgText::Text;
     text->setText(name);
     text->setCharacterSize(0.1);
-    text->setPosition(osg::Vec3d(0.05,0.05,0));
+    if(root)
+        text->setPosition(osg::Vec3d(0.05,-0.15,0));
+    else
+        text->setPosition(osg::Vec3d(0.05,0.05,0));
     text_geode->addDrawable(text);
     switch_node->addChild(text_geode,true);
 
@@ -250,7 +253,7 @@ class NodeRemover: public ::osg::NodeVisitor
 
 osg::Node *TransformerGraph::create(const std::string &name)
 {
-    return createFrame(name);
+    return createFrame(name,true);
 }
 
 osg::Node* TransformerGraph::addFrame(osg::Node &transformer,const std::string &name)

@@ -527,6 +527,8 @@ void Vizkit3DWidget::setVisualizationFrame(const QString& frame,bool update)
 {
     osgViewer::View *view = getView(0);
     assert(view);
+    // the following is not working if the directly track the transformation 
+    // therefore use a child
     osg::Node *node = TransformerGraph::getFrameGroup(*getRootNode(),frame.toStdString());
     assert(node);
 
