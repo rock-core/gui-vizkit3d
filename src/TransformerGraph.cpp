@@ -339,14 +339,6 @@ bool TransformerGraph::removeFrame(osg::Node &transformer,const std::string &nam
     if(!parent_trans)
         return false;
 
-    osg::Group *group = ::getFrameGroup(trans);
-    osg::Group *parent_group = ::getFrameGroup(parent_trans);
-
-    // attach all custom nodes to the parent node
-    for(int i=0;i <(int)group->getNumChildren();++i)
-        parent_group->addChild(group->getChild(i));
-
-    group->removeChildren(0,group->getNumChildren());
     parent_trans->removeChild(trans);
     return true;
 }

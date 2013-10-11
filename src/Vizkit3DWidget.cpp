@@ -516,10 +516,14 @@ void Vizkit3DWidget::setPluginDataFrameIntern(const QString& frame, QObject* plu
     PluginMap::iterator it = plugins.find(viz);
     if (it != plugins.end())
     {
-        bool bok = it->second->removeChild(viz->getRootNode());
-        it->second = node;
-        if(bok)
-            it->second->addChild(viz->getRootNode());
+        if(viz->isPluginEnabled())
+        {
+            disableDataHandler(viz);
+            it->second = node;
+            enableDataHandler(viz);
+        }
+        else
+            it->second = node;
     }
 }
 
