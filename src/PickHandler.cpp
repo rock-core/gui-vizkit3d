@@ -83,7 +83,6 @@ void PickHandler::pick(const osgGA::GUIEventAdapter& ea, osgViewer::View* viewer
     osg::notify(osg::NOTICE)<<std::endl;
 
     osg::Node* node = 0;
-    osg::Group* parent = 0;
 
     if (_usePolytopeIntersector)
     {
@@ -129,7 +128,6 @@ void PickHandler::pick(const osgGA::GUIEventAdapter& ea, osgViewer::View* viewer
 		    */
 		const osg::NodePath& nodePath = intersection.nodePath;
 		node = (nodePath.size()>=1)?nodePath[nodePath.size()-1]:0;
-		parent = (nodePath.size()>=2)?dynamic_cast<osg::Group*>(nodePath[nodePath.size()-2]):0;
 
 		//osg::Matrixd l2w = osg::computeLocalToWorld( nodePath );
 		//osg::Vec3 global = *intersection.matrix.get() * intersection.localIntersectionPoint;
@@ -165,7 +163,6 @@ void PickHandler::pick(const osgGA::GUIEventAdapter& ea, osgViewer::View* viewer
  
 	    osg::NodePath& nodePath = intersection.nodePath;
 	    node = (nodePath.size()>=1)?nodePath[nodePath.size()-1]:0;
-	    parent = (nodePath.size()>=2)?dynamic_cast<osg::Group*>(nodePath[nodePath.size()-2]):0;
 
 	    // see if the object has a user object which is derived from pickcallback
 	    PickedCallback *pc = dynamic_cast<PickedCallback*>(node->getUserData());
