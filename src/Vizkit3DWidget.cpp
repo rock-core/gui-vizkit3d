@@ -558,8 +558,14 @@ void Vizkit3DWidget::setVisualizationFrame(const QString& frame,bool update)
 }
 
 void Vizkit3DWidget::setTransformation(const QString &source_frame,const QString &target_frame,
-        const QVector3D &position, const QQuaternion &quat)
+        const QVector3D &_position, const QQuaternion &_quat)
 {
+    // enforce length of 1
+    QQuaternion quat = _quat.normalized();
+    // enforce valid position
+    QVector3D position = _position;
+    if(isnan(position.x()) ||isnan(position.y()) || isnan(position.z()))
+        position = QVector3D();
     int count = getVisualizationFrames()->size();
     TransformerGraph::setTransformation(*getRootNode(),source_frame.toStdString(),target_frame.toStdString(),
                                          osg::Quat(quat.x(),quat.y(),quat.z(),quat.scalar()),

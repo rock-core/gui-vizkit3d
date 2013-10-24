@@ -299,15 +299,34 @@ std::string TransformerGraph::getFrameName(osg::Node &transformer,osg::Node *nod
 }
 
 bool TransformerGraph::setTransformation(osg::Node &transformer,const std::string &source_frame,const std::string target_frame,
-        const osg::Quat &quat, const osg::Vec3d &trans)
+        const osg::Quat &_quat, const osg::Vec3d &_trans)
 {
     osg::PositionAttitudeTransform *source = FindFrame::find(transformer,source_frame);
     osg::PositionAttitudeTransform *target = FindFrame::find(transformer,target_frame);
+    osg::Quat quat = _quat;
+    osg::Vec3d trans = _trans;
 
     if(!source)
         source = getTransform(addFrame(transformer,source_frame));
     if(!target)
         target = getTransform(addFrame(transformer,target_frame));
+
+    if(source == target)
+    {
+        std::cerr << "cannot set transformation between " << source_frame << " and " << target_frame << ". They are identically" << std::endl;
+        return false;
+    }
+
+    //someone tries to move the world which is not possible
+    //invert transformation
+    if(target == &transformer)
+    {
+        quat = quat.inverse();
+        trans = -trans;
+        osg::PositionAttitudeTransform *t = target;
+        target = source;
+        source = t;
+    }
 
     // if it is not the case attach target to the source node
     if(target->getParent(0) != source)
