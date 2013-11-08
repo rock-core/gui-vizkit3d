@@ -11,6 +11,7 @@ namespace vizkit3d
     class GridVisualization : public VizPluginBase
     {
         Q_OBJECT
+        Q_PROPERTY( bool show_coordinates READ areCoordinatesShown WRITE setShowCoordinates)
         Q_PROPERTY( int rows READ getGridRows WRITE setGridRows)
         Q_PROPERTY( int cols READ getGridCols WRITE setGridCols)
         Q_PROPERTY( double dx READ getGridDx WRITE setGridDx)
@@ -25,11 +26,13 @@ namespace vizkit3d
             GridVisualization(QObject *parent = NULL);
 
         public slots:
+            void setShowCoordinates(bool b);
             void setGridRows(int val);
             void setGridCols(int val);
             void setGridDx(double val);
             void setGridDy(double val);
             void setGridColor(QColor color);
+            bool areCoordinatesShown();
             int getGridRows();
             int getGridCols();
             double getGridDx();
@@ -45,6 +48,7 @@ namespace vizkit3d
             int grid_cols;
             double grid_dx;
             double grid_dy;
+            bool show_grid_coordinates;
     };
 }
 

@@ -2,10 +2,12 @@
 
 #include <osg/PositionAttitudeTransform>
 #include <osg/Point>
+#include <osgText/Text>
+#include <boost/lexical_cast.hpp>
 
 namespace vizkit3d
 {
-    ::osg::Node* GridNode::create(int rows,int cols,float dx, float dy,const ::osg::Vec4 &color)
+    ::osg::Node* GridNode::create(int rows,int cols,float dx, float dy, bool show_coordinates, const ::osg::Vec4 &color)
     {
         float size_x = cols*dx;
         float size_y = rows*dy;
@@ -40,6 +42,29 @@ namespace vizkit3d
             {
                 v->push_back( ::osg::Vec3(cos(x)*r, sin(x)*r, 0.01f) );
                 v->push_back( ::osg::Vec3(cos(x+xp)*r, sin(x+xp)*r, 0.01f) );
+            }
+        }
+
+        // draw coordinates
+        if(show_coordinates)
+        {
+            for(float x = - size_x*0.5f; x <= size_x*0.5f; x += dx)
+            {
+                for(float y = - size_y*0.5f; y <= size_y*0.5f; y += dy)
+                {
+                    osg::Geode *text_geode = new osg::Geode;
+                    osgText::Text *text= new osgText::Text;
+                    std::string label = "(";
+                    label += boost::lexical_cast<std::string>(x);
+                    label += ",";
+                    label += boost::lexical_cast<std::string>(y);
+                    label += ")";
+                    text->setText(label);
+                    text->setCharacterSize(interval * 0.1);
+                    text->setPosition(osg::Vec3d(x+0.02, y+0.05, 0.01f));
+                    text_geode->addDrawable(text);
+                    transform->addChild(text_geode);
+                }
             }
         }
 

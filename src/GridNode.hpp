@@ -19,7 +19,7 @@ namespace vizkit3d
               @param color The color of the grid
               @returns The root node of the created sub graph
               */
-            static ::osg::Node* create(int rows,int cols,float dx, float dy,const ::osg::Vec4 &color=::osg::Vec4());
+            static ::osg::Node* create(int rows,int cols,float dx, float dy, bool show_coordinates = false, const ::osg::Vec4 &color=::osg::Vec4());
     };
 }
 

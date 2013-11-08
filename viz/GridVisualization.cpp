@@ -9,7 +9,8 @@ namespace vizkit3d
             grid_rows(20),
             grid_cols(20),
             grid_dx(1),
-            grid_dy(1)
+            grid_dy(1),
+            show_grid_coordinates(false)
     {
         setDirty();
     }
@@ -26,10 +27,14 @@ namespace vizkit3d
                 1.0/255*grid_color.blue(),
                 1.0/255*grid_color.alpha());
 
-        ::osg::Node *grid= GridNode::create(grid_rows,grid_cols,grid_dx,grid_dy,color);
+        ::osg::Node *grid= GridNode::create(grid_rows, grid_cols, grid_dx, grid_dy, show_grid_coordinates, color);
         group->addChild(grid);
     }
 
+    bool GridVisualization::areCoordinatesShown()
+    {
+        return show_grid_coordinates;
+    }
     int GridVisualization::getGridRows()
     {
         return grid_rows;
@@ -53,6 +58,12 @@ namespace vizkit3d
     QColor GridVisualization::getGridColor()
     {
         return grid_color;
+    }
+
+    void GridVisualization::setShowCoordinates(bool b)
+    {
+        show_grid_coordinates = b;
+        setDirty();
     }
 
     void GridVisualization::setGridRows(int val)
