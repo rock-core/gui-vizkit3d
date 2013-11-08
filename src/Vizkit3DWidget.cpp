@@ -228,7 +228,7 @@ void Vizkit3DWidget::setTrackedNode( VizPluginBase* plugin )
 osg::Group *Vizkit3DWidget::createSceneGraph()
 {
     //create root node that holds all other nodes
-    osg::Group *root = TransformerGraph::create("world")->asGroup();
+    osg::Group *root = TransformerGraph::create("worldOpenScenGraph")->asGroup();
     assert(root);
 
     osg::ref_ptr<osg::StateSet> state = root->getOrCreateStateSet();
