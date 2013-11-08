@@ -13,6 +13,7 @@ rock_library(vizkit3d
         AxesNode.cpp
         OsgVisitors.cpp
         TransformerGraph.cpp
+        CoordinateFrame.cpp
         ${PROPERTY_BROWSER_RESOURCES} 
     MOC
         Vizkit3DPlugin.cpp 
@@ -41,6 +42,7 @@ rock_library(vizkit3d
         QVizkitMainWindow.hpp
         PickHandler.hpp
         ColorConversionHelper.hpp
+        CoordinateFrame.hpp
         ${HEADERS_EXTRA}
     LIBS ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY}
     DEPS_PKGCONFIG openscenegraph openscenegraph-osgQt ${DEPS_EXTRA})
