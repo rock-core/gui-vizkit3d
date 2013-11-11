@@ -6,6 +6,7 @@
 #include "../src/Vizkit3DWidget.hpp"
 #include "../src/QtThreadedWidget.hpp"
 #include <boost/test/unit_test.hpp>
+#include <iostream>
 
 BOOST_AUTO_TEST_SUITE(vizkit3d_test)
 
