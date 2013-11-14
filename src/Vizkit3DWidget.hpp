@@ -41,7 +41,7 @@ namespace vizkit3d
         Q_OBJECT
         public:
             friend class VizPluginBase;
-            Vizkit3DWidget( QWidget* parent = 0);
+            Vizkit3DWidget(QWidget* parent = 0,const QString &world_name = "world_osg");
 
             /** Defined to avoid unnecessary dependencies in the headers
              *
@@ -72,8 +72,12 @@ namespace vizkit3d
              * e.g. in case of the LaserScanVisualization 'laser'
              * */
             void setPluginDataFrame(const QString &frame, QObject *plugin);
+            QString getPluginDataFrame(QObject *plugin)const;
+
             void setTransformation(const QString &source_frame,const QString &target_frame,
                     const QVector3D &position, const QQuaternion &orientation);
+            void getTransformation(const QString &source_frame,const QString &target_frame, QVector3D &position, QQuaternion &orientation)const;
+            QString getWorldName()const;
 
             void setCameraLookAt(double x, double y, double z);
             void setCameraEye(double x, double y, double z);
@@ -118,7 +122,7 @@ namespace vizkit3d
             void deregisterDataHandler(VizPluginBase *viz);
             void enableDataHandler(VizPluginBase *viz);
             void disableDataHandler(VizPluginBase *viz);
-            osg::Group *createSceneGraph();
+            osg::Group *createSceneGraph(const QString &world_name);
 
             QWidget* addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node* scene );
             osgQt::GraphicsWindowQt* createGraphicsWindow( int x, int y, int w, int h, const std::string& name="", bool windowDecoration=false );

@@ -84,7 +84,7 @@ void Vizkit3DConfig::setTransformer(bool value)
     parent->setTransformer(value);
 }
 
-Vizkit3DWidget::Vizkit3DWidget( QWidget* parent)
+Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name)
     : QWidget(parent)
 {
     //create layout
@@ -105,7 +105,7 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent)
     setKeyEventSetsDone(0);
 
     // create root scene node
-    root = createSceneGraph();
+    root = createSceneGraph(world_name);
 
     // create osg widget
     QWidget* widget = addViewWidget(createGraphicsWindow(0,0,800,600), root);
@@ -225,10 +225,10 @@ void Vizkit3DWidget::setTrackedNode( VizPluginBase* plugin )
 }
 
 
-osg::Group *Vizkit3DWidget::createSceneGraph()
+osg::Group *Vizkit3DWidget::createSceneGraph(const QString &world_name)
 {
     //create root node that holds all other nodes
-    osg::Group *root = TransformerGraph::create("worldOpenScenGraph")->asGroup();
+    osg::Group *root = TransformerGraph::create(world_name.toStdString())->asGroup();
     assert(root);
 
     osg::ref_ptr<osg::StateSet> state = root->getOrCreateStateSet();
@@ -503,6 +503,14 @@ void Vizkit3DWidget::setPluginDataFrame(const QString& frame, QObject* plugin)
     viz->setVisualizationFrame(frame);
 }
 
+QString Vizkit3DWidget::getPluginDataFrame(QObject* plugin)const
+{
+    vizkit3d::VizPluginBase* viz= dynamic_cast<vizkit3d::VizPluginBase*>(plugin);
+    if(!viz)
+        throw std::runtime_error("setPluginDataFrame called with something that is not a vizkit3d plugin");
+    return viz->getVisualizationFrame();
+}
+
 // should be called from the plugin 
 void Vizkit3DWidget::setPluginDataFrameIntern(const QString& frame, QObject* plugin)
 {
@@ -578,6 +586,19 @@ void Vizkit3DWidget::setTransformation(const QString &source_frame,const QString
         for(;it != plugins.end();++it)
             it->first->setVisualizationFrame(it->first->getVisualizationFrame());
     }
+}
+
+void Vizkit3DWidget::getTransformation(const QString &source_frame,const QString &target_frame, QVector3D &position, QQuaternion &orientation)const
+{
+    osg::Quat quat; osg::Vec3d t;
+    TransformerGraph::getTransformation(*getRootNode(),source_frame.toStdString(),target_frame.toStdString(),quat,t);
+    position = QVector3D(t[0],t[1],t[2]);
+    orientation = QQuaternion(quat.w(),quat.x(),quat.y(),quat.z());
+}
+
+QString Vizkit3DWidget::getWorldName()const
+{
+    return QString(TransformerGraph::getWorldName(*getRootNode()).c_str());
 }
 
 bool Vizkit3DWidget::isTransformer() const

@@ -247,6 +247,26 @@ class NodeRemover: public ::osg::NodeVisitor
         ::osg::ref_ptr< ::osg::Node> node;
 };
 
+class WorldCoordOfNodeVisitor : public osg::NodeVisitor
+{
+public:
+    WorldCoordOfNodeVisitor():
+        osg::NodeVisitor(NodeVisitor::TRAVERSE_PARENTS){}
+
+    virtual void apply(osg::Node &node)
+    {
+        if ( 0 == node.getNumParents() ) // no parents
+            wcMatrix.set( osg::computeLocalToWorld(this->getNodePath()) );
+        traverse(node);
+    }
+    osg::Matrixd getMatrix()
+    {
+        return wcMatrix;
+    }
+private:
+   osg::Matrix wcMatrix;
+};
+
 
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
@@ -298,7 +318,42 @@ std::string TransformerGraph::getFrameName(osg::Node &transformer,osg::Node *nod
         return "";
 }
 
-bool TransformerGraph::setTransformation(osg::Node &transformer,const std::string &source_frame,const std::string target_frame,
+std::string TransformerGraph::getWorldName(const osg::Node &transformer)
+{
+    return std::string(transformer.getName());
+}
+
+bool TransformerGraph::getTransformation(osg::Node &transformer,const std::string &source_frame,const std::string &target_frame,
+                                         osg::Quat &_quat, osg::Vec3d &_trans)
+{
+    osg::PositionAttitudeTransform *source = FindFrame::find(transformer,source_frame);
+    osg::PositionAttitudeTransform *target = FindFrame::find(transformer,target_frame);
+    if(!source || !target)
+        return false;
+
+    if(source == target)
+    {
+        _quat = osg::Quat();
+        _trans = osg::Vec3d();
+    }
+    else
+    {
+        WorldCoordOfNodeVisitor visitor;
+        source->accept(visitor);
+        osg::Matrix mat1 = visitor.getMatrix();
+        target->accept(visitor);
+        osg::Matrix mat2 = visitor.getMatrix();
+        osg::Matrix mat1_inv;
+        mat1.inverse(mat1_inv);
+
+        osg::Vec3d scale;
+        osg::Quat so;
+        (mat1_inv*mat2).decompose(_trans,_quat,scale,so);
+    }
+    return true;
+}
+
+bool TransformerGraph::setTransformation(osg::Node &transformer,const std::string &source_frame,const std::string &target_frame,
         const osg::Quat &_quat, const osg::Vec3d &_trans)
 {
     osg::PositionAttitudeTransform *source = FindFrame::find(transformer,source_frame);

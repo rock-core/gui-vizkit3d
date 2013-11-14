@@ -28,6 +28,12 @@ namespace vizkit3d
          */
         static osg::Node *create(const std::string &name);
 
+
+        /**
+         * Returns the name of the wold (root) frame.
+         */
+        static std::string getWorldName(const osg::Node &transformer);
+
         /**
          * Adds a new coordinate frame to the graph. Use setTranformation to
          * change its location in the graph.
@@ -80,7 +86,7 @@ namespace vizkit3d
         static std::string getFrameName(osg::Node &transformer,osg::Node *node);
 
         /**
-         * Sets the transformation between two coordinate frames.
+         * Sets the transformation between two subsequently coordinate frames.
          *
          * @param transformer The osg node of the transformer graph
          * @param source_frame The name of the source coordinate frame
@@ -88,8 +94,20 @@ namespace vizkit3d
          * @param quat The rotation between source and target frame
          * @param trans The translation between source and target frame
          */
-        static bool setTransformation(osg::Node &transformer,const std::string &source_frame,const std::string target_frame,
+        static bool setTransformation(osg::Node &transformer,const std::string &source_frame,const std::string &target_frame,
                                       const osg::Quat &quat, const osg::Vec3d &trans);
+
+        /**
+         * Gets the transformation between two coordinate frames. Thereby unlike setTransformation the frames do not have to be subsequently.
+         *
+         * @param transformer The osg node of the transformer graph
+         * @param source_frame The name of the source coordinate frame
+         * @param target_frame The name of the target coordinate frame
+         * @param quat The rotation between source and target frame
+         * @param trans The translation between source and target frame
+         */
+        static bool getTransformation(osg::Node &transformer,const std::string &source_frame,const std::string &target_frame,
+                                      osg::Quat &quat, osg::Vec3d &trans);
 
         /**
          * Removes the osg node for the given frame name. Returns false if the frame
