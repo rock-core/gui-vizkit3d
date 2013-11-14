@@ -1,4 +1,4 @@
-rock_find_qt4()
+rock_find_qt4(QtOpenGL)
 include(RockRuby)
 
 rock_find_cmake(Boost REQUIRED COMPONENTS thread system)
