@@ -88,7 +88,9 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
             if(prop.type() == QVariant::StringList)
             {
                 QtVariantProperty* property = variantManager->addProperty(QtVariantPropertyManager::enumTypeId(),prop.name());
-                property->setValue(var.toStringList().front());
+                QStringList string_list = var.toStringList();
+                if(!string_list.empty())
+                    property->setValue(string_list.front());
                 property->setAttribute("enumNames",var);
                 properties.push_back(property);
             }
