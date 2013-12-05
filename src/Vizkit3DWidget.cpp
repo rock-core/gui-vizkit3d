@@ -158,6 +158,39 @@ QString Vizkit3DWidget::getVisualizationFrame() const
     return current_frame;
 }
 
+void Vizkit3DWidget::enableGrabbing()
+{
+    grabImage = new osg::Image;
+    getView(0)->getCamera()->attach(osg::Camera::COLOR_BUFFER, grabImage);
+    // We do it once here, as the image format is not set properly on first
+    // frame (we get RGBA on the first frame)
+    osg::Viewport* view = getView(0)->getCamera()->getViewport();
+    grabImage->readPixels(view->x(), view->y(), view->width(), view->height(), GL_BGRA, GL_UNSIGNED_BYTE);
+}
+
+void Vizkit3DWidget::disableGrabbing()
+{
+    getView(0)->getCamera()->detach(osg::Camera::COLOR_BUFFER);
+    grabImage.release();
+}
+
+QImage Vizkit3DWidget::grab()
+{
+    if (!grabImage)
+    {
+        qWarning("you must call enableGrabbing() before grab()");
+        return QImage();
+    }
+
+    frame();
+
+    osg::Viewport* view = getView(0)->getCamera()->getViewport();
+    grabImage->readPixels(view->x(), view->y(), view->width(), view->height(), GL_BGRA, GL_UNSIGNED_BYTE);
+    grabImage->flipVertical();
+
+    return QImage(grabImage->data(), view->width(), view->height(), QImage::Format_ARGB32);
+};
+
 QWidget* Vizkit3DWidget::addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node* scene )
 {
     osgViewer::View* view = new osgViewer::View;

@@ -92,6 +92,24 @@ namespace vizkit3d
             bool isAxes() const;
             void setAxes(bool value);
 
+            /** Enables grabbing
+             *
+             * Must be called before grab()
+             */
+            void enableGrabbing();
+            /** Disables grabbing
+             *
+             * You will have to call enableGrabbing() again before you can use
+             * grab()
+             */
+            void disableGrabbing();
+            /** Captures the current state of the 3D view
+             *
+             * You must call enableGrabbing() first. Will return an empty image
+             * if you did not do so.
+             */
+            QImage grab();
+
             QString findPluginPath(QString plugin_name);
             QString findLibPath(QString lib_name);
             QObject* loadPlugin(QString lib_name,QString plugin_name);
@@ -139,6 +157,8 @@ namespace vizkit3d
 
             QTimer _timer;
             QString current_frame;
+
+            osg::ref_ptr<osg::Image> grabImage;
     };
 }
 #endif
