@@ -160,6 +160,9 @@ QString Vizkit3DWidget::getVisualizationFrame() const
 
 void Vizkit3DWidget::enableGrabbing()
 {
+    if (grabImage)
+        return; // already enabled
+
     grabImage = new osg::Image;
     getView(0)->getCamera()->attach(osg::Camera::COLOR_BUFFER, grabImage);
     // We do it once here, as the image format is not set properly on first
