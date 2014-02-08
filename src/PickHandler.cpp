@@ -22,13 +22,80 @@ PickHandler::PickHandler():
 
 PickHandler::~PickHandler() {}
 
+bool PickHandler::addFunction(int whatKey, functionType newFunction)
+{
+   if ( keyFuncMap.end() != keyFuncMap.find( whatKey ))
+   {
+      std::cout << "duplicate key '" << whatKey << "' ignored." << std::endl;
+      return false;
+   }
+   else
+   {
+      keyFuncMap[whatKey].keyFunction = newFunction;
+      return true;
+   }
+}
+
+bool PickHandler::addFunction (int whatKey, keyStatusType keyPressStatus, functionType newFunction)
+{
+   if (keyPressStatus == KEY_DOWN)
+   {
+      return addFunction(whatKey,newFunction);
+   }
+   else
+   {
+      if ( keyUPFuncMap.end() != keyUPFuncMap.find( whatKey )) 
+      {
+         std::cout << "duplicate key '" << whatKey << "' ignored." << std::endl;
+         return false;
+      }
+      else
+      {
+         keyUPFuncMap[whatKey].keyFunction = newFunction;
+         return true;
+      }
+   } // KEY_UP
+}
+
 bool PickHandler::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa)
 {
     osgViewer::View* viewer = dynamic_cast<osgViewer::View*>(&aa);
     if (!viewer) return false;
 
+    bool newKeyDownEvent = false;
+
     switch(ea.getEventType())
     {
+        case(osgGA::GUIEventAdapter::KEYDOWN):
+            {
+                if (ea.getKey()=='w')
+		{
+                    this->wireFrameModeOn(viewer->getSceneData());
+		}
+                else if (ea.getKey()=='n')
+		{
+                    this->wireFrameModeOff(viewer->getSceneData());
+		}
+                else
+                {
+                    keyFunctionMap::iterator itr = keyFuncMap.find(ea.getKey());
+                    if (itr != keyFuncMap.end())
+                    {
+                        if ( (*itr).second.keyState == KEY_UP )
+                        {
+                            (*itr).second.keyState = KEY_DOWN;
+                            newKeyDownEvent = true;
+                        }
+                        if (newKeyDownEvent)
+                        {
+                            (*itr).second.keyFunction();
+                            newKeyDownEvent = false;
+                        }
+                        return true;
+                    }
+                }
+                return false;
+            }
 	case(osgGA::GUIEventAdapter::KEYUP):
 	    {
 		if (ea.getKey()=='p')
@@ -51,6 +118,22 @@ bool PickHandler::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 			osg::notify(osg::NOTICE)<<"Using projection coordiates for picking"<<std::endl;
 		    }
 		}
+                else
+                {
+                    keyFunctionMap::iterator itr = keyFuncMap.find(ea.getKey());
+                    if (itr != keyFuncMap.end() )
+                    {
+                        (*itr).second.keyState = KEY_UP;
+                    }
+
+                    itr = keyUPFuncMap.find(ea.getKey());
+                    if (itr != keyUPFuncMap.end())
+                    {
+                        (*itr).second.keyFunction();
+                        return true;
+                    }
+                }
+
 		return false;
 	    }
 	case(osgGA::GUIEventAdapter::PUSH):
@@ -68,7 +151,7 @@ bool PickHandler::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 		    pick(ea,viewer);
 		}
 		return false;
-	    }    
+            }
 
 	default:
 	    return false;
@@ -206,5 +289,54 @@ void PickHandler::setTrackedNode(osgViewer::View* viewer, osg::ref_ptr< osg::Nod
     tracker->setTrackerMode( osgGA::NodeTrackerManipulator::NODE_CENTER );
     tracker->setTrackNode( node );
     }
+}
+
+void PickHandler::wireFrameModeOn(osg::Node *srcNode)
+{
+    //Quick sanity check , we need a node
+    if( srcNode == NULL )
+        return;
+
+    //Grab the state set of the node, this  will a StateSet if one does not exist
+    osg::StateSet *state = srcNode->getOrCreateStateSet();
+
+    //We need to retrieve the Polygon mode of the  state set, and create one if does not have one
+    osg::PolygonMode *polyModeObj;
+
+    polyModeObj = dynamic_cast< osg::PolygonMode* >( state->getAttribute( osg::StateAttribute::POLYGONMODE ));
+
+    if ( !polyModeObj )
+    {
+        polyModeObj = new osg::PolygonMode;
+        state->setAttribute( polyModeObj );
+    }
+
+    //Now we can set the state to WIREFRAME
+    polyModeObj->setMode(  osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE );
+
+}
+
+void PickHandler::wireFrameModeOff(osg::Node *srcNode)
+{
+    //Quick sanity check , we need a node
+    if( srcNode == NULL )
+        return;
+
+    //Grab the state set of the node, this  will a StateSet if one does not exist
+    osg::StateSet *state = srcNode->getOrCreateStateSet();
+
+    //We need to retrieve the Polygon mode of the  state set, and create one if does not have one
+    osg::PolygonMode *polyModeObj;
+
+    polyModeObj = dynamic_cast< osg::PolygonMode* >( state->getAttribute( osg::StateAttribute::POLYGONMODE ));
+
+    if ( !polyModeObj )
+    {
+        polyModeObj = new osg::PolygonMode;
+        state->setAttribute( polyModeObj );
+    }
+
+    //Now we can set the state to FILL
+    polyModeObj->setMode(  osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL );
 }
 
