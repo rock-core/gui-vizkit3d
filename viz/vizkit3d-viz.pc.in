@@ -3,10 +3,10 @@ exec_prefix=@CMAKE_INSTALL_PREFIX@
 libdir=${prefix}/lib
 includedir=${prefix}/include
 
-Name: @PROJECT_NAME@-base-viz
+Name: @PROJECT_NAME@-viz
 Description: Vizkit3D plugins from Vizkit itself
 Version: @PROJECT_VERSION@
 Requires: vizkit3d
-Libs: -L${libdir} -l@PROJECT_NAME@-base-viz
+Libs: -L${libdir} -l@PROJECT_NAME@-viz
 Cflags: -I${includedir}
 
