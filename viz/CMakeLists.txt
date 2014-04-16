@@ -1,6 +1,6 @@
 rock_vizkit_plugin(vizkit3d-viz
     PluginLoader.cpp
-    MOC GridVisualization.cpp
+    MOC GridVisualization.cpp TextureBoxVisualization.cpp
     DEPS vizkit3d
-    HEADERS GridVisualization.hpp
+    HEADERS GridVisualization.hpp TextureBoxVisualization.hpp
 )

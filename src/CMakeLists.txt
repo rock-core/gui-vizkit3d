@@ -10,6 +10,7 @@ rock_library(vizkit3d
         NodeLink.cpp
         ColorConversionHelper.cpp
         GridNode.cpp
+        TextureBox.cpp
         AxesNode.cpp
         OsgVisitors.cpp
         TransformerGraph.cpp
@@ -33,6 +34,7 @@ rock_library(vizkit3d
     HEADERS
         TransformerGraph.hpp
         GridNode.hpp
+        TextureBox.hpp
         NodeLink.hpp
         AxesNode.hpp
         OsgVisitors.hpp

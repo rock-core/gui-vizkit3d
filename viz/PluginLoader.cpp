@@ -1,5 +1,6 @@
 #include "../src/Vizkit3DPlugin.hpp"
 #include "GridVisualization.hpp"
+#include "TextureBoxVisualization.hpp"
 
 namespace vizkit3d {
     class QtPluginVizkit : public vizkit3d::VizkitPluginFactory {
@@ -17,6 +18,7 @@ namespace vizkit3d {
 	{
 	    QStringList *pluginNames = new QStringList();
 	    pluginNames->push_back("GridVisualization");
+	    pluginNames->push_back("TextureBoxVisualization");
 	    return pluginNames;
 	}
 	
@@ -25,6 +27,8 @@ namespace vizkit3d {
 	    vizkit3d::VizPluginBase* plugin = 0;
 	    if (pluginName == "GridVisualization")
 	        plugin = new vizkit3d::GridVisualization();
+	    if (pluginName == "TextureBoxVisualization")
+	        plugin = new vizkit3d::TextureBoxVisualization();
 
 	    return plugin;
         };
