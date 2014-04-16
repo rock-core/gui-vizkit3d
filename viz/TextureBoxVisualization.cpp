@@ -11,6 +11,7 @@ namespace vizkit3d
             texbox_sy(10),
             texbox_filename("scene.png")
     {
+        this->setPluginEnabled(false);
         setDirty();
     }
 
