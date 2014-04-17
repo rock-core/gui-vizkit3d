@@ -14,11 +14,13 @@ namespace vizkit3d
 
               @param px the origin of the box (x)
               @param py the origin of the box (y) 
+              @param pz the origin of the box (z) 
               @param sx The size of the box in x direction
               @param sy The size of the box in y direction
+              @param filename The filename of the texture to be loaded
               @returns The root node of the created sub graph
               */
-            static ::osg::Node* create(float px, float py, float sx, float sy,  std::string filename="scene.png");
+            static ::osg::Node* create(float px, float py, float pz, float sx, float sy,  std::string filename="scene.png");
     };
 }
 

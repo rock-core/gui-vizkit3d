@@ -9,7 +9,7 @@
 
 namespace vizkit3d
 {
-    ::osg::Node* TextureBox::create(float px, float py, float sx, float sy, std::string filename)
+    ::osg::Node* TextureBox::create(float px, float py, float pz, float sx, float sy, std::string filename)
     {
         ::osg::PositionAttitudeTransform *transform = new ::osg::PositionAttitudeTransform();
         ::osg::Geode *geode = new ::osg::Geode;
@@ -20,10 +20,10 @@ namespace vizkit3d
         geom->setVertexArray(v);
 
         // create the box
-        v->push_back( ::osg::Vec3(px, py, 0.01f));
-        v->push_back( ::osg::Vec3(px + sx, py, 0.01f));
-        v->push_back( ::osg::Vec3(px, py + sy, 0.01f));
-        v->push_back( ::osg::Vec3(px + sx, py + sy, 0.01f));
+        v->push_back( ::osg::Vec3(px, py, pz + 0.01f));
+        v->push_back( ::osg::Vec3(px + sx, py, pz + 0.01f));
+        v->push_back( ::osg::Vec3(px, py + sy, pz + 0.01f));
+        v->push_back( ::osg::Vec3(px + sx, py + sy, pz + 0.01f));
 
         // Draw a four-vertex quad from the stored data.
         geom->addPrimitiveSet(new ::osg::DrawArrays(::osg::PrimitiveSet::TRIANGLE_STRIP,0,v->size()));

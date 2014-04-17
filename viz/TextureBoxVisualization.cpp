@@ -7,6 +7,7 @@ namespace vizkit3d
         vizkit3d::VizPluginBase(parent),
             texbox_px(0),
             texbox_py(0),
+            texbox_pz(0),
             texbox_sx(10),
             texbox_sy(10),
             texbox_filename("scene.png")
@@ -24,14 +25,12 @@ namespace vizkit3d
         group->removeChildren(0,group->getNumChildren());
 
         std::string utf8_filename = texbox_filename.toUtf8().constData();
-        ::osg::Node *texbox= TextureBox::create(texbox_px, texbox_py, texbox_sx, texbox_sy, utf8_filename);
+        ::osg::Node *texbox= TextureBox::create(texbox_px, texbox_py, texbox_pz, texbox_sx, texbox_sy, utf8_filename);
         group->addChild(texbox);
     }
 
     void TextureBoxVisualization::setTexBoxPx(double val)
     {
-        if(val <= 0)
-            return;
         texbox_px=val;
         setDirty();
     }
@@ -43,8 +42,6 @@ namespace vizkit3d
 
     void TextureBoxVisualization::setTexBoxPy(double val)
     {
-        if(val <= 0)
-            return;
         texbox_py=val;
         setDirty();
     }
@@ -52,6 +49,17 @@ namespace vizkit3d
     double TextureBoxVisualization::getTexBoxPy()
     {
         return texbox_py;
+    }
+
+    void TextureBoxVisualization::setTexBoxPz(double val)
+    {
+        texbox_pz=val;
+        setDirty();
+    }
+
+    double TextureBoxVisualization::getTexBoxPz()
+    {
+        return texbox_pz;
     }
 
     void TextureBoxVisualization::setTexBoxSx(double val)

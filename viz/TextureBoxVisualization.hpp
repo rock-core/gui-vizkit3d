@@ -13,6 +13,7 @@ namespace vizkit3d
         Q_OBJECT
         Q_PROPERTY( double px READ getTexBoxPx WRITE setTexBoxPx)
         Q_PROPERTY( double py READ getTexBoxPy WRITE setTexBoxPy)
+        Q_PROPERTY( double pz READ getTexBoxPz WRITE setTexBoxPz)
         Q_PROPERTY( double sx READ getTexBoxSx WRITE setTexBoxSx)
         Q_PROPERTY( double sy READ getTexBoxSy WRITE setTexBoxSy)
         Q_PROPERTY( QString filename READ getTexBoxFilename WRITE setTexBoxFilename)
@@ -29,6 +30,8 @@ namespace vizkit3d
             double getTexBoxPx();
             void setTexBoxPy(double val);
             double getTexBoxPy();
+            void setTexBoxPz(double val);
+            double getTexBoxPz();
 
             void setTexBoxSx(double val);
             double getTexBoxSx();
@@ -43,6 +46,7 @@ namespace vizkit3d
         private:
             double texbox_px;
             double texbox_py;
+            double texbox_pz;
             double texbox_sx;
             double texbox_sy;
             QString texbox_filename;
