@@ -422,14 +422,15 @@ void Vizkit3DWidget::changeCameraView(const osg::Vec3* lookAtPos, const osg::Vec
     osgViewer::View *view = getView(0);
     assert(view);
 
-    osgGA::KeySwitchMatrixManipulator* switchMatrixManipulator = dynamic_cast<osgGA::KeySwitchMatrixManipulator*>(view->getCameraManipulator());
-    if (!switchMatrixManipulator) return;
+
+    osgGA::TerrainManipulator* manipulator = dynamic_cast<osgGA::TerrainManipulator*>(view->getCameraManipulator());
+    if (!manipulator) return;
     //select TerrainManipulator
     //switchMatrixManipulator->selectMatrixManipulator(3); //why this switch was needed here?, each manipulator should be able  to do the folliowing steps
 
     //get last values of eye, center and up
     osg::Vec3d eye, center, up;
-    switchMatrixManipulator->getHomePosition(eye, center, up);
+    manipulator->getHomePosition(eye, center, up);
 
     if (lookAtPos)
         center = *lookAtPos;
@@ -439,7 +440,7 @@ void Vizkit3DWidget::changeCameraView(const osg::Vec3* lookAtPos, const osg::Vec
         up = *upVector;
 
     //set new values
-    switchMatrixManipulator->setHomePosition(eye, center, up);
+    manipulator->setHomePosition(eye, center, up);
     view->home();
 }
 
