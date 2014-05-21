@@ -7,9 +7,10 @@
     <copyright>
 	DFKI/robotik@dfki.de
     </copyright>
-    <rosdep name="osg" />
-    <rosdep name="qt4" />
-    <rosdep name="boost" />
-    <rosdep name="base/cmake" />
-    <!--    <rosdep name="qt-designer" /> !-->
+    <depend package="osg" />
+    <depend package="qt4" />
+    <depend package="qt4-opengl" />
+    <depend package="boost" />
+    <depend package="base/cmake" />
+    <!--    <depend package="qt-designer" /> !-->
 </package>
