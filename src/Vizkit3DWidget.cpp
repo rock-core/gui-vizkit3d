@@ -294,8 +294,8 @@ osg::Group *Vizkit3DWidget::createSceneGraph(const QString &world_name)
             break;
         case 1:
             light->setAmbient( osg::Vec4( .1f, .1f, .1f, 1.f ));
-            light->setDiffuse( osg::Vec4( .1f, .3f, .1f, 1.f ));
-            light->setSpecular( osg::Vec4( .1f, .3f, .1f, 1.f ));
+            light->setDiffuse( osg::Vec4( .3f, .3f, .3f, 1.f ));
+            light->setSpecular( osg::Vec4( .3f, .3f, .3f, 1.f ));
             light->setPosition( osg::Vec4( -1.f, -3.f, 1.f, 0.f ));
         }
 
