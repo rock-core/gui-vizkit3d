@@ -84,6 +84,23 @@ void Vizkit3DConfig::setTransformer(bool value)
     parent->setTransformer(value);
 }
 
+QColor Vizkit3DConfig::getBackgroundColor() const
+{
+    Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
+    if(!parent)
+        return QColor();
+    return parent->getBackgroundColor();
+}
+
+void Vizkit3DConfig::setBackgroundColor(QColor color)
+{
+    Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
+    if(!parent)
+        return;
+    return parent->setBackgroundColor(color);
+}
+
+
 Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name)
     : QWidget(parent)
 {
@@ -442,6 +459,21 @@ void Vizkit3DWidget::changeCameraView(const osg::Vec3* lookAtPos, const osg::Vec
     //set new values
     manipulator->setHomePosition(eye, center, up);
     view->home();
+}
+
+QColor Vizkit3DWidget::getBackgroundColor()const
+{
+    const osgViewer::View *view = getView(0);
+    assert(view);
+    osg::Vec4 color = view->getCamera()->getClearColor();
+    return QColor(color.r()*255,color.g()*255,color.b()*255,color.a()*255);
+}
+
+void Vizkit3DWidget::setBackgroundColor(QColor color)
+{
+    osgViewer::View *view = getView(0);
+    assert(view);
+    view->getCamera()->setClearColor(::osg::Vec4(color.red()/255.0,color.green()/255.0,color.blue()/255.0,1.0));
 }
 
 /**

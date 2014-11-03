@@ -18,6 +18,7 @@ namespace vizkit3d
         Q_PROPERTY( bool axes READ isAxes WRITE setAxes)
         Q_PROPERTY( bool transformer READ isTransformer WRITE setTransformer)
         Q_PROPERTY( QStringList frame READ getVisualizationFrames WRITE setVisualizationFrame)
+        Q_PROPERTY( QColor background READ getBackgroundColor WRITE setBackgroundColor)
 
         public:
             Vizkit3DConfig(QObject *parent);
@@ -34,6 +35,9 @@ namespace vizkit3d
 
             bool isTransformer() const;
             void setTransformer(bool value);
+
+            QColor getBackgroundColor()const;
+            void setBackgroundColor(QColor color);
     };
 
     class QDESIGNER_WIDGET_EXPORT Vizkit3DWidget : public QWidget, public osgViewer::CompositeViewer
@@ -83,6 +87,9 @@ namespace vizkit3d
             void setCameraEye(double x, double y, double z);
             void setCameraUp(double x, double y, double z);
             void getCameraView(QVector3D& eye, QVector3D& lookAt, QVector3D& up);
+
+            QColor getBackgroundColor()const;
+            void setBackgroundColor(QColor color);
 
             void collapsePropertyBrowser();
             QWidget* getPropertyWidget()const;
