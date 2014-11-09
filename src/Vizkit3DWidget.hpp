@@ -16,9 +16,10 @@ namespace vizkit3d
     {
         Q_OBJECT
         Q_PROPERTY( bool axes READ isAxes WRITE setAxes)
-        Q_PROPERTY( bool transformer READ isTransformer WRITE setTransformer)
-        Q_PROPERTY( QStringList frame READ getVisualizationFrames WRITE setVisualizationFrame)
+        Q_PROPERTY( bool axes_labels READ isAxesLabels WRITE setAxesLabels)
         Q_PROPERTY( QColor background READ getBackgroundColor WRITE setBackgroundColor)
+        Q_PROPERTY( QStringList frame READ getVisualizationFrames WRITE setVisualizationFrame)
+        Q_PROPERTY( bool transformer READ isTransformer WRITE setTransformer)
 
         public:
             Vizkit3DConfig(QObject *parent);
@@ -30,6 +31,8 @@ namespace vizkit3d
             bool isAxes() const;
             void setAxes(bool value);
 
+            bool isAxesLabels() const;
+            void setAxesLabels(bool value);
             QStringList getVisualizationFrames() const;
             void setVisualizationFrame(const QStringList &frames);
 
@@ -99,6 +102,8 @@ namespace vizkit3d
             bool isAxes() const;
             void setAxes(bool value);
 
+            bool isAxesLabels() const;
+            void setAxesLabels(bool value);
             /** Enables grabbing
              *
              * Must be called before grab()

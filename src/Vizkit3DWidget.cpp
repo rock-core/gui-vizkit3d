@@ -100,6 +100,21 @@ void Vizkit3DConfig::setBackgroundColor(QColor color)
     return parent->setBackgroundColor(color);
 }
 
+void Vizkit3DConfig::setAxesLabels(bool value)
+{
+    Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
+    if(!parent)
+        return;
+    parent->setAxesLabels(value);
+}
+
+bool Vizkit3DConfig::isAxesLabels() const
+{
+    Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
+    if(!parent)
+        return false;
+    return parent->isAxesLabels();
+}
 
 Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name)
     : QWidget(parent)
@@ -679,6 +694,28 @@ void Vizkit3DWidget::setTransformer(bool value)
 {
     TransformerGraph::showFrameAnnotation(*getRootNode(),value);
     emit propertyChanged("transformer");
+}
+
+void Vizkit3DWidget::setAxesLabels(bool value)
+{
+    osg::Node *node = FindNode::find(*getRootNode(),"axes_node");
+    if(!node)
+        return;
+    osg::Switch *switch_node = node->asSwitch();
+    if(switch_node)
+        AxesNode::displayLabels(switch_node->getChild(0),value);
+}
+
+
+bool Vizkit3DWidget::isAxesLabels() const
+{
+    osg::Node *node = FindNode::find(*getRootNode(),"axes_node");
+    if(!node)
+        return false;
+    osg::Switch *switch_node = node->asSwitch();
+    if(switch_node)
+        return AxesNode::hasLabels(switch_node->getChild(0));
+    return false;
 }
 
 bool Vizkit3DWidget::isAxes() const
