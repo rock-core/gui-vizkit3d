@@ -1,17 +1,14 @@
 #ifndef __VIZKIT3D_VIZPLUGIN_HPP__
 #define __VIZKIT3D_VIZPLUGIN_HPP__
 
+#include <QtCore>
+#include <QtGui>
+
 #include <osg/NodeCallback>
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
 
 #include <boost/thread/mutex.hpp>
-#include <qobject.h>
-#include <QDockWidget>
-#include <QVariant>
-#include <QtPlugin>
-#include <QVector3D>
-#include <QQuaternion>
 
 namespace vizkit3d
 {
@@ -116,7 +113,8 @@ class VizPluginBase : public QObject
     Q_PROPERTY(bool enabled READ isPluginEnabled WRITE setPluginEnabled)
     Q_PROPERTY(bool KeepOldData READ isKeepOldDataEnabled WRITE setKeepOldData)
     Q_PROPERTY(int MaxOldData READ getMaxOldData WRITE setMaxOldData)
-    Q_PROPERTY( QStringList frame READ getVisualizationFrames WRITE setVisualizationFrame)
+    Q_PROPERTY(QStringList frame READ getVisualizationFrames WRITE setVisualizationFrame)
+    Q_PROPERTY(double scale READ getScale WRITE setScale)
 
     public:
         VizPluginBase(QObject *parent=NULL);
@@ -188,6 +186,17 @@ class VizPluginBase : public QObject
         QString getVisualizationFrame() const;
         void setVisualizationFrame(const QStringList &frames);
         void setVisualizationFrame(const QString &frame);
+
+       /**
+        * Returns the scale of the plugin (1.0 by default)
+        */
+        double getScale() const;
+
+       /**
+        * Sets the scale of the plugin (1.0 by default)
+        */
+        void setScale(double scale);
+
     signals:
        /**
         * must be emitted if a property of an inherited plugin changes
@@ -209,6 +218,7 @@ class VizPluginBase : public QObject
         * That is the container widget of the OSG viewer and the property browser.
         */
         void clicked(float x, float y);
+
 
     protected:
 	/** override this function to update the visualisation.

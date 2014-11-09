@@ -49,6 +49,17 @@ osg::ref_ptr<osg::Group> VizPluginBase::getVizNode() const
     return vizNode;
 }
 
+void VizPluginBase::setScale(double scale)
+{
+    vizNode->setScale(osg::Vec3d(scale,scale,scale));
+}
+
+double VizPluginBase::getScale() const
+{
+    osg::Vec3d scale = vizNode->getScale();
+    return (scale.x()+scale.y()+scale.y())/3;
+}
+
 osg::ref_ptr<osg::Group> VizPluginBase::getRootNode() const 
 {
     return rootNode;
