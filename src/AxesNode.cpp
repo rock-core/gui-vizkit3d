@@ -3,12 +3,14 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/Point>
 #include <osg/LineWidth>
+#include <osg/Switch>
+#include <osgText/Text>
 #include <assert.h>
 #include <iostream>
 
 namespace vizkit3d
 {
-    ::osg::Node* AxesNode::create(float scale)
+    ::osg::Node* AxesNode::create(float scale,bool blabels)
     {
         ::osg::PositionAttitudeTransform *transform = new ::osg::PositionAttitudeTransform();
         ::osg::Geode *geode = new ::osg::Geode;
@@ -57,6 +59,43 @@ namespace vizkit3d
         ::osg::StateSet* stategeode = geode->getOrCreateStateSet();
         stategeode->setMode( GL_LIGHTING, ::osg::StateAttribute::OFF );
         geode->addDrawable(geom);
+
+        // add label
+        osg::Switch *switch_node = new osg::Switch();
+        ::osg::Geode *geode_label = new ::osg::Geode;
+        switch_node->setName("labels");
+        transform->addChild(switch_node);
+        switch_node->addChild(geode_label);
+
+        ::osgText::Text *text= new ::osgText::Text;
+        text->setText("X");
+        text->setCharacterSize(0.1);
+        text->setPosition(::osg::Vec3d(0.4,0.0,0.02));
+        text->setAxisAlignment(osgText::Text::XZ_PLANE);
+        text->setColor( osg::Vec4(0.9f, 0.1f, 0.1f, 1.0f) );
+        geode_label->addDrawable(text);
+
+        text= new ::osgText::Text;
+        text->setText("Y");
+        text->setCharacterSize(0.1);
+        text->setPosition(::osg::Vec3d(0,0.4,0.02));
+        text->setAxisAlignment(osgText::Text::YZ_PLANE);
+        text->setColor( osg::Vec4(0.1f, 0.9f, 0.1f, 1.0f) );
+        geode_label->addDrawable(text);
+
+        text= new ::osgText::Text;
+        text->setText("Z");
+        text->setCharacterSize(0.1);
+        text->setPosition(::osg::Vec3d(0,0.01,0.4));
+        text->setAxisAlignment(osgText::Text::YZ_PLANE);
+        text->setColor( osg::Vec4(0.1f, 0.1f, 0.9f, 1.0f) );
+        geode_label->addDrawable(text);
+
+        if(blabels)
+            switch_node->setAllChildrenOn();
+        else
+            switch_node->setAllChildrenOff();
+
         return (::osg::Node*)transform;
     }
 
@@ -68,5 +107,51 @@ namespace vizkit3d
         ::osg::PositionAttitudeTransform *p = transform->asPositionAttitudeTransform();
         assert(p);
         p->setPosition(position);
+    }
+
+    osg::Switch* AxesNode::getLabelSwitch(::osg::Node* axes)
+    {
+        assert(axes);
+        ::osg::Transform *transform = axes->asTransform();
+        assert(transform);
+        int num = transform->getNumChildren();
+        for(int i=0;i < num;++i)
+        {
+            osg::Node *node = transform->getChild(i);
+            if(node->getName() == "labels")
+            {
+                osg::Switch *switch_node = node->asSwitch();
+                if(switch_node)
+                    return switch_node;
+                return NULL;
+            }
+        }
+        return NULL;
+    }
+
+    bool AxesNode::hasLabels(::osg::Node* axes)
+    {
+        osg::Switch *switch_node = getLabelSwitch(axes);
+        if(switch_node)
+        {
+            return switch_node->getValue(0);
+        }
+        else
+            throw std::runtime_error("AxesNode: cannot find child switch 'labels'");
+        return false;
+    }
+
+    void AxesNode::displayLabels(::osg::Node* axes,bool blabels)
+    {
+        osg::Switch *switch_node = getLabelSwitch(axes);
+        if(switch_node)
+        {
+            if(blabels)
+                switch_node->setAllChildrenOn();
+            else
+                switch_node->setAllChildrenOff();
+        }
+        else
+            throw std::runtime_error("AxesNode: cannot find child switch 'labels'");
     }
 }
