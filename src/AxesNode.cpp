@@ -7,6 +7,7 @@
 #include <osgText/Text>
 #include <assert.h>
 #include <iostream>
+#include <stdexcept>
 
 namespace vizkit3d
 {
