@@ -91,6 +91,8 @@ namespace vizkit3d
             void setCameraUp(double x, double y, double z);
             void getCameraView(QVector3D& eye, QVector3D& lookAt, QVector3D& up);
 
+            void setSmallFeatureCullingPixelSize(float val);
+
             QColor getBackgroundColor()const;
             void setBackgroundColor(QColor color);
 

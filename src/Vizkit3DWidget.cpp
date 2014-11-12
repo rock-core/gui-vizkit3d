@@ -430,6 +430,14 @@ void Vizkit3DWidget::collapsePropertyBrowser()
     splitter->setSizes(sizes);
 }
 
+
+void Vizkit3DWidget::setSmallFeatureCullingPixelSize(float val)
+{
+    osgViewer::View *view = getView(0);
+    assert(view);
+    view->getCamera()->setSmallFeatureCullingPixelSize(val);
+}
+
 void Vizkit3DWidget::getCameraView(QVector3D& lookAtPos, QVector3D& eyePos, QVector3D& upVector)
 {
     osg::Vec3d eye, lookAt, up;
