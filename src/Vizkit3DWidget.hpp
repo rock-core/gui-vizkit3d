@@ -8,20 +8,41 @@
 #include <QVector3D>
 #include <QTimer>
 
+#include <osgGA/CameraManipulator>
+
 namespace osgQt { class GraphicsWindowQt;}
 namespace vizkit3d
 {
     class Vizkit3DWidget;
 
+    /** The list of available camera manipulators
+     *
+     * IMPORTANT: if you change this, you MUST edit the KNOWN_MANIPULATORS
+     *            array in Vizkit3DWidget.cpp as well !
+     */
+    enum CAMERA_MANIPULATORS
+    {
+        FIRST_PERSON_MANIPULATOR,
+        FLIGHT_MANIPULATOR,
+        ORBIT_MANIPULATOR,
+        TERRAIN_MANIPULATOR,
+        TRACKBALL_MANIPULATOR,
+        MULTI_TOUCH_TRACKBALL_MANIPULATOR
+    };
+
     // configuration class
     class Vizkit3DConfig :public QObject
     {
         Q_OBJECT
-        Q_PROPERTY( bool axes READ isAxes WRITE setAxes)
-        Q_PROPERTY( bool axes_labels READ isAxesLabels WRITE setAxesLabels)
-        Q_PROPERTY( QColor background READ getBackgroundColor WRITE setBackgroundColor)
-        Q_PROPERTY( QStringList frame READ getVisualizationFrames WRITE setVisualizationFrame)
-        Q_PROPERTY( bool transformer READ isTransformer WRITE setTransformer)
+
+        private:
+            Q_PROPERTY( bool axes READ isAxes WRITE setAxes)
+            Q_PROPERTY( bool axes_labels READ isAxesLabels WRITE setAxesLabels)
+            Q_PROPERTY( QColor background READ getBackgroundColor WRITE setBackgroundColor)
+            Q_PROPERTY( QStringList frame READ getVisualizationFrames WRITE setVisualizationFrame)
+            Q_PROPERTY( bool transformer READ isTransformer WRITE setTransformer)
+            Q_ENUMS( CAMERA_MANIPULATORS )
+            Q_PROPERTY( QStringList manipulator READ getAvailableCameraManipulators WRITE setCameraManipulator )
 
         public:
             Vizkit3DConfig(Vizkit3DWidget *parent);
@@ -44,12 +65,28 @@ namespace vizkit3d
 
             QColor getBackgroundColor()const;
             void setBackgroundColor(QColor color);
+
+            /** Converts a manipulator ID to its name */
+            static QString manipulatorIDToName(CAMERA_MANIPULATORS id);
+            /** Converts a manipulator name to its ID */
+            static CAMERA_MANIPULATORS manipulatorNameToID(QString const& name);
+            
+            /** Sets the current camera manipulator among those available */
+            void setCameraManipulator(QStringList const& manipulators);
+            /** Returns the list of available camera manipulators, with the
+             * current one at the top
+             */
+            QStringList getAvailableCameraManipulators() const;
     };
 
     class QDESIGNER_WIDGET_EXPORT Vizkit3DWidget : public QWidget, public osgViewer::CompositeViewer
     {
         Q_OBJECT
         public:
+            static osg::Vec3d const DEFAULT_EYE;
+            static osg::Vec3d const DEFAULT_CENTER;
+            static osg::Vec3d const DEFAULT_UP;
+
             friend class VizPluginBase;
             Vizkit3DWidget(QWidget* parent = 0,const QString &world_name = "world_osg");
 
@@ -63,6 +100,9 @@ namespace vizkit3d
             osg::Group* getRootNode() const;
             void setTrackedNode(vizkit3d::VizPluginBase* plugin);
             QSize sizeHint() const;
+
+            /** Sets the current camera manipulator */
+            void setCameraManipulator(osg::ref_ptr<osgGA::CameraManipulator> manipulator, bool resetToDefaultHome = false);
 
         public slots:
             void addPlugin(QObject* plugin, QObject* parent = NULL);
@@ -132,6 +172,11 @@ namespace vizkit3d
             QObject* loadPlugin(QString lib_name,QString plugin_name);
             QStringList* getAvailablePlugins();
 
+            /** Sets the current camera manipulator among those available */
+            void setCameraManipulator(CAMERA_MANIPULATORS manipulator, bool resetToDefaultHome = false);
+            /** Returns the current camera manipulator */
+            CAMERA_MANIPULATORS getCameraManipulator() const;
+
         signals:
             void addPlugins(QObject* plugin,QObject* parent);
             void removePlugins(QObject* plugin);
@@ -176,6 +221,8 @@ namespace vizkit3d
             QString current_frame;
 
             osg::ref_ptr<osg::Image> grabImage;
+
+            CAMERA_MANIPULATORS currentManipulator;
     };
 }
 #endif

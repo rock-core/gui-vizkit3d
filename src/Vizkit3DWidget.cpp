@@ -21,16 +21,23 @@
 #include <boost/lexical_cast.hpp>
 
 #include <osg/PositionAttitudeTransform>
-#include <osgGA/TrackballManipulator>
-#include <osgGA/TerrainManipulator>
-#include <osgGA/KeySwitchMatrixManipulator>
-#include <osgGA/NodeTrackerManipulator>
 #include <osgDB/ReadFile>
 #include <osgQt/GraphicsWindowQt>
 #include <osgViewer/ViewerEventHandlers>
 
+#include <osgGA/FirstPersonManipulator>
+#include <osgGA/FlightManipulator>
+#include <osgGA/NodeTrackerManipulator>
+#include <osgGA/TerrainManipulator>
+#include <osgGA/TrackballManipulator>
+#include <osgGA/MultiTouchTrackballManipulator>
+
 using namespace vizkit3d;
 using namespace std;
+
+osg::Vec3d const Vizkit3DWidget::DEFAULT_EYE(-5, 0, 5);
+osg::Vec3d const Vizkit3DWidget::DEFAULT_CENTER(0, 0, 0);
+osg::Vec3d const Vizkit3DWidget::DEFAULT_UP(0, 0, 1);
 
 Vizkit3DWidget* Vizkit3DConfig::getWidget() const
 {
@@ -94,6 +101,65 @@ bool Vizkit3DConfig::isAxesLabels() const
 {
     return getWidget()->isAxesLabels();
 }
+
+namespace
+{
+    struct ManipulatorDefinition
+    {
+        QString name;
+        CAMERA_MANIPULATORS id;
+    };
+    ManipulatorDefinition KNOWN_MANIPULATORS[] = {
+        { "First Person", FIRST_PERSON_MANIPULATOR },
+        { "Flight", FLIGHT_MANIPULATOR },
+        { "Orbit", ORBIT_MANIPULATOR },
+        { "Terrain", TERRAIN_MANIPULATOR },
+        { "Trackball", TRACKBALL_MANIPULATOR },
+        { "Multi Touch Trackball", MULTI_TOUCH_TRACKBALL_MANIPULATOR },
+        { 0, FIRST_PERSON_MANIPULATOR } // only the empty string is used as guard
+    };
+}
+
+
+QStringList Vizkit3DConfig::getAvailableCameraManipulators() const
+{
+    QString current = manipulatorIDToName(getWidget()->getCameraManipulator());
+    QStringList names;
+    for (int i = 0; KNOWN_MANIPULATORS[i].name != 0; ++i)
+    {
+        QString n = KNOWN_MANIPULATORS[i].name;
+        if (n == current)
+            names.prepend(n);
+        else
+            names.append(n);
+    }
+    return names;
+}
+
+QString Vizkit3DConfig::manipulatorIDToName(CAMERA_MANIPULATORS id)
+{
+    for (int i = 0; KNOWN_MANIPULATORS[i].name != 0; ++i)
+    {
+        if (id == KNOWN_MANIPULATORS[i].id)
+            return KNOWN_MANIPULATORS[i].name;
+    }
+    throw std::invalid_argument("camera manipulator ID " + boost::lexical_cast<std::string>(id) + " has no declared name");
+}
+
+CAMERA_MANIPULATORS Vizkit3DConfig::manipulatorNameToID(QString const& name)
+{
+    for (int i = 0; KNOWN_MANIPULATORS[i].name != 0; ++i)
+    {
+        if (name == KNOWN_MANIPULATORS[i].name)
+            return KNOWN_MANIPULATORS[i].id;
+    }
+    throw std::invalid_argument("camera manipulator name " + name.toStdString() + " does not exist");
+}
+
+void Vizkit3DConfig::setCameraManipulator(QStringList const& manipulator)
+{
+    CAMERA_MANIPULATORS id = manipulatorNameToID(manipulator.front());
+    return getWidget()->setCameraManipulator(id);
 }
 
 Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name)
@@ -227,8 +293,7 @@ QWidget* Vizkit3DWidget::addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node
 
     view->setSceneData(scene);
     view->addEventHandler( new osgViewer::StatsHandler );
-    // view->setCameraManipulator( new osgGA::TrackballManipulator );
-    view->setCameraManipulator( new osgGA::TerrainManipulator);
+    setCameraManipulator(TERRAIN_MANIPULATOR);
 
     // pickhandler is for selecting objects in the opengl view
     PickHandler* pickHandler = new PickHandler();
@@ -447,13 +512,7 @@ void Vizkit3DWidget::changeCameraView(const osg::Vec3* lookAtPos, const osg::Vec
     osgViewer::View *view = getView(0);
     assert(view);
 
-
-    osgGA::TerrainManipulator* manipulator = dynamic_cast<osgGA::TerrainManipulator*>(view->getCameraManipulator());
-    if (!manipulator) return;
-    //select TerrainManipulator
-    //switchMatrixManipulator->selectMatrixManipulator(3); //why this switch was needed here?, each manipulator should be able  to do the folliowing steps
-
-    //get last values of eye, center and up
+    osgGA::CameraManipulator* manipulator = dynamic_cast<osgGA::CameraManipulator*>(view->getCameraManipulator());
     osg::Vec3d eye, center, up;
     manipulator->getHomePosition(eye, center, up);
 
@@ -624,12 +683,12 @@ void Vizkit3DWidget::setVisualizationFrame(const QString& frame,bool update)
 
     if(frame.size()==0 || frame == QString(getRootNode()->getName().c_str()))
     {
-        osgGA::TerrainManipulator* manipulator = new osgGA::TerrainManipulator;
-        manipulator->setHomePosition(osg::Vec3(-5, 0, 5), osg::Vec3(0,0,0), osg::Vec3(0,0,1));
-        view->setCameraManipulator(manipulator);
+        // Reset to the centre of the scene, and allow the user to move freely
+        setCameraManipulator(currentManipulator, true);
     }
     else
     {
+        // Track the requested frame
         osgGA::NodeTrackerManipulator* manipulator = new osgGA::NodeTrackerManipulator;
         view->setCameraManipulator(manipulator);
         manipulator->setTrackNode(node);
@@ -863,5 +922,60 @@ QObject* Vizkit3DWidget::loadPlugin(QString lib_name,QString plugin_name)
     }
     addPlugin(plugin);
     return plugin;
+}
+
+CAMERA_MANIPULATORS Vizkit3DWidget::getCameraManipulator() const
+{
+    return currentManipulator;
+}
+
+void Vizkit3DWidget::setCameraManipulator(osg::ref_ptr<osgGA::CameraManipulator> manipulator, bool resetToDefaultHome)
+{
+    osgViewer::View *view = getView(0);
+    assert(view);
+
+    osg::Vec3d
+        eye = DEFAULT_EYE,
+        center = DEFAULT_CENTER,
+        up = DEFAULT_UP;
+
+    osgGA::CameraManipulator* current = view->getCameraManipulator();
+    if (!resetToDefaultHome && current)
+        current->getHomePosition(eye, center, up);
+
+    manipulator->setHomePosition(eye, center, up);
+    view->setCameraManipulator(manipulator);
+    view->home();
+}
+
+void Vizkit3DWidget::setCameraManipulator(QString manipulator, bool resetToDefaultHome)
+{
+    return setCameraManipulator(Vizkit3DConfig::manipulatorNameToID(manipulator), resetToDefaultHome);
+}
+
+void Vizkit3DWidget::setCameraManipulator(CAMERA_MANIPULATORS manipulatorType, bool resetToDefaultHome)
+{
+    osg::ref_ptr<osgGA::CameraManipulator> newManipulator;
+    switch(manipulatorType)
+    {
+        case FIRST_PERSON_MANIPULATOR:
+            newManipulator = new osgGA::FirstPersonManipulator;
+            break;
+        case FLIGHT_MANIPULATOR:
+            newManipulator = new osgGA::FlightManipulator;
+            break;
+        case TERRAIN_MANIPULATOR:
+            newManipulator = new osgGA::TerrainManipulator;
+            break;
+        case TRACKBALL_MANIPULATOR:
+            newManipulator = new osgGA::TrackballManipulator;
+            break;
+        case MULTI_TOUCH_TRACKBALL_MANIPULATOR:
+            newManipulator = new osgGA::MultiTouchTrackballManipulator;
+            break;
+    };
+
+    setCameraManipulator(newManipulator);
+    currentManipulator = manipulatorType;
 }
 
