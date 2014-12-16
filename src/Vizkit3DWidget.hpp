@@ -11,6 +11,8 @@
 namespace osgQt { class GraphicsWindowQt;}
 namespace vizkit3d
 {
+    class Vizkit3DWidget;
+
     // configuration class
     class Vizkit3DConfig :public QObject
     {
@@ -22,7 +24,8 @@ namespace vizkit3d
         Q_PROPERTY( bool transformer READ isTransformer WRITE setTransformer)
 
         public:
-            Vizkit3DConfig(QObject *parent);
+            Vizkit3DConfig(Vizkit3DWidget *parent);
+            Vizkit3DWidget* getWidget() const;
 
         signals:
             void propertyChanged(QString);

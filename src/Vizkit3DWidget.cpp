@@ -32,7 +32,14 @@
 using namespace vizkit3d;
 using namespace std;
 
-Vizkit3DConfig::Vizkit3DConfig(QObject *parent):QObject(parent)
+Vizkit3DWidget* Vizkit3DConfig::getWidget() const
+{
+    Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
+    assert(parent);
+    return parent;
+}
+
+Vizkit3DConfig::Vizkit3DConfig(Vizkit3DWidget *parent):QObject(parent)
 {
     setObjectName("Viewer");
     connect(parent, SIGNAL(propertyChanged(QString)),this,SIGNAL(propertyChanged(QString)));
@@ -40,82 +47,53 @@ Vizkit3DConfig::Vizkit3DConfig(QObject *parent):QObject(parent)
 
 bool Vizkit3DConfig::isAxes() const
 {
-    Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
-    if(!parent)
-        return false;
-    return parent->isAxes();
+    return getWidget()->isAxes();
 }
 
 void Vizkit3DConfig::setAxes(bool value)
 {
-    Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
-    if(!parent)
-        return;
-    parent->setAxes(value);
+    return getWidget()->setAxes(value);
 }
 
 QStringList Vizkit3DConfig::getVisualizationFrames() const
 {
-    Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
-    if(!parent)
-        return QStringList();
-    return *parent->getVisualizationFrames();
+    return getWidget()->getVisualizationFrames();
 }
 
 void Vizkit3DConfig::setVisualizationFrame(const QStringList &frames)
 {
-    Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
-    if(!parent && frames.isEmpty())
-        return;
-    return parent->setVisualizationFrame(frames.front(),false);
+    return getWidget()->setVisualizationFrame(frames.front(),false);
 }
 
 bool Vizkit3DConfig::isTransformer() const
 {
-    Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
-    if(!parent)
-        return false;
-    return parent->isTransformer();
+    return getWidget()->isTransformer();
 }
 
 void Vizkit3DConfig::setTransformer(bool value)
 {
-    Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
-    if(!parent)
-        return;
-    parent->setTransformer(value);
+    return getWidget()->setTransformer(value);
 }
 
 QColor Vizkit3DConfig::getBackgroundColor() const
 {
-    Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
-    if(!parent)
-        return QColor();
-    return parent->getBackgroundColor();
+    return getWidget()->getBackgroundColor();
 }
 
 void Vizkit3DConfig::setBackgroundColor(QColor color)
 {
-    Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
-    if(!parent)
-        return;
-    return parent->setBackgroundColor(color);
+    return getWidget()->setBackgroundColor(color);
 }
 
 void Vizkit3DConfig::setAxesLabels(bool value)
 {
-    Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
-    if(!parent)
-        return;
-    parent->setAxesLabels(value);
+    return getWidget()->setAxesLabels(value);
 }
 
 bool Vizkit3DConfig::isAxesLabels() const
 {
-    Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
-    if(!parent)
-        return false;
-    return parent->isAxesLabels();
+    return getWidget()->isAxesLabels();
+}
 }
 
 Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name)
