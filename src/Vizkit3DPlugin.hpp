@@ -90,6 +90,7 @@ class VizPluginRubyAdapterCollection : public QObject
     protected:
         std::vector<VizPluginRubyAdapterBase*> adapterList;
 };
+class Vizkit3DWidget;
 
 /** 
  * Interface class for all visualization plugins based on vizkit3d. All plugins
@@ -119,6 +120,12 @@ class VizPluginBase : public QObject
     public:
         VizPluginBase(QObject *parent=NULL);
         ~VizPluginBase();
+
+        /** The underlying Vizkit3D Widget
+         *
+         * May be NULL if the plugin is e.g. built as a child of another plugin
+         */
+        Vizkit3DWidget* getWidget() const;
 
 	/** @return true if the plugins internal state has been updated */
 	virtual bool isDirty() const;
@@ -182,9 +189,22 @@ class VizPluginBase : public QObject
 
 	void setPose(const QVector3D &position, const QQuaternion &orientation);
 
+        /** Returns the list of available visualization frames
+         *
+         * It is used for the relevant Q_PROPERTY to get a combobox
+         */
         QStringList getVisualizationFrames() const;
+
+        /** Returns the frame at which this plugin is attached
+         */
         QString getVisualizationFrame() const;
+
+        /** @overload Helper method to set the visualization frame from the Qt Property Browser
+         */
         void setVisualizationFrame(const QStringList &frames);
+
+        /** Set the name of the frame which is the origin of this plugin
+         */
         void setVisualizationFrame(const QString &frame);
 
        /**

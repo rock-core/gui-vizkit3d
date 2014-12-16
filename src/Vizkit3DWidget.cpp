@@ -64,7 +64,14 @@ void Vizkit3DConfig::setAxes(bool value)
 
 QStringList Vizkit3DConfig::getVisualizationFrames() const
 {
-    return getWidget()->getVisualizationFrames();
+    QStringList frames = getWidget()->getVisualizationFrames();
+    QString current = getWidget()->getVisualizationFrame();
+    if (!current.isEmpty() && !frames.isEmpty())
+    {
+        frames.removeOne(current);
+        frames.prepend(current);
+    }
+    return frames;
 }
 
 void Vizkit3DConfig::setVisualizationFrame(const QStringList &frames)
@@ -221,18 +228,17 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name)
 Vizkit3DWidget::~Vizkit3DWidget() {}
 
 //qt ruby is crashing if we use none pointer here
-QStringList* Vizkit3DWidget::getVisualizationFrames() const
+QStringList* Vizkit3DWidget::getVisualizationFramesRuby() const
 {
-    QStringList *list = new QStringList;
-    std::vector<std::string> std_list = TransformerGraph::getFrameNames(*getRootNode());
-    std::vector<std::string>::iterator iter = std_list.begin();
-    for(;iter != std_list.end();++iter)
-       *list << QString(iter->c_str());
-    if(!current_frame.isEmpty())
-    {
-        list->removeOne(current_frame);
-        list->prepend(current_frame);
-    }
+    return new QStringList(getVisualizationFrames());
+}
+
+QStringList Vizkit3DWidget::getVisualizationFrames() const
+{
+    QStringList list;
+    vector<string> names = TransformerGraph::getFrameNames(*getRootNode());
+    for (unsigned int i = 0; i != names.size(); ++i)
+        list.append(QString::fromStdString(names[i]));
     return list;
 }
 
@@ -711,12 +717,12 @@ void Vizkit3DWidget::setTransformation(const QString &source_frame,const QString
     QVector3D position = _position;
     if(std::isnan(position.x()) ||std::isnan(position.y()) || std::isnan(position.z()))
         position = QVector3D();
-    int count = getVisualizationFrames()->size();
+    int count = getVisualizationFrames().size();
     TransformerGraph::setTransformation(*getRootNode(),source_frame.toStdString(),target_frame.toStdString(),
                                          osg::Quat(quat.x(),quat.y(),quat.z(),quat.scalar()),
                                          osg::Vec3d(position.x(),position.y(),position.z()));
 
-    if(count != getVisualizationFrames()->size())
+    if(count != getVisualizationFrames().size())
     {
         emit propertyChanged("frame");
         PluginMap::iterator it = plugins.begin();

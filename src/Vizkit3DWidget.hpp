@@ -112,7 +112,8 @@ namespace vizkit3d
             void setVisualizationFrame(const QString &frame,bool update=true);
 
             // we have to use a pointer here otherwise qt ruby is crashing
-            QStringList* getVisualizationFrames() const;
+            QStringList* getVisualizationFramesRuby() const;
+            QStringList getVisualizationFrames() const;
             QString getVisualizationFrame() const;
 
             /**
