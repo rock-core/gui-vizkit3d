@@ -12,84 +12,6 @@
 
 namespace vizkit3d
 {
-/** 
- * Interface class for all ruby adapters of the visualization plugins
- * Ruby adapters are usefull to get incoming data via ruby.
- */
-class VizPluginRubyAdapterBase : public QObject
-{
-    Q_OBJECT
-    
-    public slots:
-        virtual void update(QVariant&, bool) = 0;
-        virtual QString getDataType() = 0;
-        virtual QString getRubyMethod() = 0;
-};
-
-/** 
- * This class holds all ruby adapters of a specific visualization plugin.
- */
-class VizPluginRubyAdapterCollection : public QObject
-{
-    Q_OBJECT
-
-    public:
-        /**
-         * adds an adapter to the list of ruby adapters.
-         */
-        void addAdapter(VizPluginRubyAdapterBase* adapter) 
-        {
-            adapterList.push_back(adapter);
-        };
-
-        /**
-         * removes an adapter from the list if available.
-         */
-        void removeAdapter(VizPluginRubyAdapterBase* adapter)
-        {
-            std::vector<VizPluginRubyAdapterBase*>::iterator it = std::find(adapterList.begin(), adapterList.end(), adapter);
-            if (it != adapterList.end()) adapterList.erase(it);
-        };
-
-        const std::vector<VizPluginRubyAdapterBase*> &getAdapterList() const
-        {
-            return adapterList;
-        }
-
-    public slots:
-        /**
-         * The method names of all available adapers will be returned.
-         * @return QStringList of known adapters
-         */
-        QStringList* getListOfAvailableAdapter()
-        {
-            QStringList* adapterStringList = new QStringList();
-            for(std::vector<VizPluginRubyAdapterBase*>::iterator it = adapterList.begin(); it != adapterList.end(); it++)
-            {
-                adapterStringList->push_back((*it)->getRubyMethod());
-            }
-            return adapterStringList;
-        };
-
-        /**
-         * Retruns the ruby adapter given by its ruby method name.
-         * It will be returnd as QObject, so ruby can get it.
-         * @param rubyMethodName method name of the adapter
-         * @return the adapter
-         */
-        QObject* getAdapter(QString rubyMethodName)
-        {
-            for(std::vector<VizPluginRubyAdapterBase*>::iterator it = adapterList.begin(); it != adapterList.end(); it++)
-            {
-                if ((*it)->getRubyMethod() == rubyMethodName) 
-                    return *it; 
-            }
-            return NULL;
-        };
-
-    protected:
-        std::vector<VizPluginRubyAdapterBase*> adapterList;
-};
 
 /** 
  * Interface class for all visualization plugins based on vizkit3d. All plugins
@@ -154,11 +76,6 @@ class VizPluginBase : public QObject
          * Emits signal 'clicked(float, float)' if the plugin has a Vizkit3DWidget as an ancestor.
          */
         virtual void click(float x,float y);
-
-        /**
-        * @return an instance of the ruby adapter collection.
-        */
-        QObject* getRubyAdapterCollection();
 
         /**
         * clones the current osg graphs and adds it to the root node.
@@ -248,7 +165,6 @@ class VizPluginBase : public QObject
 
         std::vector<QDockWidget*> dockWidgets;
         QString vizkit3d_plugin_name;
-        VizPluginRubyAdapterCollection adapterCollection;
 
     private:
 	class CallbackAdapter;
@@ -367,33 +283,7 @@ class VizkitPluginFactory : public QObject
  * </code>
  */
 #define VizPluginRubyAdapterCommon(pluginName, dataType, methodName, rubyMethodName)\
-    class VizPluginRubyAdapter##pluginName##rubyMethodName : public VizPluginRubyAdapterBase {\
-        public:\
-            VizPluginRubyAdapter##pluginName##rubyMethodName(pluginName* plugin)\
-            {\
-                vizPlugin = plugin;\
-            };\
-            void update(QVariant& data, bool pass_ownership)\
-            {\
-                void* ptr = data.value<void*>();\
-                dataType* pluginData = reinterpret_cast<dataType*>(ptr);\
-                vizPlugin->methodName(*pluginData);\
-		if (pass_ownership) \
-			delete pluginData; \
-            }\
-        public slots:\
-            QString getDataType() \
-            {\
-                return #dataType;\
-            }\
-            QString getRubyMethod() \
-            {\
-                return #rubyMethodName; \
-            }\
-        private:\
-            pluginName* vizPlugin;\
-    };\
-    adapterCollection.addAdapter(new VizPluginRubyAdapter##pluginName##rubyMethodName(this));
+    RUBY_PLUGIN_ADAPTERS_HAVE_BEEN_DISCONTINUED_USE_QT_PROPERTIES_INSTEAD
 
 #define VizPluginRubyAdapter(pluginName, dataType, typeName) \
     VizPluginRubyAdapterCommon(pluginName, dataType, updateData, update##typeName)
@@ -438,41 +328,6 @@ class VizkitPluginFactory : public QObject
         };\
     };\
     Q_EXPORT_PLUGIN2(QtPlugin##pluginName, QtPlugin##pluginName)
-
-/** @deprecated adapter item for legacy visualizations. Do not derive from this
- * class for new designs. Use VizPlugin directly instead.
- */
-template <class T>
-class VizPluginAdapter : public Vizkit3DPlugin<T>
-{
-    protected:
-	virtual void operatorIntern( osg::Node* node, osg::NodeVisitor* nv ) = 0;
-
-        VizPluginAdapter()
-	    : groupNode(new osg::Group())
-        {
-        }
-
-	osg::ref_ptr<osg::Node> createMainNode()
-	{
-	    return groupNode;
-	}
-
-	void updateMainNode( osg::Node* node )
-	{
-	    // NULL for nodevisitor is ok here, since its not used anywhere
-	    operatorIntern( node, NULL );
-	}
-
-	void setMainNode( osg::Node* node )
-	{
-	    groupNode->addChild( node );
-	}
-
-    protected:
-	osg::ref_ptr<osg::Group> groupNode;
-	osg::ref_ptr<osg::Node> ownNode;
-};
 
 }
 #endif

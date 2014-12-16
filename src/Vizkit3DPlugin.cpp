@@ -181,11 +181,6 @@ void VizPluginBase::setDirty()
     dirty = true;
 }
 
-QObject* vizkit3d::VizPluginBase::getRubyAdapterCollection()
-{
-    return &adapterCollection;
-}
-
 bool VizPluginBase::isPluginEnabled()
 {
     return plugin_enabled;
