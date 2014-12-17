@@ -22,11 +22,76 @@ namespace vizkit3d
      */
     enum CAMERA_MANIPULATORS
     {
+        /**
+         * Wheel controls forward/backward movement, in the direction of the
+         * camera. Left button + mouse movement controls pitch and yaw.
+         *
+         * The value given to setWheelMovement is the scale factor between the
+         * wheel movement and the actual movement in the scene. It defaults to
+         * 0.05. There is also a way to force centering the camera on the
+         * current mouse pointer position whenever the wheel is used by giving
+         * the SET_CENTER_ON_WHEEL_FORWARD_MOVEMENT flag to the constructor. The
+         * centering is animated (i.e. not abrupt) and the animation step is
+         * controlled by setAnimationTime
+         *
+         * If vertical axis is fixed (the default), the rotation maintain the
+         * "up" vector. Otherwise, they don't. It can be changed with
+         * setVerticalAxisFixed.
+         */
         FIRST_PERSON_MANIPULATOR,
+        /** Behaves like a flight simulator controlled by a mouse. The position
+         * of the mouse w.r.t. the center of the window causes pitch/roll. By
+         * default (can be turned off), yaw is also changed if the camera banked
+         * (has non-zero roll).
+         *
+         * In addition, the camera has a velocity and moves continuously if this
+         * velocity is non-zero. The left mouse button causes the camera's
+         * velocity to grow, the right mouse to decrease and the middle mouse
+         * button sets it to zero.
+         */
         FLIGHT_MANIPULATOR,
+        /** Transforms the camera as if it was "orbiting" a point of reference
+         * (the camera center).
+         *
+         * The mouse wheel applies a scale factor on the distance between the
+         * camera eye and the center, as 1.0 + wheelZoomFactor (regardless of
+         * the actual wheel movement). The default wheelZoomFactor is 0.1. If
+         * this distance becomes smaller than a minimum distance (defaults to
+         * 0.05), the center gets "pushed" forward so that the minimum distance
+         * is kept. In practice, it means that the wheel movement is huge when
+         * far from the center and tiny when close.
+         *
+         * Moving the mouse with the left mouse button pressed does a trackball
+         * rotation, i.e. makes the camera move "as if" the mouse moved a sphere
+         * centered on the center point. By default, the orbit manipulator
+         * constrains the vertical axis to keep within the same plane (i.e.
+         * vertical is always vertical)
+         *
+         * Moving the mouse with the right mouse button pressed also applies a
+         * zoom (following the same rules). The scale factor applied is the
+         * movement in Y, 1.0 seems to be the whole height of the window.
+         *
+         * Moving the mouse with the middle mouse button pressed applies a panning
+         * movement. The movement is displacement * 0.3 * distance_to_center
+         */
         ORBIT_MANIPULATOR,
+        /** Like an orbit manipulator, with the middle-button behaviour changed
+         *
+         * If the mouse is moved while the middle button is pressed, X movement
+         * moves the center in the camera's side direction and Y movement
+         * moves it in the forward direction. The movement in each case is 0.3 *
+         * distance_to_center * distance_moved. In addition, if a node is
+         * associated with the camera, the center will "track" the node's shape,
+         * i.e. an intersection is computed and the distance-to-node kept.
+         */
         TERRAIN_MANIPULATOR,
+        /** Just like an orbit manipulator, but with the fixed-vertical-axis
+         * constraint set to false by default
+         */
         TRACKBALL_MANIPULATOR,
+        /** Like the trackball manipulator, but reacts to pinch-to-zoom vs. drag
+         * multitouch events.
+         */
         MULTI_TOUCH_TRACKBALL_MANIPULATOR
     };
 
