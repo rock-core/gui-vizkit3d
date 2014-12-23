@@ -18,6 +18,7 @@ rock_library(vizkit3d
         OsgVisitors.cpp
         TransformerGraph.cpp
         CoordinateFrame.cpp
+        DefaultManipulator.cpp
         EnableGLDebugOperation.cpp
         ${PROPERTY_BROWSER_RESOURCES} 
     MOC
@@ -50,6 +51,7 @@ rock_library(vizkit3d
         ColorConversionHelper.hpp
         CoordinateFrame.hpp
         EnvPluginBase.hpp
+        DefaultManipulator.hpp
         ${HEADERS_EXTRA}
     LIBS ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${OPENSCENEGRAPH_LIBRARIES}
     DEPS_CMAKE OpenGL

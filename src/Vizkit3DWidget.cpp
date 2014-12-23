@@ -26,6 +26,7 @@
 #include <osgQt/GraphicsWindowQt>
 #include <osgViewer/ViewerEventHandlers>
 
+#include <vizkit3d/DefaultManipulator.hpp>
 #include <osgGA/FirstPersonManipulator>
 #include <osgGA/FlightManipulator>
 #include <osgGA/OrbitManipulator>
@@ -136,6 +137,7 @@ namespace
         bool is_public;
     };
     ManipulatorDefinition KNOWN_MANIPULATORS[] = {
+        { "Default", DEFAULT_MANIPULATOR, true },
         { "First Person", FIRST_PERSON_MANIPULATOR, true },
         { "Flight", FLIGHT_MANIPULATOR, true },
         { "Multi Touch Trackball", MULTI_TOUCH_TRACKBALL_MANIPULATOR, true },
@@ -1101,6 +1103,9 @@ void Vizkit3DWidget::setCameraManipulator(CAMERA_MANIPULATORS manipulatorType, b
     osg::ref_ptr<osgGA::CameraManipulator> newManipulator;
     switch(manipulatorType)
     {
+        case DEFAULT_MANIPULATOR:
+            newManipulator = new vizkit3d::DefaultManipulator;
+            break;
         case FIRST_PERSON_MANIPULATOR:
             newManipulator = new osgGA::FirstPersonManipulator;
             break;
