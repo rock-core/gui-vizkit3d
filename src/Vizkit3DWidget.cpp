@@ -970,6 +970,9 @@ void Vizkit3DWidget::setCameraManipulator(CAMERA_MANIPULATORS manipulatorType, b
         case FLIGHT_MANIPULATOR:
             newManipulator = new osgGA::FlightManipulator;
             break;
+        case ORBIT_MANIPULATOR:
+            newManipulator = new osgGA::FlightManipulator;
+            break;
         case TERRAIN_MANIPULATOR:
             newManipulator = new osgGA::TerrainManipulator;
             break;
