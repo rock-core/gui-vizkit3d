@@ -132,14 +132,9 @@ QStringList Vizkit3DConfig::getAvailableCameraManipulators() const
 {
     QString current = manipulatorIDToName(getWidget()->getCameraManipulator());
     QStringList names;
+    names.append(current);
     for (int i = 0; KNOWN_MANIPULATORS[i].name != 0; ++i)
-    {
-        QString n = KNOWN_MANIPULATORS[i].name;
-        if (n == current)
-            names.prepend(n);
-        else
-            names.append(n);
-    }
+        names.append(KNOWN_MANIPULATORS[i].name);
     return names;
 }
 
