@@ -930,6 +930,11 @@ QObject* Vizkit3DWidget::loadPlugin(QString lib_name,QString plugin_name)
     return plugin;
 }
 
+QString Vizkit3DWidget::getCameraManipulatorName() const
+{
+    return Vizkit3DConfig::manipulatorIDToName(getCameraManipulator());
+}
+
 CAMERA_MANIPULATORS Vizkit3DWidget::getCameraManipulator() const
 {
     return currentManipulator;

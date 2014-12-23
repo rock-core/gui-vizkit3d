@@ -238,8 +238,14 @@ namespace vizkit3d
             QObject* loadPlugin(QString lib_name,QString plugin_name);
             QStringList* getAvailablePlugins();
 
+            /** @overload sets the camera manipulator by name */
+            void setCameraManipulator(QString manipulator, bool resetToDefaultHome = false);
             /** Sets the current camera manipulator among those available */
             void setCameraManipulator(CAMERA_MANIPULATORS manipulator, bool resetToDefaultHome = false);
+            /** @overload returns the name of the current camera manipulator
+             * (needed for the Ruby bindings
+             */
+            QString getCameraManipulatorName() const;
             /** Returns the current camera manipulator */
             CAMERA_MANIPULATORS getCameraManipulator() const;
 
