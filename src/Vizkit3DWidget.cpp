@@ -634,7 +634,8 @@ void Vizkit3DWidget::setVisualizationFrame(const QString& frame,bool update)
     // the following is not working if the directly track the transformation 
     // therefore use a child
     osg::Node *node = TransformerGraph::getFrameGroup(*getRootNode(),frame.toStdString());
-    assert(node);
+    if (!node)
+        throw std::invalid_argument("frame " + frame.toStdString() + " does not exist");
 
     if(frame.size()==0 || frame == QString(getRootNode()->getName().c_str()))
     {
