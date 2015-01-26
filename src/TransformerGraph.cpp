@@ -353,16 +353,30 @@ bool TransformerGraph::getTransformation(osg::Node &transformer,const std::strin
     return true;
 }
 
-bool TransformerGraph::setTransformation(osg::Node &transformer,const std::string &source_frame,const std::string &target_frame,
+static void invertOSGTransform(osg::Vec3d& trans, osg::Quat& quat,
+        osg::PositionAttitudeTransform*& source, osg::PositionAttitudeTransform*& target,
+        std::string& source_frame, std::string& target_frame)
+{
+    quat = quat.inverse();
+    trans = -(quat * trans);
+    std::swap(source, target);
+    std::swap(source_frame, target_frame);
+}
+
+bool TransformerGraph::setTransformation(osg::Node &transformer,const std::string &_source_frame,const std::string &_target_frame,
         const osg::Quat &_quat, const osg::Vec3d &_trans)
 {
+    std::string source_frame = _source_frame;
+    std::string target_frame = _target_frame;
     osg::PositionAttitudeTransform *source = FindFrame::find(transformer,source_frame);
     osg::PositionAttitudeTransform *target = FindFrame::find(transformer,target_frame);
     osg::Quat quat = _quat;
     osg::Vec3d trans = _trans;
 
     if(!source)
+    {
         source = getTransform(addFrame(transformer,source_frame));
+    }
     if(!target)
         target = getTransform(addFrame(transformer,target_frame));
 
@@ -371,21 +385,19 @@ bool TransformerGraph::setTransformation(osg::Node &transformer,const std::strin
         std::cerr << "cannot set transformation between " << source_frame << " and " << target_frame << ". They are identically" << std::endl;
         return false;
     }
-
-    //someone tries to move the world which is not possible
-    //invert transformation
-    if(target == &transformer)
+    
+    if (source->getParent(0) == target)
     {
-        quat = quat.inverse();
-        trans = -trans;
-        osg::PositionAttitudeTransform *t = target;
-        target = source;
-        source = t;
+        invertOSGTransform(trans, quat, source, target, source_frame, target_frame);
     }
-
-    // if it is not the case attach target to the source node
-    if(target->getParent(0) != source)
+    else if (target->getParent(0) != source)
     {
+        if (target == &transformer || (source->getParent(0) == &transformer && target->getParent(0) != &transformer))
+        {
+            invertOSGTransform(trans, quat, source, target, source_frame, target_frame);
+        }
+
+
 	osg::ref_ptr<osg::Node> node = target; //insures that node is not deleted
         removeFrame(transformer,target_frame);
         source->addChild(node);
