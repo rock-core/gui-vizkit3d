@@ -219,17 +219,19 @@ class VizPluginBase : public QObject
         */
         void clicked(float x, float y);
 
+    public:
+    	/** override this function to update the visualisation.
+    	 * @param node contains a point to the node which can be modified.
+    	 */
+    	virtual void updateMainNode(osg::Node* node) = 0;
+
+    	/** override this method to provide your own main node.
+    	 * @return node derived from osg::Group
+    	 */
+    	virtual osg::ref_ptr<osg::Node> createMainNode();
 
     protected:
-	/** override this function to update the visualisation.
-	 * @param node contains a point to the node which can be modified.
-	 */
-	virtual void updateMainNode(osg::Node* node) = 0;
 
-	/** override this method to provide your own main node.
-	 * @return node derived from osg::Group
-	 */ 
-	virtual osg::ref_ptr<osg::Node> createMainNode();
 
         /** override this method to provide your own QDockWidgets.
          * The QDockWidgets will automatically attached to the main window.
