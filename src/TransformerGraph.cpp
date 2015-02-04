@@ -70,6 +70,8 @@ osg::PositionAttitudeTransform *getParentTransform(osg::Node *transformer)
 {
     assert(transformer);
     osg::PositionAttitudeTransform *trans= getTransform(transformer);
+    if (trans->getNumParents() == 0)
+        return NULL;
     osg::Node *parent_node = trans->getParent(0);
     if(!parent_node)
         return NULL;
@@ -97,6 +99,7 @@ osg::Switch *getFrameSwitch(osg::Node *transformer)
     assert(switch_node);
     return switch_node;
 }
+
 
 class FindFrame: public ::osg::NodeVisitor
 {
@@ -267,6 +270,36 @@ private:
    osg::Matrix wcMatrix;
 };
 
+class DescriptionVisitor: public ::osg::NodeVisitor
+{
+    TransformerGraph::GraphDescription& description;
+
+    public:
+        DescriptionVisitor(TransformerGraph::GraphDescription& description)
+            : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
+            , description(description) {}
+
+        void apply(::osg::Node &node)
+        {
+            osg::PositionAttitudeTransform *trans = getTransform(&node,false);
+            if(!trans)
+            {
+                return;
+            }
+
+
+            osg::PositionAttitudeTransform *parent = getParentTransform(trans);
+            if (parent)
+            {
+                description.push_back(make_pair(parent->getName(), trans->getName()));
+            }
+            else
+            {
+            }
+
+            traverse(node);
+        }
+};
 
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
@@ -274,6 +307,14 @@ private:
 osg::Node *TransformerGraph::create(const std::string &name)
 {
     return createFrame(name,true);
+}
+
+TransformerGraph::GraphDescription TransformerGraph::getGraphDescription(osg::Node& transformer)
+{
+    GraphDescription result;
+    DescriptionVisitor visitor(result);
+    transformer.accept(visitor);
+    return result;
 }
 
 osg::Node* TransformerGraph::addFrame(osg::Node &transformer,const std::string &name)

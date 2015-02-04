@@ -1,11 +1,3 @@
-#ifndef BOOST_TEST_DYN_LINK
-    #define BOOST_TEST_DYN_LINK
-#endif
-
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_MODULE "test"
-#define BOOST_AUTO_TEST_MAIN
-
 #include "../src/Vizkit3DWidget.hpp"
 #include "../src/QtThreadedWidget.hpp"
 #include <boost/test/unit_test.hpp>
