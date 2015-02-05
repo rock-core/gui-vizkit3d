@@ -17,6 +17,8 @@
 #include "AxesNode.hpp"
 #include "OsgVisitors.hpp"
 #include "TransformerGraph.hpp"
+#include "EnableGLDebugOperation.hpp"
+#include <boost/lexical_cast.hpp>
 
 #include <osg/PositionAttitudeTransform>
 #include <osgGA/TrackballManipulator>
@@ -133,6 +135,11 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name)
     // set threading model
     setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
 
+    if (getenv("VIZKIT_GL_DEBUG") && (std::string(getenv("VIZKIT_GL_DEBUG")) == "1"))
+    {
+        osg::setNotifyLevel(osg::DEBUG_INFO);
+        setRealizeOperation(new EnableGLDebugOperation());
+    }
     // disable the default setting of viewer.done() by pressing Escape.
     setKeyEventSetsDone(0);
 

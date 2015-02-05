@@ -15,6 +15,7 @@ rock_library(vizkit3d
         OsgVisitors.cpp
         TransformerGraph.cpp
         CoordinateFrame.cpp
+        EnableGLDebugOperation.cpp
         ${PROPERTY_BROWSER_RESOURCES} 
     MOC
         Vizkit3DPlugin.cpp 
