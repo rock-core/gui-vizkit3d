@@ -1,27 +1,30 @@
 #include "ConnexionPlugin.h"
 
-#include <Eigen/Geometry>
-
 namespace vizkit3d{
 
 
 ConnexionPlugin::ConnexionPlugin(){
     //Different Values for this Plugin
-    scale[RX] = 5000.0;
-    scale[RY] = 5000.0;
-    scale[RZ] = 5000.0;
-    scale[TX] = 10.0;
-    scale[TY] = 10.0;
-    scale[TZ] = 10.0;
-    matrix.makeIdentity();
+    scale[RX] = 0.1;
+    scale[RY] = 0.1;
+    scale[RZ] = 0.1;
+    scale[TX] = 0.3;
+    scale[TY] = 0.3;
+    scale[TZ] = 0.3;
+    matrix = osg::Matrix::rotate(osg::Quat(
+                M_PI/2.0, osg::Vec3f(1,0,0), 
+                0.0f, osg::Vec3f(0,1,0), 
+                -M_PI/2.0, osg::Vec3f(0,0,1))) * 
+        osg::Matrix::translate(-4,0,1);
+
+
 }
 
 ConnexionPlugin::~ConnexionPlugin(){
 }
 
 bool ConnexionPlugin::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us){
-    //Do Nothing, otherwise the screen would be resettet, but if needed in future here could be an addtional mouse handler registered
-    return false;
+    return handleMouse();
 }
 
 bool ConnexionPlugin::init(osgGA::MatrixManipulator *manipulator){
@@ -30,26 +33,21 @@ bool ConnexionPlugin::init(osgGA::MatrixManipulator *manipulator){
       return false;
 
   if(!ConnexionHID::init()) return false;
-
-  timer.setSingleShot(false);
-  timer.setInterval(20);
-  manipulator->setByMatrix(osg::Matrixd::identity());
-  timer.start();
-  connect(&timer,SIGNAL(timeout()), this, SLOT(handleMouse()));
   return true;
 }
 
-void ConnexionPlugin::handleMouse(){
-    controldev::connexionValues motion;
+bool ConnexionPlugin::handleMouse(){
+  if(getFileDescriptor() < 0) return false;
+  controldev::connexionValues motion;
 
   //Maybe in future the buttons could also be handelt, currently not used but already requested
-    controldev::connexionValues newValues;
+  controldev::connexionValues newValues;
 
   //Getting actual readings
   getValue(motion, newValues);
 
   //Save processing power if mouse is not moved
-  if(motion.rx == 0.0 && motion.ry == 0.0 && motion.rz == 0.0 && motion.tx == 0.0 && motion.ty == 0.0 && motion.tz == 0.0) return;
+  if(motion.rx == 0.0 && motion.ry == 0.0 && motion.rz == 0.0 && motion.tx == 0.0 && motion.ty == 0.0 && motion.tz == 0.0) return false;
 
   //Get current Camera matrix
   osg::Matrixd m = manipulator->getMatrix();
@@ -57,33 +55,19 @@ void ConnexionPlugin::handleMouse(){
   //Create Quaternion from current Camera Orientation
   osg::Quat q;
   q.set(m);
-  Eigen::Quaterniond qu(q.w(),q.x(),q.y(),q.z());
-
-  //Create Quaternion from Rotation request
-  Eigen::Quaterniond q2 = 
-        Eigen::AngleAxisd(motion.rx,Eigen::Vector3d::UnitX()) *
-        Eigen::AngleAxisd(motion.ry,Eigen::Vector3d::UnitY()) *
-        Eigen::AngleAxisd(-motion.rz,Eigen::Vector3d::UnitZ());
-
-  //Be sure that the rotation does not include an scake
-  qu.normalize();
-
+  
   //Create vector from Translation request
-  Eigen::Vector3d v(motion.tx,motion.ty,-motion.tz);
-
+  osg::Vec3f translation(motion.tx,motion.tz,-motion.ty);
   //Rotation translation Request into current Camra frame
-  v = qu * v;
-
+  translation = q * translation;
   //Apply Translation request to current Camera matrix
-  m *= osg::Matrix::translate(v[0],v[1],v[2]);
-
+  m *= osg::Matrix::translate(translation);
+  //Create Quaternion from Rotation request
+  q.makeRotate(motion.rx,osg::Vec3f(1,0,0), -motion.ry, osg::Vec3f(0,0,1), motion.rz, osg::Vec3f(0,1,0));
   //Apply Rotation Request to current Camera matrix (after translation!)
-  m = osg::Matrix::rotate(osg::Quat(q2.x(),q2.y(),q2.z(),q2.w())) * m;
-
-  //Apply matrix to camera(-maipulator)
+  m = osg::Matrix::rotate(q) * m;
   manipulator->setByMatrix(m);
-
-  //LOG_DEBUG("Got called! %f,%f,%f, %f, %f, %f\n",v[0],v[1],v[2],rx,ry,rz);
+  return true;
 }
 
 }
