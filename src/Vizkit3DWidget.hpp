@@ -63,6 +63,7 @@ namespace vizkit3d
             void setTrackedNode(vizkit3d::VizPluginBase* plugin);
             QSize sizeHint() const;
 
+            static Vizkit3DWidget *widget;
             ConnexionPlugin *cp;
 
         public slots:
@@ -132,6 +133,8 @@ namespace vizkit3d
             QString findLibPath(QString lib_name);
             QObject* loadPlugin(QString lib_name,QString plugin_name);
             QStringList* getAvailablePlugins();
+
+            void changeBlending();
 
         signals:
             void addPlugins(QObject* plugin,QObject* parent);

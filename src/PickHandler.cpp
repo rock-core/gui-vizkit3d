@@ -13,6 +13,8 @@
 
 #include "PickHandler.hpp"
 
+#include "Vizkit3DWidget.hpp"
+
 using namespace vizkit3d;
 
 PickHandler::PickHandler():
@@ -75,6 +77,10 @@ bool PickHandler::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
                 else if (ea.getKey()=='n')
 		{
                     this->wireFrameModeOff(viewer->getSceneData());
+		}
+                else if (ea.getKey()=='b')
+		{
+                    Vizkit3DWidget::widget->changeBlending();
 		}
                 else
                 {

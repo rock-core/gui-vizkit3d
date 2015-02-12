@@ -5,9 +5,9 @@ namespace vizkit3d{
 
 ConnexionPlugin::ConnexionPlugin(){
     //Different Values for this Plugin
-    scale[RX] = 0.1;
-    scale[RY] = 0.1;
-    scale[RZ] = 0.1;
+    scale[RX] = 0.02;
+    scale[RY] = 0.02;
+    scale[RZ] = 0.02;
     scale[TX] = 0.3;
     scale[TY] = 0.3;
     scale[TZ] = 0.3;

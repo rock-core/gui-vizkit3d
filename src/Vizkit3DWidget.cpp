@@ -19,6 +19,7 @@
 #include "OsgVisitors.hpp"
 #include "TransformerGraph.hpp"
 
+#include <osg/BlendFunc>
 #include <osg/PositionAttitudeTransform>
 #include <osgGA/TrackballManipulator>
 #include <osgGA/TerrainManipulator>
@@ -117,9 +118,12 @@ bool Vizkit3DConfig::isAxesLabels() const
     return parent->isAxesLabels();
 }
 
+Vizkit3DWidget* Vizkit3DWidget::widget =0;
+
 Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name)
     : QWidget(parent)
 {
+    Vizkit3DWidget::widget = this;
     //create layout
     //objects will be owned by the parent widget (this)
     QVBoxLayout* layout = new QVBoxLayout;
@@ -299,6 +303,27 @@ void Vizkit3DWidget::setTrackedNode( VizPluginBase* plugin )
 }
 
 
+void Vizkit3DWidget::changeBlending(){
+    static int i=-1;
+    osg::ref_ptr<osg::StateSet> state = root->getOrCreateStateSet();
+    osg::ref_ptr<osg::BlendFunc> bf = new osg::BlendFunc;
+    i++;
+    printf("Selecting blending handler %i\n",i);
+    switch(i){
+        case 0: bf->setFunction(GL_DST_COLOR, GL_SRC_COLOR); break;
+        case 1: bf->setFunction(GL_DST_COLOR, GL_SRC_ALPHA); break;
+        case 2: bf->setFunction(GL_ONE, GL_ONE); break;
+        case 3: bf->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); break;
+        case 4: bf->setFunction(GL_ONE_MINUS_DST_COLOR, GL_ONE_MINUS_SRC_COLOR); break;
+        case 5: bf->setFunction(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA); break;
+        case 6: bf->setFunction(GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA);
+        default:
+                i=0;
+    }
+    state->setAttributeAndModes(bf);
+}
+
+
 osg::Group *Vizkit3DWidget::createSceneGraph(const QString &world_name)
 {
     //create root node that holds all other nodes
@@ -308,13 +333,15 @@ osg::Group *Vizkit3DWidget::createSceneGraph(const QString &world_name)
     osg::ref_ptr<osg::StateSet> state = root->getOrCreateStateSet();
     state->setGlobalDefaults();
     state->setMode( GL_LINE_SMOOTH, osg::StateAttribute::ON );
-    state->setMode( GL_POINT_SMOOTH, osg::StateAttribute::ON );
-    state->setMode( GL_BLEND, osg::StateAttribute::ON );    
+    state->setMode( GL_POINT_SMOOTH, osg::StateAttribute::ON);
+    state->setMode( GL_BLEND, osg::StateAttribute::ON );   
+//    osg::BlendFunc
     state->setMode( GL_DEPTH_TEST, osg::StateAttribute::ON);
-    state->setMode( GL_LIGHTING, osg::StateAttribute::ON );
-    state->setMode( GL_LIGHT0, osg::StateAttribute::ON );
-    state->setMode( GL_LIGHT1, osg::StateAttribute::ON );
+    state->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
+    state->setMode( GL_LIGHT0, osg::StateAttribute::OFF );
+    state->setMode( GL_LIGHT1, osg::StateAttribute::OFF );
 
+    //TODO new
     root->setDataVariance(osg::Object::DYNAMIC);
 
     // Add the Light to a LightSource. Add the LightSource and
