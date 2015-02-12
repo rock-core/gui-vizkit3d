@@ -316,9 +316,10 @@ void Vizkit3DWidget::changeBlending(){
         case 3: bf->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); break;
         case 4: bf->setFunction(GL_ONE_MINUS_DST_COLOR, GL_ONE_MINUS_SRC_COLOR); break;
         case 5: bf->setFunction(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA); break;
-        case 6: bf->setFunction(GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA);
+        case 6: bf->setFunction(GL_ONE, GL_ZERO); break;
+        case 7: bf->setFunction(GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA);
         default:
-                i=0;
+                i=-1;
     }
     state->setAttributeAndModes(bf);
 }
