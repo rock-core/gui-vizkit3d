@@ -256,8 +256,9 @@ QWidget* Vizkit3DWidget::addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node
     view->addEventHandler(pickHandler);
     
     cp = new ConnexionPlugin();
-    view->setCameraManipulator( cp );
-    cp->init(view->getCameraManipulator());
+    if(cp->init(view->getCameraManipulator())){
+        view->setCameraManipulator( cp );
+    }
 
     return gw->getGLWidget();
 }
