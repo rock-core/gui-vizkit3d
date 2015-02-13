@@ -665,7 +665,7 @@ void Vizkit3DWidget::setTransformation(const QString &source_frame,const QString
     QQuaternion quat = _quat.normalized();
     // enforce valid position
     QVector3D position = _position;
-    if(isnan(position.x()) ||isnan(position.y()) || isnan(position.z()))
+    if(std::isnan(position.x()) ||std::isnan(position.y()) || std::isnan(position.z()))
         position = QVector3D();
     int count = getVisualizationFrames()->size();
     TransformerGraph::setTransformation(*getRootNode(),source_frame.toStdString(),target_frame.toStdString(),
