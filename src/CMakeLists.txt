@@ -4,6 +4,15 @@ include(RockRuby)
 rock_find_cmake(Boost REQUIRED COMPONENTS thread system)
 QT4_ADD_RESOURCES(PROPERTY_BROWSER_RESOURCES qtpropertybrowser/qtpropertybrowser.qrc)
 
+pkg_check_modules(CONTROLDEV "controldev")
+if(CONTROLDEV_FOUND)
+    LIST(APPEND DEPS_EXTRA "controldev")
+    ADD_DEFINITIONS(-DUSE_3DMOUSE)
+    LIST(APPEND ADDITIONAL_SOURCES "ConnexionPlugin.cpp")
+    LIST(APPEND MOC_EXTRA "ConnexionPlugin.h")
+endif()
+
+
 rock_library(vizkit3d
     SOURCES
         QtThreadedWidget.cpp
@@ -15,7 +24,8 @@ rock_library(vizkit3d
         OsgVisitors.cpp
         TransformerGraph.cpp
         CoordinateFrame.cpp
-        ${PROPERTY_BROWSER_RESOURCES} 
+        ${PROPERTY_BROWSER_RESOURCES}
+        ${ADDITIONAL_SOURCES}
     MOC
         Vizkit3DPlugin.cpp 
         PickHandler.cpp

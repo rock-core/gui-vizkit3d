@@ -11,6 +11,8 @@
 namespace osgQt { class GraphicsWindowQt;}
 namespace vizkit3d
 {
+    class ConnexionPlugin;
+
     // configuration class
     class Vizkit3DConfig :public QObject
     {
@@ -60,6 +62,9 @@ namespace vizkit3d
             osg::Group* getRootNode() const;
             void setTrackedNode(vizkit3d::VizPluginBase* plugin);
             QSize sizeHint() const;
+
+            static Vizkit3DWidget *widget;
+            ConnexionPlugin *cp;
 
         public slots:
             void addPlugin(QObject* plugin, QObject* parent = NULL);
@@ -128,6 +133,8 @@ namespace vizkit3d
             QString findLibPath(QString lib_name);
             QObject* loadPlugin(QString lib_name,QString plugin_name);
             QStringList* getAvailablePlugins();
+
+            void changeBlending();
 
         signals:
             void addPlugins(QObject* plugin,QObject* parent);

@@ -10,6 +10,7 @@
 #include <QRegExp>
 #include <algorithm>
 
+#include "ConnexionPlugin.h"
 #include "Vizkit3DWidget.hpp"
 #include "Vizkit3DPlugin.hpp"
 #include "PickHandler.hpp"
@@ -18,6 +19,7 @@
 #include "OsgVisitors.hpp"
 #include "TransformerGraph.hpp"
 
+#include <osg/BlendFunc>
 #include <osg/PositionAttitudeTransform>
 #include <osgGA/TrackballManipulator>
 #include <osgGA/TerrainManipulator>
@@ -116,9 +118,12 @@ bool Vizkit3DConfig::isAxesLabels() const
     return parent->isAxesLabels();
 }
 
+Vizkit3DWidget* Vizkit3DWidget::widget =0;
+
 Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name)
     : QWidget(parent)
 {
+    Vizkit3DWidget::widget = this;
     //create layout
     //objects will be owned by the parent widget (this)
     QVBoxLayout* layout = new QVBoxLayout;
@@ -242,12 +247,18 @@ QWidget* Vizkit3DWidget::addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node
 
     view->setSceneData(scene);
     view->addEventHandler( new osgViewer::StatsHandler );
+    
     // view->setCameraManipulator( new osgGA::TrackballManipulator );
     view->setCameraManipulator( new osgGA::TerrainManipulator);
 
     // pickhandler is for selecting objects in the opengl view
     PickHandler* pickHandler = new PickHandler();
     view->addEventHandler(pickHandler);
+    
+    cp = new ConnexionPlugin();
+    if(cp->init()){
+        view->setCameraManipulator( cp );
+    }
 
     return gw->getGLWidget();
 }
@@ -293,6 +304,32 @@ void Vizkit3DWidget::setTrackedNode( VizPluginBase* plugin )
 }
 
 
+void Vizkit3DWidget::changeBlending(){
+    static int i=-1;
+    osg::ref_ptr<osg::StateSet> state = root->getOrCreateStateSet();
+    osg::ref_ptr<osg::BlendFunc> bf = new osg::BlendFunc;
+    i++;
+    printf("Selecting blending handler %i\n",i);
+    switch(i){
+        case 0: state->setMode( GL_BLEND, osg::StateAttribute::OFF ); break;
+        case 1: 
+                bf->setFunction(GL_DST_COLOR, GL_SRC_COLOR); 
+                state->setMode( GL_BLEND, osg::StateAttribute::ON );
+                break;
+        case 2: bf->setFunction(GL_DST_COLOR, GL_SRC_ALPHA); break;
+        case 3: bf->setFunction(GL_ONE, GL_ONE); break;
+        case 4: bf->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); break;
+        case 5: bf->setFunction(GL_ONE_MINUS_DST_COLOR, GL_ONE_MINUS_SRC_COLOR); break;
+        case 6: bf->setFunction(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA); break;
+        case 7: bf->setFunction(GL_ONE, GL_ZERO); break;
+        case 8: bf->setFunction(GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA);
+        default:
+                i=-1;
+    }
+    state->setAttributeAndModes(bf);
+}
+
+
 osg::Group *Vizkit3DWidget::createSceneGraph(const QString &world_name)
 {
     //create root node that holds all other nodes
@@ -302,13 +339,15 @@ osg::Group *Vizkit3DWidget::createSceneGraph(const QString &world_name)
     osg::ref_ptr<osg::StateSet> state = root->getOrCreateStateSet();
     state->setGlobalDefaults();
     state->setMode( GL_LINE_SMOOTH, osg::StateAttribute::ON );
-    state->setMode( GL_POINT_SMOOTH, osg::StateAttribute::ON );
-    state->setMode( GL_BLEND, osg::StateAttribute::ON );    
+    state->setMode( GL_POINT_SMOOTH, osg::StateAttribute::ON);
+    state->setMode( GL_BLEND, osg::StateAttribute::ON );   
+//    osg::BlendFunc
     state->setMode( GL_DEPTH_TEST, osg::StateAttribute::ON);
-    state->setMode( GL_LIGHTING, osg::StateAttribute::ON );
-    state->setMode( GL_LIGHT0, osg::StateAttribute::ON );
-    state->setMode( GL_LIGHT1, osg::StateAttribute::ON );
+    state->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
+    state->setMode( GL_LIGHT0, osg::StateAttribute::OFF );
+    state->setMode( GL_LIGHT1, osg::StateAttribute::OFF );
 
+    //TODO new
     root->setDataVariance(osg::Object::DYNAMIC);
 
     // Add the Light to a LightSource. Add the LightSource and
