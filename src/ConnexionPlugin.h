@@ -9,17 +9,17 @@
 namespace vizkit3d{
 
 
-class ConnexionPlugin : public QObject,public controldev::ConnexionHID,  public osgGA::MatrixManipulator{
+class ConnexionPlugin : public QObject, public controldev::ConnexionHID,  public osgGA::MatrixManipulator{
     Q_OBJECT
 public:
   
     ConnexionPlugin();
-    ~ConnexionPlugin();
+    virtual ~ConnexionPlugin();
 
   /* Scan all devices in /dev/input/ to find the SpaceMouse.
    * Returns the true if an SpaceMouse could be found.
    */
-  bool init(osgGA::MatrixManipulator *manipulator);
+  bool init();
 
   /**
    * Needed functions for osgGA::MatrixManipulator
@@ -66,7 +66,7 @@ public slots:
      * this method need to called periodicly, this is normally done
      * via an QT-Timer which is initialized in the init() function
      */
-    void handleMouse();
+    bool handleMouse();
     
 };
 

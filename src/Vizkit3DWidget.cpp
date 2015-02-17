@@ -10,6 +10,7 @@
 #include <QRegExp>
 #include <algorithm>
 
+#include "ConnexionPlugin.h"
 #include "Vizkit3DWidget.hpp"
 #include "Vizkit3DPlugin.hpp"
 #include "PickHandler.hpp"
@@ -242,12 +243,18 @@ QWidget* Vizkit3DWidget::addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node
 
     view->setSceneData(scene);
     view->addEventHandler( new osgViewer::StatsHandler );
+    
     // view->setCameraManipulator( new osgGA::TrackballManipulator );
     view->setCameraManipulator( new osgGA::TerrainManipulator);
 
     // pickhandler is for selecting objects in the opengl view
     PickHandler* pickHandler = new PickHandler();
     view->addEventHandler(pickHandler);
+    
+    cp = new ConnexionPlugin();
+    if(cp->init()){
+        view->setCameraManipulator( cp );
+    }
 
     return gw->getGLWidget();
 }
