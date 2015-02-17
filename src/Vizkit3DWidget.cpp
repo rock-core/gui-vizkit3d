@@ -311,14 +311,18 @@ void Vizkit3DWidget::changeBlending(){
     i++;
     printf("Selecting blending handler %i\n",i);
     switch(i){
-        case 0: bf->setFunction(GL_DST_COLOR, GL_SRC_COLOR); break;
-        case 1: bf->setFunction(GL_DST_COLOR, GL_SRC_ALPHA); break;
-        case 2: bf->setFunction(GL_ONE, GL_ONE); break;
-        case 3: bf->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); break;
-        case 4: bf->setFunction(GL_ONE_MINUS_DST_COLOR, GL_ONE_MINUS_SRC_COLOR); break;
-        case 5: bf->setFunction(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA); break;
-        case 6: bf->setFunction(GL_ONE, GL_ZERO); break;
-        case 7: bf->setFunction(GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA);
+        case 0: state->setMode( GL_BLEND, osg::StateAttribute::OFF ); break;
+        case 1: 
+                bf->setFunction(GL_DST_COLOR, GL_SRC_COLOR); 
+                state->setMode( GL_BLEND, osg::StateAttribute::ON );
+                break;
+        case 2: bf->setFunction(GL_DST_COLOR, GL_SRC_ALPHA); break;
+        case 3: bf->setFunction(GL_ONE, GL_ONE); break;
+        case 4: bf->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); break;
+        case 5: bf->setFunction(GL_ONE_MINUS_DST_COLOR, GL_ONE_MINUS_SRC_COLOR); break;
+        case 6: bf->setFunction(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA); break;
+        case 7: bf->setFunction(GL_ONE, GL_ZERO); break;
+        case 8: bf->setFunction(GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA);
         default:
                 i=-1;
     }
