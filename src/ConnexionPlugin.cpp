@@ -1,4 +1,5 @@
 #include "ConnexionPlugin.h"
+#include <iostream>
 
 namespace vizkit3d{
 
@@ -27,12 +28,11 @@ bool ConnexionPlugin::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionA
     return handleMouse();
 }
 
-bool ConnexionPlugin::init(osgGA::MatrixManipulator *manipulator){
-  this->manipulator = manipulator;
-  if(!manipulator)
+bool ConnexionPlugin::init(){
+  if(!ConnexionHID::init()){
+      std::cerr << "Cannot open mouse" << std::endl;
       return false;
-
-  if(!ConnexionHID::init()) return false;
+  }
   return true;
 }
 
@@ -49,24 +49,20 @@ bool ConnexionPlugin::handleMouse(){
   //Save processing power if mouse is not moved
   if(motion.rx == 0.0 && motion.ry == 0.0 && motion.rz == 0.0 && motion.tx == 0.0 && motion.ty == 0.0 && motion.tz == 0.0) return false;
 
-  //Get current Camera matrix
-  osg::Matrixd m = manipulator->getMatrix();
-  
   //Create Quaternion from current Camera Orientation
   osg::Quat q;
-  q.set(m);
+  q.set(matrix);
   
   //Create vector from Translation request
   osg::Vec3f translation(motion.tx,motion.tz,-motion.ty);
   //Rotation translation Request into current Camra frame
   translation = q * translation;
   //Apply Translation request to current Camera matrix
-  m *= osg::Matrix::translate(translation);
+  matrix *= osg::Matrix::translate(translation);
   //Create Quaternion from Rotation request
   q.makeRotate(motion.rx,osg::Vec3f(1,0,0), -motion.ry, osg::Vec3f(0,0,1), motion.rz, osg::Vec3f(0,1,0));
   //Apply Rotation Request to current Camera matrix (after translation!)
-  m = osg::Matrix::rotate(q) * m;
-  manipulator->setByMatrix(m);
+  matrix = osg::Matrix::rotate(q) * matrix;
   return true;
 }
 

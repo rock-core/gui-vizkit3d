@@ -19,7 +19,7 @@ public:
   /* Scan all devices in /dev/input/ to find the SpaceMouse.
    * Returns the true if an SpaceMouse could be found.
    */
-  bool init(osgGA::MatrixManipulator *manipulator);
+  bool init();
 
   /**
    * Needed functions for osgGA::MatrixManipulator
