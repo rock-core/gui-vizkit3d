@@ -3,10 +3,8 @@ Unless otherwise specified later in this file, vizkit3d is licensed under LGPLv2
 Copyright (c) 2011-2014 DFKI GmbH
               2014 Brazilian Institute of Robotics
 
-== Copyright and license for src/EnableGLDebugOperation.hpp and src/EnableGLDebugOperation.cpp
-
-Copyright (c) 2014, Andreas Klein
-All rights reserved.
+src/EnableGLDebugOperation.hpp and src/EnableGLDebugOperation.cpp are Copyright
+(c) 2014, Andreas Klein. License for these two files follows:
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met: 
