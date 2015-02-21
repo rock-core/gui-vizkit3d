@@ -85,6 +85,14 @@ namespace vizkit3d
          */
         static std::string getFrameName(osg::Node &transformer,osg::Node *node);
 
+        typedef std::pair<std::string, std::string> EdgeDescription;
+        typedef std::list<EdgeDescription> GraphDescription;
+
+        /** Returns the shape of the graph as a list of frame names pairs
+         * (from->to)
+         */
+        static GraphDescription getGraphDescription(osg::Node& transformer);
+
         /**
          * Sets the transformation between two subsequently coordinate frames.
          *
