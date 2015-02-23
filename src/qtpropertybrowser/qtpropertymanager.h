@@ -1063,7 +1063,7 @@ public:
 
 public Q_SLOTS:
     void setValue(QtProperty *property, int val);
-    void setEnumNames(QtProperty *property, const QStringList &names);
+    void setEnumNames(QtProperty *property, QStringList names);
     void setEnumIcons(QtProperty *property, const QMap<int, QIcon> &icons);
 Q_SIGNALS:
     void valueChanged(QtProperty *property, int val);

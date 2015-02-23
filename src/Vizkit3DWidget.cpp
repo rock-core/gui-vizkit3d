@@ -65,12 +65,7 @@ void Vizkit3DConfig::setAxes(bool value)
 QStringList Vizkit3DConfig::getVisualizationFrames() const
 {
     QStringList frames = getWidget()->getVisualizationFrames();
-    QString current = getWidget()->getVisualizationFrame();
-    if (!current.isEmpty() && !frames.isEmpty())
-    {
-        frames.removeOne(current);
-        frames.prepend(current);
-    }
+    frames.push_front(getWidget()->getVisualizationFrame());
     return frames;
 }
 
@@ -130,11 +125,23 @@ namespace
 
 QStringList Vizkit3DConfig::getAvailableCameraManipulators() const
 {
-    QString current = manipulatorIDToName(getWidget()->getCameraManipulator());
     QStringList names;
-    names.append(current);
     for (int i = 0; KNOWN_MANIPULATORS[i].name != 0; ++i)
-        names.append(KNOWN_MANIPULATORS[i].name);
+    {
+        if (KNOWN_MANIPULATORS[i].is_public)
+            names.append(KNOWN_MANIPULATORS[i].name);
+    }
+
+    QString current = getWidget()->getCameraManipulatorName();
+    // When using the node tracker, the visualization frame name is not part of
+    // the list of available frames. Add it at the back to ensure the qt
+    // property browser handles it properly
+    if (!names.contains(current))
+        names.push_back(current);
+
+    // The first element of the list is interpreted as the currently selected
+    // frame by the property browser
+    names.push_front(current);
     return names;
 }
 

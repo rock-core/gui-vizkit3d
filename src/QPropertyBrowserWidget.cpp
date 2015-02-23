@@ -88,10 +88,7 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
             if(prop.type() == QVariant::StringList)
             {
                 QtVariantProperty* property = variantManager->addProperty(QtVariantPropertyManager::enumTypeId(),prop.name());
-                QStringList string_list = var.toStringList();
-                if(!string_list.empty())
-                    property->setValue(string_list.front());
-                property->setAttribute("enumNames",var);
+                property->setAttribute("enumNames", var);
                 properties.push_back(property);
             }
             else
@@ -220,17 +217,10 @@ void QPropertyBrowserWidget::propertyChangedInObject(QString property_name)
             if(!value.isValid())
                 return;
 
-            // emulate string list by using enum factory
-            if(value.type() == QVariant::StringList)
-            {
-                QtVariantProperty* prop = dynamic_cast<QtVariantProperty*>(property);
-                prop->setValue(value.toStringList().front());
-                prop->setAttribute("enumNames",value);
-            }
+            if (value.type() == QVariant::StringList)
+                dynamic_cast<QtVariantProperty*>(property)->setAttribute("enumNames", value);
             else
-            {
                 variantManager->setValue(property, value);
-            }
         }
     }
 }
