@@ -982,6 +982,8 @@ void Vizkit3DWidget::setCameraManipulator(CAMERA_MANIPULATORS manipulatorType, b
         case MULTI_TOUCH_TRACKBALL_MANIPULATOR:
             newManipulator = new osgGA::MultiTouchTrackballManipulator;
             break;
+        default:
+            throw std::invalid_argument("invalid camera manipulator type provided");
     };
 
     setCameraManipulator(newManipulator);
