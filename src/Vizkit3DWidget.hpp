@@ -92,7 +92,12 @@ namespace vizkit3d
         /** Like the trackball manipulator, but reacts to pinch-to-zoom vs. drag
          * multitouch events.
          */
-        MULTI_TOUCH_TRACKBALL_MANIPULATOR
+        MULTI_TOUCH_TRACKBALL_MANIPULATOR,
+        /** Tracks a node. This cannot be set with setCameraManipulator, as the
+         * manipulator requires special setup. It is used internally by
+         * setVisualizationFrame and setTrackedNode
+         */
+        NODE_TRACKER_MANIPULATOR
     };
 
     // configuration class
@@ -163,18 +168,47 @@ namespace vizkit3d
             ~Vizkit3DWidget();
 
             osg::Group* getRootNode() const;
+            /** Sets the camera to track this node's reference position
+             *
+             * @arg tracked_object_name the name of the object being tracked,
+             *   to be reported in getCameraManipulatorName (and therefore in
+             *   the property browser view)
+             */
+            void setTrackedNode(osg::Node* node, QString tracked_object_name);
+            /** @overload sets the camera to track this plugins's root position
+             *
+             * The tracked object name is <Plugin plugin_name>
+             */
             void setTrackedNode(vizkit3d::VizPluginBase* plugin);
+
             QSize sizeHint() const;
 
-            /** Sets the current camera manipulator */
+            /** Sets the current camera manipulator
+             *
+             * Unlike the two setCameraManipulator overloads, calling this
+             * method will not change the manipulator's property as displayed in
+             * the widget.  Use only if you know what you are doing
+             */
             void setCameraManipulator(osg::ref_ptr<osgGA::CameraManipulator> manipulator, bool resetToDefaultHome = false);
 
         public slots:
             void addPlugin(QObject* plugin, QObject* parent = NULL);
             void removePlugin(QObject* plugin);
 
-            ///The frame in which the data should be displayed
-            void setVisualizationFrame(const QString &frame,bool update=true);
+            /** The frame name of the OSG visualization's root frame
+             */
+            QString getRootVisualizationFrame() const;
+
+            /** @deprecated the update parameter is unused now, use
+             * setVisualizationFrame(QString) instead
+             */
+            void setVisualizationFrame(const QString &frame, bool update)
+            { return setVisualizationFrame(frame); }
+
+            /** Sets the camera to be centered on this frame (and fixed in this
+             * frame)
+             */
+            void setVisualizationFrame(const QString &frame);
 
             // we have to use a pointer here otherwise qt ruby is crashing
             QStringList* getVisualizationFramesRuby() const;
@@ -290,11 +324,20 @@ namespace vizkit3d
             PluginMap plugins;
 
             QTimer _timer;
+
+            /** The current visualization frame as set by setVisualizationFrame */
             QString current_frame;
+
+            /** The current tracked object if the manipulator is a node tracker
+             *
+             * This is set by setTrackedNode and setVisualizationFrame
+             */
+            QString tracked_object_name;
 
             osg::ref_ptr<osg::Image> grabImage;
 
-            CAMERA_MANIPULATORS currentManipulator;
+            CAMERA_MANIPULATORS last_manipulator;
+            CAMERA_MANIPULATORS current_manipulator;
     };
 }
 #endif

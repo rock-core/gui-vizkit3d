@@ -111,14 +111,16 @@ namespace
     {
         QString name;
         CAMERA_MANIPULATORS id;
+        bool is_public;
     };
     ManipulatorDefinition KNOWN_MANIPULATORS[] = {
-        { "First Person", FIRST_PERSON_MANIPULATOR },
-        { "Flight", FLIGHT_MANIPULATOR },
-        { "Orbit", ORBIT_MANIPULATOR },
-        { "Terrain", TERRAIN_MANIPULATOR },
-        { "Trackball", TRACKBALL_MANIPULATOR },
-        { "Multi Touch Trackball", MULTI_TOUCH_TRACKBALL_MANIPULATOR },
+        { "First Person", FIRST_PERSON_MANIPULATOR, true },
+        { "Flight", FLIGHT_MANIPULATOR, true },
+        { "Multi Touch Trackball", MULTI_TOUCH_TRACKBALL_MANIPULATOR, true },
+        { "Node Tracker", NODE_TRACKER_MANIPULATOR, false },
+        { "Orbit", ORBIT_MANIPULATOR, true },
+        { "Terrain", TERRAIN_MANIPULATOR, true },
+        { "Trackball", TRACKBALL_MANIPULATOR, true },
         { 0, FIRST_PERSON_MANIPULATOR } // only the empty string is used as guard
     };
 }
@@ -168,6 +170,9 @@ CAMERA_MANIPULATORS Vizkit3DConfig::manipulatorNameToID(QString const& name)
 
 void Vizkit3DConfig::setCameraManipulator(QStringList const& manipulator)
 {
+    if (getWidget()->getCameraManipulatorName() == manipulator.front())
+        return;
+    
     CAMERA_MANIPULATORS id = manipulatorNameToID(manipulator.front());
     return getWidget()->setCameraManipulator(id);
 }
@@ -346,9 +351,25 @@ osg::Group* Vizkit3DWidget::getRootNode() const
 
 void Vizkit3DWidget::setTrackedNode( VizPluginBase* plugin )
 {
+    return setTrackedNode(plugin->getRootNode(), QString("<Plugin %1>").arg(plugin->getPluginName()));
+}
+
+void Vizkit3DWidget::setTrackedNode( osg::Node* node, QString tracked_object_name )
+{
     osgViewer::View *view = getView(0);
     assert(view);
-    //TODO 
+
+    osgGA::NodeTrackerManipulator* manipulator = new osgGA::NodeTrackerManipulator;
+    view->setCameraManipulator(manipulator);
+    manipulator->setTrackNode(node);
+    manipulator->setHomePosition(osg::Vec3(-5, 0, 5), osg::Vec3(0,0,0), osg::Vec3(0,0,1));
+    manipulator->setTrackerMode(osgGA::NodeTrackerManipulator::NODE_CENTER);
+    if (current_manipulator != NODE_TRACKER_MANIPULATOR)
+        last_manipulator = current_manipulator;
+    current_manipulator = NODE_TRACKER_MANIPULATOR;
+    view->home();
+    this->tracked_object_name = tracked_object_name;
+    emit propertyChanged("manipulator");
 }
 
 
@@ -680,8 +701,23 @@ void Vizkit3DWidget::setPluginDataFrameIntern(const QString& frame, QObject* plu
     }
 }
 
-void Vizkit3DWidget::setVisualizationFrame(const QString& frame,bool update)
+QString Vizkit3DWidget::getRootVisualizationFrame() const
 {
+    return QString::fromStdString(getRootNode()->getName());
+}
+
+void Vizkit3DWidget::setVisualizationFrame(const QString& frame)
+{
+    if (current_frame == frame)
+        return;
+    else if (frame.isEmpty() || frame == getRootVisualizationFrame())
+    {
+        // Reset to the previously used manipulator. This will reset the frame
+        // to the root frame and emit the propertyChanged event
+        setCameraManipulator(last_manipulator);
+        return;
+    }
+
     osgViewer::View *view = getView(0);
     assert(view);
     // the following is not working if the directly track the transformation 
@@ -690,25 +726,9 @@ void Vizkit3DWidget::setVisualizationFrame(const QString& frame,bool update)
     if (!node)
         throw std::invalid_argument("frame " + frame.toStdString() + " does not exist");
 
-    if(frame.size()==0 || frame == QString(getRootNode()->getName().c_str()))
-    {
-        // Reset to the centre of the scene, and allow the user to move freely
-        setCameraManipulator(currentManipulator, true);
-    }
-    else
-    {
-        // Track the requested frame
-        osgGA::NodeTrackerManipulator* manipulator = new osgGA::NodeTrackerManipulator;
-        view->setCameraManipulator(manipulator);
-        manipulator->setTrackNode(node);
-        manipulator->setHomePosition(osg::Vec3(-5, 0, 5), osg::Vec3(0,0,0), osg::Vec3(0,0,1));
-        manipulator->setTrackerMode(osgGA::NodeTrackerManipulator::NODE_CENTER);
-    }
     current_frame = frame;
-    view->home();
-
-    if(update)
-        emit propertyChanged("frame");
+    setTrackedNode(node, QString("<Frame %1>").arg(frame));
+    emit propertyChanged("frame");
 }
 
 void Vizkit3DWidget::setTransformation(const QString &source_frame,const QString &target_frame,
@@ -935,12 +955,15 @@ QObject* Vizkit3DWidget::loadPlugin(QString lib_name,QString plugin_name)
 
 QString Vizkit3DWidget::getCameraManipulatorName() const
 {
-    return Vizkit3DConfig::manipulatorIDToName(getCameraManipulator());
+    if (getCameraManipulator() == NODE_TRACKER_MANIPULATOR)
+        return tracked_object_name;
+    else
+        return Vizkit3DConfig::manipulatorIDToName(getCameraManipulator());
 }
 
 CAMERA_MANIPULATORS Vizkit3DWidget::getCameraManipulator() const
 {
-    return currentManipulator;
+    return current_manipulator;
 }
 
 void Vizkit3DWidget::setCameraManipulator(osg::ref_ptr<osgGA::CameraManipulator> manipulator, bool resetToDefaultHome)
@@ -990,12 +1013,20 @@ void Vizkit3DWidget::setCameraManipulator(CAMERA_MANIPULATORS manipulatorType, b
         case MULTI_TOUCH_TRACKBALL_MANIPULATOR:
             newManipulator = new osgGA::MultiTouchTrackballManipulator;
             break;
+        case NODE_TRACKER_MANIPULATOR:
+            throw std::invalid_argument("cannot set the manipulaor to NODE_TRACKER_MANIPULATOR using setCameraManipulator, use setTrackedNode instead");
         default:
             throw std::invalid_argument("invalid camera manipulator type provided");
     };
 
     setCameraManipulator(newManipulator);
-    currentManipulator = manipulatorType;
+    current_manipulator = manipulatorType;
     emit propertyChanged("manipulator");
+
+    if (current_frame != getRootVisualizationFrame())
+    {
+        current_frame = getRootVisualizationFrame();
+        emit propertyChanged("frame");
+    }
 }
 
