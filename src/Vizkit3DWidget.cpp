@@ -27,6 +27,7 @@
 
 #include <osgGA/FirstPersonManipulator>
 #include <osgGA/FlightManipulator>
+#include <osgGA/OrbitManipulator>
 #include <osgGA/NodeTrackerManipulator>
 #include <osgGA/TerrainManipulator>
 #include <osgGA/TrackballManipulator>
@@ -978,7 +979,7 @@ void Vizkit3DWidget::setCameraManipulator(CAMERA_MANIPULATORS manipulatorType, b
             newManipulator = new osgGA::FlightManipulator;
             break;
         case ORBIT_MANIPULATOR:
-            newManipulator = new osgGA::FlightManipulator;
+            newManipulator = new osgGA::OrbitManipulator;
             break;
         case TERRAIN_MANIPULATOR:
             newManipulator = new osgGA::TerrainManipulator;
