@@ -66,7 +66,8 @@ void Vizkit3DConfig::setAxes(bool value)
 QStringList Vizkit3DConfig::getVisualizationFrames() const
 {
     QStringList frames = getWidget()->getVisualizationFrames();
-    frames.push_front(getWidget()->getVisualizationFrame());
+    if (!frames.isEmpty())
+        frames.push_front(getWidget()->getVisualizationFrame());
     return frames;
 }
 
