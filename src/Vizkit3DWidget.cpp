@@ -540,6 +540,8 @@ void Vizkit3DWidget::clearEnvironmentPlugin()
     if (!env_plugin)
         return;
 
+    disableEnvironmentPlugin();
+
     env_plugin->getRefNode()->removeChild(root);
     PluginMap::iterator it = plugins.find(env_plugin);
     if (it != plugins.end())
