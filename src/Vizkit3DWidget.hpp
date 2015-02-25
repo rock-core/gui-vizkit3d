@@ -68,6 +68,10 @@ namespace vizkit3d
             ///The frame in which the data should be displayed
             void setVisualizationFrame(const QString &frame,bool update=true);
 
+            /** Require the given frame to be directly attached to the root
+             */
+            void setRootFrame(QString frame);
+
             // we have to use a pointer here otherwise qt ruby is crashing
             QStringList* getVisualizationFrames() const;
             QString getVisualizationFrame() const;
@@ -162,6 +166,9 @@ namespace vizkit3d
         private:
             //holds the scene
             osg::ref_ptr<osg::Group> root;
+
+            // The name of a frame that should be directly attached to osg_world
+            QString root_frame;
 
             /** The set of known plugins, as a mapping from the plugin to the osg::Node
              * to which it should be attached.

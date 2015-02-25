@@ -105,6 +105,11 @@ namespace vizkit3d
         static bool setTransformation(osg::Node &transformer,const std::string &source_frame,const std::string &target_frame,
                                       const osg::Quat &quat, const osg::Vec3d &trans);
 
+        /** Ensures that the transform node for the given frame is a direct
+         * child of the transformer node
+         */
+        static void makeRoot(osg::Node& transformer, std::string const& desiredRoot);
+
         /**
          * Gets the transformation between two coordinate frames. Thereby unlike setTransformation the frames do not have to be subsequently.
          *

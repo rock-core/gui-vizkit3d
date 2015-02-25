@@ -47,6 +47,59 @@ BOOST_AUTO_TEST_CASE(it_keeps_existing_links_even_if_updates_are_provided_revers
     REQUIRE_SAME_GRAPH(expected_graph, root);
 }
 
+BOOST_AUTO_TEST_CASE(it_allows_to_make_a_frame_root)
+{
+    NodePtr root(TransformerGraph::create("root"));
+
+    TransformerGraph::setTransformation(*root, "frame1", "frame2", Identity, Zero);
+    TransformerGraph::setTransformation(*root, "frame1", "frame3", Identity, Zero);
+    TransformerGraph::setTransformation(*root, "frame2", "frame4", Identity, Zero);
+    TransformerGraph::makeRoot(*root, "frame2");
+
+    char const* expected_graph[] = {
+        "root", "frame2",
+        "frame2", "frame1",
+        "frame1", "frame3",
+        "frame2", "frame4"
+    };
+    REQUIRE_SAME_GRAPH(expected_graph, root);
+}
+
+BOOST_AUTO_TEST_CASE(it_automatically_changes_the_node_shape_when_needed)
+{
+    NodePtr root(TransformerGraph::create("root"));
+
+    TransformerGraph::setTransformation(*root, "frame1", "frame2", Identity, Zero);
+    TransformerGraph::setTransformation(*root, "frame3", "frame4", Identity, Zero);
+    TransformerGraph::setTransformation(*root, "frame2", "frame4", Identity, Zero);
+
+    char const* expected_graph[] = {
+        "root", "frame1",
+        "frame1", "frame2",
+        "frame2", "frame4",
+        "frame4", "frame3"
+    };
+    REQUIRE_SAME_GRAPH(expected_graph, root);
+}
+
+BOOST_AUTO_TEST_CASE(it_handles_loops_gracefully_when_reshaping)
+{
+    NodePtr root(TransformerGraph::create("root"));
+
+    TransformerGraph::setTransformation(*root, "frame1", "frame2", Identity, Zero);
+    TransformerGraph::setTransformation(*root, "frame2", "frame3", Identity, Zero);
+    TransformerGraph::setTransformation(*root, "frame3", "frame4", Identity, Zero);
+    TransformerGraph::setTransformation(*root, "frame4", "frame2", Identity, Zero);
+
+    char const* expected_graph[] = {
+        "root", "frame3",
+        "frame3", "frame4",
+        "frame4", "frame2",
+        "frame2", "frame1"
+    };
+    REQUIRE_SAME_GRAPH(expected_graph, root);
+}
+
 BOOST_AUTO_TEST_SUITE_END();
 
 
