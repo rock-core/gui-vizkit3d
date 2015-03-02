@@ -4,7 +4,7 @@ using namespace vizkit3d;
 
 DefaultManipulator::DefaultManipulator()
 {
-    setWheelMovement(10.0, false);
+    setWheelMovement(1.0, false);
 }
 
 // doc in parent
