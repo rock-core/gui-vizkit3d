@@ -12,6 +12,7 @@
 #include <iostream>
 
 using namespace vizkit3d;
+using namespace osg;
 
 //local helper methods://
 //////////////////////////////////////////////////////////////////
@@ -404,6 +405,43 @@ static void invertOSGTransform(osg::Vec3d& trans, osg::Quat& quat,
     std::swap(source_frame, target_frame);
 }
 
+static void makeRoot(osg::Node& _transformer,
+        osg::ref_ptr<osg::PositionAttitudeTransform> desiredRoot,
+        std::set<osg::Node*> ancestors)
+{
+    PositionAttitudeTransform* transformer = getTransform(&_transformer);
+
+    osg::Vec3d trans = osg::Vec3d(0, 0, 0);
+    osg::Quat  rot   = osg::Quat(0, 0, 0, 1);
+
+    ref_ptr<PositionAttitudeTransform> currentNode(desiredRoot);
+    ref_ptr<PositionAttitudeTransform> lastNode(transformer);
+    while(currentNode != transformer && !ancestors.count(currentNode))
+    {
+        osg::Vec3d nextTrans = currentNode->getPosition();
+        osg::Quat  nextRot   = currentNode->getAttitude();
+        currentNode->setPosition(trans);
+        currentNode->setAttitude(rot);
+        rot   = nextRot.inverse();
+        trans = -(rot * nextTrans);
+
+        ref_ptr<PositionAttitudeTransform> parent(getTransform(currentNode->getParent(0)));
+        parent->removeChild(currentNode);
+        lastNode->addChild(currentNode);
+        lastNode = currentNode;
+        currentNode = parent;
+    }
+}
+
+void TransformerGraph::makeRoot(osg::Node& _transformer, std::string const& frame)
+{
+    ref_ptr<PositionAttitudeTransform> desiredRoot(FindFrame::find(_transformer, frame));
+    if (!desiredRoot)
+        return;
+
+    return ::makeRoot(_transformer, desiredRoot, std::set<osg::Node*>());
+}
+
 bool TransformerGraph::setTransformation(osg::Node &transformer,const std::string &_source_frame,const std::string &_target_frame,
         const osg::Quat &_quat, const osg::Vec3d &_trans)
 {
@@ -415,9 +453,7 @@ bool TransformerGraph::setTransformation(osg::Node &transformer,const std::strin
     osg::Vec3d trans = _trans;
 
     if(!source)
-    {
         source = getTransform(addFrame(transformer,source_frame));
-    }
     if(!target)
         target = getTransform(addFrame(transformer,target_frame));
 
@@ -438,6 +474,27 @@ bool TransformerGraph::setTransformation(osg::Node &transformer,const std::strin
             invertOSGTransform(trans, quat, source, target, source_frame, target_frame);
         }
 
+        if (target->getParent(0) != &transformer)
+        {
+            std::set<osg::Node*> ancestors;
+            osg::ref_ptr<osg::Node> sourceAncestor = source;
+            while (sourceAncestor != &transformer)
+            {
+                ancestors.insert(sourceAncestor);
+                if (sourceAncestor->getParent(0) == target)
+                {
+                    target->removeChild(sourceAncestor);
+                    getTransform(&transformer)->addChild(sourceAncestor);
+                    ancestors.clear();
+                    break;
+                }
+                else
+                    sourceAncestor = sourceAncestor->getParent(0);
+            }
+
+            ::makeRoot(transformer, getTransform(target), ancestors);
+
+        }
 
 	osg::ref_ptr<osg::Node> node = target; //insures that node is not deleted
         removeFrame(transformer,target_frame);

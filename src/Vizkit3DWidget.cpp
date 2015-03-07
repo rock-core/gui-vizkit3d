@@ -753,6 +753,15 @@ void Vizkit3DWidget::setTransformation(const QString &source_frame,const QString
         for(;it != plugins.end();++it)
             it->first->setVisualizationFrame(it->first->getVisualizationFrame());
     }
+
+    if (!root_frame.isEmpty());
+        TransformerGraph::makeRoot(*getRootNode(), root_frame.toStdString());
+}
+
+void Vizkit3DWidget::setRootFrame(QString frame)
+{
+    TransformerGraph::makeRoot(*getRootNode(), frame.toStdString());
+    root_frame = frame;
 }
 
 void Vizkit3DWidget::getTransformation(const QString &source_frame,const QString &target_frame, QVector3D &position, QQuaternion &orientation)const
