@@ -8,21 +8,115 @@
 #include <QVector3D>
 #include <QTimer>
 
+#include <osgGA/CameraManipulator>
+
 namespace osgQt { class GraphicsWindowQt;}
 namespace vizkit3d
 {
+    class Vizkit3DWidget;
+
+    /** The list of available camera manipulators
+     *
+     * IMPORTANT: if you change this, you MUST edit the KNOWN_MANIPULATORS
+     *            array in Vizkit3DWidget.cpp as well !
+     */
+    enum CAMERA_MANIPULATORS
+    {
+        /**
+         * Wheel controls forward/backward movement, in the direction of the
+         * camera. Left button + mouse movement controls pitch and yaw.
+         *
+         * The value given to setWheelMovement is the scale factor between the
+         * wheel movement and the actual movement in the scene. It defaults to
+         * 0.05. There is also a way to force centering the camera on the
+         * current mouse pointer position whenever the wheel is used by giving
+         * the SET_CENTER_ON_WHEEL_FORWARD_MOVEMENT flag to the constructor. The
+         * centering is animated (i.e. not abrupt) and the animation step is
+         * controlled by setAnimationTime
+         *
+         * If vertical axis is fixed (the default), the rotation maintain the
+         * "up" vector. Otherwise, they don't. It can be changed with
+         * setVerticalAxisFixed.
+         */
+        FIRST_PERSON_MANIPULATOR,
+        /** Behaves like a flight simulator controlled by a mouse. The position
+         * of the mouse w.r.t. the center of the window causes pitch/roll. By
+         * default (can be turned off), yaw is also changed if the camera banked
+         * (has non-zero roll).
+         *
+         * In addition, the camera has a velocity and moves continuously if this
+         * velocity is non-zero. The left mouse button causes the camera's
+         * velocity to grow, the right mouse to decrease and the middle mouse
+         * button sets it to zero.
+         */
+        FLIGHT_MANIPULATOR,
+        /** Transforms the camera as if it was "orbiting" a point of reference
+         * (the camera center).
+         *
+         * The mouse wheel applies a scale factor on the distance between the
+         * camera eye and the center, as 1.0 + wheelZoomFactor (regardless of
+         * the actual wheel movement). The default wheelZoomFactor is 0.1. If
+         * this distance becomes smaller than a minimum distance (defaults to
+         * 0.05), the center gets "pushed" forward so that the minimum distance
+         * is kept. In practice, it means that the wheel movement is huge when
+         * far from the center and tiny when close.
+         *
+         * Moving the mouse with the left mouse button pressed does a trackball
+         * rotation, i.e. makes the camera move "as if" the mouse moved a sphere
+         * centered on the center point. By default, the orbit manipulator
+         * constrains the vertical axis to keep within the same plane (i.e.
+         * vertical is always vertical)
+         *
+         * Moving the mouse with the right mouse button pressed also applies a
+         * zoom (following the same rules). The scale factor applied is the
+         * movement in Y, 1.0 seems to be the whole height of the window.
+         *
+         * Moving the mouse with the middle mouse button pressed applies a panning
+         * movement. The movement is displacement * 0.3 * distance_to_center
+         */
+        ORBIT_MANIPULATOR,
+        /** Like an orbit manipulator, with the middle-button behaviour changed
+         *
+         * If the mouse is moved while the middle button is pressed, X movement
+         * moves the center in the camera's side direction and Y movement
+         * moves it in the forward direction. The movement in each case is 0.3 *
+         * distance_to_center * distance_moved. In addition, if a node is
+         * associated with the camera, the center will "track" the node's shape,
+         * i.e. an intersection is computed and the distance-to-node kept.
+         */
+        TERRAIN_MANIPULATOR,
+        /** Just like an orbit manipulator, but with the fixed-vertical-axis
+         * constraint set to false by default
+         */
+        TRACKBALL_MANIPULATOR,
+        /** Like the trackball manipulator, but reacts to pinch-to-zoom vs. drag
+         * multitouch events.
+         */
+        MULTI_TOUCH_TRACKBALL_MANIPULATOR,
+        /** Tracks a node. This cannot be set with setCameraManipulator, as the
+         * manipulator requires special setup. It is used internally by
+         * setVisualizationFrame and setTrackedNode
+         */
+        NODE_TRACKER_MANIPULATOR
+    };
+
     // configuration class
     class Vizkit3DConfig :public QObject
     {
         Q_OBJECT
-        Q_PROPERTY( bool axes READ isAxes WRITE setAxes)
-        Q_PROPERTY( bool axes_labels READ isAxesLabels WRITE setAxesLabels)
-        Q_PROPERTY( QColor background READ getBackgroundColor WRITE setBackgroundColor)
-        Q_PROPERTY( QStringList frame READ getVisualizationFrames WRITE setVisualizationFrame)
-        Q_PROPERTY( bool transformer READ isTransformer WRITE setTransformer)
+
+        private:
+            Q_PROPERTY( bool axes READ isAxes WRITE setAxes)
+            Q_PROPERTY( bool axes_labels READ isAxesLabels WRITE setAxesLabels)
+            Q_PROPERTY( QColor background READ getBackgroundColor WRITE setBackgroundColor)
+            Q_PROPERTY( QStringList frame READ getVisualizationFrames WRITE setVisualizationFrame)
+            Q_PROPERTY( bool transformer READ isTransformer WRITE setTransformer)
+            Q_ENUMS( CAMERA_MANIPULATORS )
+            Q_PROPERTY( QStringList manipulator READ getAvailableCameraManipulators WRITE setCameraManipulator )
 
         public:
-            Vizkit3DConfig(QObject *parent);
+            Vizkit3DConfig(Vizkit3DWidget *parent);
+            Vizkit3DWidget* getWidget() const;
 
         signals:
             void propertyChanged(QString);
@@ -41,12 +135,28 @@ namespace vizkit3d
 
             QColor getBackgroundColor()const;
             void setBackgroundColor(QColor color);
+
+            /** Converts a manipulator ID to its name */
+            static QString manipulatorIDToName(CAMERA_MANIPULATORS id);
+            /** Converts a manipulator name to its ID */
+            static CAMERA_MANIPULATORS manipulatorNameToID(QString const& name);
+            
+            /** Sets the current camera manipulator among those available */
+            void setCameraManipulator(QStringList const& manipulators);
+            /** Returns the list of available camera manipulators, with the
+             * current one at the top
+             */
+            QStringList getAvailableCameraManipulators() const;
     };
 
     class QDESIGNER_WIDGET_EXPORT Vizkit3DWidget : public QWidget, public osgViewer::CompositeViewer
     {
         Q_OBJECT
         public:
+            static osg::Vec3d const DEFAULT_EYE;
+            static osg::Vec3d const DEFAULT_CENTER;
+            static osg::Vec3d const DEFAULT_UP;
+
             friend class VizPluginBase;
             Vizkit3DWidget(QWidget* parent = 0,const QString &world_name = "world_osg");
 
@@ -58,18 +168,51 @@ namespace vizkit3d
             ~Vizkit3DWidget();
 
             osg::Group* getRootNode() const;
+            /** Sets the camera to track this node's reference position
+             *
+             * @arg tracked_object_name the name of the object being tracked,
+             *   to be reported in getCameraManipulatorName (and therefore in
+             *   the property browser view)
+             */
+            void setTrackedNode(osg::Node* node, QString tracked_object_name);
+            /** @overload sets the camera to track this plugins's root position
+             *
+             * The tracked object name is <Plugin plugin_name>
+             */
             void setTrackedNode(vizkit3d::VizPluginBase* plugin);
+
             QSize sizeHint() const;
+
+            /** Sets the current camera manipulator
+             *
+             * Unlike the two setCameraManipulator overloads, calling this
+             * method will not change the manipulator's property as displayed in
+             * the widget.  Use only if you know what you are doing
+             */
+            void setCameraManipulator(osg::ref_ptr<osgGA::CameraManipulator> manipulator, bool resetToDefaultHome = false);
 
         public slots:
             void addPlugin(QObject* plugin, QObject* parent = NULL);
             void removePlugin(QObject* plugin);
 
-            ///The frame in which the data should be displayed
-            void setVisualizationFrame(const QString &frame,bool update=true);
+            /** The frame name of the OSG visualization's root frame
+             */
+            QString getRootVisualizationFrame() const;
+
+            /** @deprecated the update parameter is unused now, use
+             * setVisualizationFrame(QString) instead
+             */
+            void setVisualizationFrame(const QString &frame, bool update)
+            { return setVisualizationFrame(frame); }
+
+            /** Sets the camera to be centered on this frame (and fixed in this
+             * frame)
+             */
+            void setVisualizationFrame(const QString &frame);
 
             // we have to use a pointer here otherwise qt ruby is crashing
-            QStringList* getVisualizationFrames() const;
+            QStringList* getVisualizationFramesRuby() const;
+            QStringList getVisualizationFrames() const;
             QString getVisualizationFrame() const;
 
             /**
@@ -129,6 +272,17 @@ namespace vizkit3d
             QObject* loadPlugin(QString lib_name,QString plugin_name);
             QStringList* getAvailablePlugins();
 
+            /** @overload sets the camera manipulator by name */
+            void setCameraManipulator(QString manipulator, bool resetToDefaultHome = false);
+            /** Sets the current camera manipulator among those available */
+            void setCameraManipulator(CAMERA_MANIPULATORS manipulator, bool resetToDefaultHome = false);
+            /** @overload returns the name of the current camera manipulator
+             * (needed for the Ruby bindings
+             */
+            QString getCameraManipulatorName() const;
+            /** Returns the current camera manipulator */
+            CAMERA_MANIPULATORS getCameraManipulator() const;
+
         signals:
             void addPlugins(QObject* plugin,QObject* parent);
             void removePlugins(QObject* plugin);
@@ -170,9 +324,20 @@ namespace vizkit3d
             PluginMap plugins;
 
             QTimer _timer;
+
+            /** The current visualization frame as set by setVisualizationFrame */
             QString current_frame;
 
+            /** The current tracked object if the manipulator is a node tracker
+             *
+             * This is set by setTrackedNode and setVisualizationFrame
+             */
+            QString tracked_object_name;
+
             osg::ref_ptr<osg::Image> grabImage;
+
+            CAMERA_MANIPULATORS last_manipulator;
+            CAMERA_MANIPULATORS current_manipulator;
     };
 }
 #endif

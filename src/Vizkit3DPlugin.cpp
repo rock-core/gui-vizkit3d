@@ -229,18 +229,23 @@ void VizPluginBase::deleteOldData()
     oldNodes->removeChild(0,oldNodes->getNumChildren());
 }
 
+Vizkit3DWidget* VizPluginBase::getWidget() const
+{
+    return dynamic_cast<Vizkit3DWidget*>(this->parent());
+}
+
 QStringList VizPluginBase::getVisualizationFrames() const
 {
-    Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
-    if(!parent)
+    if (!getWidget())
         return QStringList();
-    QStringList *list = parent->getVisualizationFrames();
-    if(!current_frame.isEmpty() && !list->isEmpty())
+
+    QStringList list = getWidget()->getVisualizationFrames();
+    if(!current_frame.isEmpty() && !list.isEmpty())
     {
-        list->removeOne(current_frame);
-        list->prepend(current_frame);
+        list.removeOne(current_frame);
+        list.prepend(current_frame);
     }
-    return QStringList(*list);
+    return list;
 }
 
 QString VizPluginBase::getVisualizationFrame() const
@@ -252,22 +257,18 @@ QString VizPluginBase::getVisualizationFrame() const
 // this is called from the property browser
 void VizPluginBase::setVisualizationFrame(const QStringList &frames)
 {
-    if(frames.isEmpty())
+    if (frames.empty())
         return;
-
-    Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
-    if(!parent)
-        return;
-    parent->setPluginDataFrameIntern(frames.front(),this);
-    current_frame = frames.front();
+    
+    setVisualizationFrame(frames.front());
 }
 
 void VizPluginBase::setVisualizationFrame(const QString &frame)
 {
-    Vizkit3DWidget *parent = dynamic_cast<Vizkit3DWidget*>(this->parent());
-    if(!parent)
+    if (!getWidget())
         return;
-    parent->setPluginDataFrameIntern(frame,this);
+
+    getWidget()->setPluginDataFrameIntern(frame,this);;
     current_frame = frame;
     emit propertyChanged("frame");
 }

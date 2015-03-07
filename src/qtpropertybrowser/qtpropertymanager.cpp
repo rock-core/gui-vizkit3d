@@ -4385,7 +4385,7 @@ void QtEnumPropertyManager::setValue(QtProperty *property, int val)
 
     \sa enumNames(), enumNamesChanged()
 */
-void QtEnumPropertyManager::setEnumNames(QtProperty *property, const QStringList &enumNames)
+void QtEnumPropertyManager::setEnumNames(QtProperty *property, QStringList enumNames)
 {
     const QtEnumPropertyManagerPrivate::PropertyValueMap::iterator it = d_ptr->m_values.find(property);
     if (it == d_ptr->m_values.end())
@@ -4393,22 +4393,37 @@ void QtEnumPropertyManager::setEnumNames(QtProperty *property, const QStringList
 
     QtEnumPropertyManagerPrivate::Data data = it.value();
 
-    if (data.enumNames == enumNames)
-        return;
+    QString oldValue, currentValue;
+    if (data.val != -1)
+        oldValue = data.enumNames.at(data.val);
 
+    int newVal = data.val;
+    if (enumNames.empty())
+        newVal = -1;
+    else
+    {
+        currentValue = enumNames.front();
+        enumNames.pop_front();
+        newVal = enumNames.indexOf(currentValue);
+        if (newVal == -1)
+        {
+            newVal = 0;
+            enumNames.push_front(currentValue);
+        }
+    }
+
+    bool updatedNames = (data.enumNames != enumNames);
+    bool updatedValue = (oldValue != currentValue);
     data.enumNames = enumNames;
-
-    data.val = -1;
-
-    if (enumNames.count() > 0)
-        data.val = 0;
-
+    data.val = newVal;
     it.value() = data;
 
-    emit enumNamesChanged(property, data.enumNames);
-
-    emit propertyChanged(property);
-    emit valueChanged(property, data.val);
+    if (updatedNames)
+        emit enumNamesChanged(property, data.enumNames);
+    if (updatedValue)
+        emit valueChanged(property, data.val);
+    if (updatedNames || updatedValue)
+        emit propertyChanged(property);
 }
 
 /*!
