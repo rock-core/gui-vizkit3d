@@ -510,6 +510,8 @@ void Vizkit3DWidget::setEnvironmentPlugin(QObject* plugin)
         it = plugins.find(env_plugin);
     }
 
+    clearEnvironmentPlugin();
+
     it->second->removeChild(env_plugin->getRootNode());
     env_plugin->getRefNode()->addChild(root);
     this->env_plugin = env_plugin;
