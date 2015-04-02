@@ -35,7 +35,7 @@ osg::PositionAttitudeTransform *getTransform(osg::Node *node,bool raise=true)
     return pos;
 }
 
-osg::PositionAttitudeTransform *createFrame(const std::string &name,bool root=false)
+osg::PositionAttitudeTransform *createFrame(const std::string &name,bool root=false,float textSize=0.1)
 {
     osg::PositionAttitudeTransform* node = new osg::PositionAttitudeTransform();
     node->setName(name.c_str());
@@ -51,11 +51,11 @@ osg::PositionAttitudeTransform *createFrame(const std::string &name,bool root=fa
     osg::Geode *text_geode = new osg::Geode;
     osgText::Text *text= new osgText::Text;
     text->setText(name);
-    text->setCharacterSize(0.1);
+    text->setCharacterSize(textSize);
     if(root)
-        text->setPosition(osg::Vec3d(0.05,-0.15,0));
+        text->setPosition(osg::Vec3d(textSize/2,-textSize*1.5,0));
     else
-        text->setPosition(osg::Vec3d(0.05,0.05,0));
+        text->setPosition(osg::Vec3d(textSize/2,textSize/2,0));
     text_geode->addDrawable(text);
     switch_node->addChild(text_geode,true);
 
@@ -101,6 +101,15 @@ osg::Switch *getFrameSwitch(osg::Node *transformer)
     return switch_node;
 }
 
+osgText::Text *getFrameText(osg::Node *transform)
+{
+    osg::Switch* switch_node = getFrameSwitch(transform);
+    osg::Geode *text_geode = switch_node->getChild(1)->asGeode();
+    assert(text_geode);
+    osgText::Text* text = dynamic_cast<osgText::Text*>(text_geode->getDrawable(0));
+    assert(text);
+    return text;
+}
 
 class FindFrame: public ::osg::NodeVisitor
 {
@@ -223,6 +232,39 @@ class AnnotationSetter: public ::osg::NodeVisitor
         bool active;
 };
 
+class TextSizeSetter: public ::osg::NodeVisitor
+{
+    public:
+        static void set(::osg::Node &node,float size)
+        {
+            TextSizeSetter setter(size);
+            node.accept(setter);
+        }
+
+        TextSizeSetter(float size)
+            : ::osg::NodeVisitor(::osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN)
+            , size(size) {}
+
+        void apply(::osg::Node &node)
+        {
+            // Just stop if the node is not a PositionAttitudeTransform to prevent
+            // traversing the hole graph.
+            // The assumption here is that all custom nodes are always added
+            // to a group child node of the transformation nodes.
+            osg::PositionAttitudeTransform *trans = getTransform(&node,false);
+            if(!trans)
+                return;
+            
+            osgText::Text* text = getFrameText(trans);
+            text->setCharacterSize(size);
+            text->setPosition(osg::Vec3d(size / 2, size / 2, size / 2));
+
+            traverse(node);
+        }
+    private:
+        float size;
+};
+
 class NodeRemover: public ::osg::NodeVisitor
 {
     public:
@@ -307,7 +349,7 @@ class DescriptionVisitor: public ::osg::NodeVisitor
 
 osg::Node *TransformerGraph::create(const std::string &name)
 {
-    return createFrame(name,true);
+    return createFrame(name,true,0.1);
 }
 
 TransformerGraph::GraphDescription TransformerGraph::getGraphDescription(osg::Node& transformer)
@@ -324,7 +366,7 @@ osg::Node* TransformerGraph::addFrame(osg::Node &transformer,const std::string &
         return getFrame(transformer,name);
 
     osg::PositionAttitudeTransform *trans = getTransform(&transformer);
-    osg::PositionAttitudeTransform *node = createFrame(name);
+    osg::PositionAttitudeTransform *node = createFrame(name,false,getTextSize(transformer));
     trans->addChild(node);
     return node;
 }
@@ -363,6 +405,17 @@ std::string TransformerGraph::getFrameName(osg::Node &transformer,osg::Node *nod
 std::string TransformerGraph::getWorldName(const osg::Node &transformer)
 {
     return std::string(transformer.getName());
+}
+
+void TransformerGraph::setTextSize(osg::Node &transformer, float size)
+{
+    TextSizeSetter::set(transformer, size);
+}
+
+float TransformerGraph::getTextSize(osg::Node &transformer)
+{
+    osgText::Text *text= getFrameText(&transformer);
+    return text->getCharacterHeight();
 }
 
 bool TransformerGraph::getTransformation(osg::Node &transformer,const std::string &source_frame,const std::string &target_frame,

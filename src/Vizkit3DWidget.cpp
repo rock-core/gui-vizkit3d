@@ -97,6 +97,16 @@ void Vizkit3DConfig::setEnvironmentPluginEnabled(bool enabled)
     return getWidget()->setEnvironmentPluginEnabled(enabled);
 }
 
+float Vizkit3DConfig::getTransformerTextSize() const
+{
+    return getWidget()->getTransformerTextSize();
+}
+
+void Vizkit3DConfig::setTransformerTextSize(float value)
+{
+    return getWidget()->setTransformerTextSize(value);
+}
+
 QColor Vizkit3DConfig::getBackgroundColor() const
 {
     return getWidget()->getBackgroundColor();
@@ -861,6 +871,17 @@ void Vizkit3DWidget::setTransformer(bool value)
 {
     TransformerGraph::showFrameAnnotation(*getRootNode(),value);
     emit propertyChanged("transformer");
+}
+
+float Vizkit3DWidget::getTransformerTextSize() const
+{
+    return TransformerGraph::getTextSize(*getRootNode());
+}
+
+void Vizkit3DWidget::setTransformerTextSize(float size)
+{
+    TransformerGraph::setTextSize(*getRootNode(),size);
+    emit propertyChanged("transformerTextSize");
 }
 
 void Vizkit3DWidget::setAxesLabels(bool value)
