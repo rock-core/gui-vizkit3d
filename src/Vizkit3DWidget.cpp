@@ -87,6 +87,16 @@ void Vizkit3DConfig::setTransformer(bool value)
     return getWidget()->setTransformer(value);
 }
 
+bool Vizkit3DConfig::isEnvironmentPluginEnabled() const
+{
+    return getWidget()->isEnvironmentPluginEnabled();
+}
+
+void Vizkit3DConfig::setEnvironmentPluginEnabled(bool enabled)
+{
+    return getWidget()->setEnvironmentPluginEnabled(enabled);
+}
+
 QColor Vizkit3DConfig::getBackgroundColor() const
 {
     return getWidget()->getBackgroundColor();
@@ -471,10 +481,7 @@ void Vizkit3DWidget::setPluginEnabled(QObject* plugin, bool enabled)
 
     if (viz_plugin == env_plugin)
     {
-        if (enabled)
-            enableEnvironmentPlugin();
-        else
-            disableEnvironmentPlugin();
+        setEnvironmentPluginEnabled(enabled);
         return;
     }
 
@@ -515,26 +522,27 @@ void Vizkit3DWidget::setEnvironmentPlugin(QObject* plugin)
     it->second->removeChild(env_plugin->getRootNode());
     env_plugin->getRefNode()->addChild(root);
     this->env_plugin = env_plugin;
-    if (env_plugin->isPluginEnabled())
-        enableEnvironmentPlugin();
+    setEnvironmentPluginEnabled(env_plugin->isPluginEnabled());
 }
 
-void Vizkit3DWidget::enableEnvironmentPlugin()
+void Vizkit3DWidget::setEnvironmentPluginEnabled(bool enabled)
 {
     if (!env_plugin)
-        throw std::logic_error("one must call setEnvironmentPlugin before it can call enableEnvironmentPlugin");
+        return;
 
     osgViewer::View *view = getView(0);
-    view->setSceneData(env_plugin->getRootNode());
+    if (enabled)
+        view->setSceneData(env_plugin->getRootNode());
+    else
+        view->setSceneData(root);
+    emit propertyChanged("environment");
 }
 
-void Vizkit3DWidget::disableEnvironmentPlugin()
+bool Vizkit3DWidget::isEnvironmentPluginEnabled() const
 {
     if (!env_plugin)
-        throw std::logic_error("one must call setEnvironmentPlugin before it can call disableEnvironmentPlugin");
-
-    osgViewer::View *view = getView(0);
-    view->setSceneData(root);
+        return false;
+    return getView(0)->getSceneData() != root;
 }
 
 void Vizkit3DWidget::clearEnvironmentPlugin()
@@ -542,7 +550,7 @@ void Vizkit3DWidget::clearEnvironmentPlugin()
     if (!env_plugin)
         return;
 
-    disableEnvironmentPlugin();
+    setEnvironmentPluginEnabled(false);
 
     env_plugin->getRefNode()->removeChild(root);
     PluginMap::iterator it = plugins.find(env_plugin);

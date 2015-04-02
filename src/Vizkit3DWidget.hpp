@@ -111,6 +111,7 @@ namespace vizkit3d
             Q_PROPERTY( bool axes_labels READ isAxesLabels WRITE setAxesLabels)
             Q_PROPERTY( QColor background READ getBackgroundColor WRITE setBackgroundColor)
             Q_PROPERTY( QStringList frame READ getVisualizationFrames WRITE setVisualizationFrame)
+            Q_PROPERTY( bool environment READ isEnvironmentPluginEnabled WRITE setEnvironmentPluginEnabled)
             Q_PROPERTY( bool transformer READ isTransformer WRITE setTransformer)
             Q_ENUMS( CAMERA_MANIPULATORS )
             Q_PROPERTY( QStringList manipulator READ getAvailableCameraManipulators WRITE setCameraManipulator )
@@ -133,6 +134,9 @@ namespace vizkit3d
 
             bool isTransformer() const;
             void setTransformer(bool value);
+
+            bool isEnvironmentPluginEnabled() const;
+            void setEnvironmentPluginEnabled(bool enabled);
 
             QColor getBackgroundColor()const;
             void setBackgroundColor(QColor color);
@@ -298,6 +302,19 @@ namespace vizkit3d
              * setPluginEnabled
              */
             void setEnvironmentPlugin(QObject* plugin);
+
+            /** Enables or disables the currently selected environment plugin
+             *
+             * It does nothing if there are no selected environment plugin
+             */
+            void setEnvironmentPluginEnabled(bool enabled);
+
+            /** Tests whether the current environment plugin is enabled or not
+             *
+             * It returns false if no environment plugin has been selected at
+             * all
+             */
+            bool isEnvironmentPluginEnabled() const;
 
             /** Removes the current environment plugin
              *
