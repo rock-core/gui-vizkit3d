@@ -46,6 +46,7 @@ rock_library(vizkit3d
         PickHandler.hpp
         ColorConversionHelper.hpp
         CoordinateFrame.hpp
+        EnvPluginBase.hpp
         ${HEADERS_EXTRA}
     LIBS ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY}
     DEPS_CMAKE OpenGL

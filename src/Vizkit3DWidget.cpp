@@ -19,6 +19,7 @@
 #include "TransformerGraph.hpp"
 #include "EnableGLDebugOperation.hpp"
 #include <boost/lexical_cast.hpp>
+#include <vizkit3d/EnvPluginBase.hpp>
 
 #include <osg/PositionAttitudeTransform>
 #include <osgDB/ReadFile>
@@ -84,6 +85,16 @@ bool Vizkit3DConfig::isTransformer() const
 void Vizkit3DConfig::setTransformer(bool value)
 {
     return getWidget()->setTransformer(value);
+}
+
+bool Vizkit3DConfig::isEnvironmentPluginEnabled() const
+{
+    return getWidget()->isEnvironmentPluginEnabled();
+}
+
+void Vizkit3DConfig::setEnvironmentPluginEnabled(bool enabled)
+{
+    return getWidget()->setEnvironmentPluginEnabled(enabled);
 }
 
 QColor Vizkit3DConfig::getBackgroundColor() const
@@ -180,6 +191,7 @@ void Vizkit3DConfig::setCameraManipulator(QStringList const& manipulator)
 
 Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name)
     : QWidget(parent)
+    , env_plugin(NULL)
 {
     //create layout
     //objects will be owned by the parent widget (this)
@@ -446,6 +458,9 @@ void Vizkit3DWidget::deregisterDataHandler(VizPluginBase* viz)
 
 void Vizkit3DWidget::enableDataHandler(VizPluginBase *viz)
 {
+    if (viz == env_plugin)
+        throw std::invalid_argument("attempted to enable the environment plugin");
+
     PluginMap::iterator it = plugins.find(viz);
     if (it != plugins.end())
         it->second->addChild(viz->getRootNode());
@@ -464,6 +479,12 @@ void Vizkit3DWidget::setPluginEnabled(QObject* plugin, bool enabled)
     if (!viz_plugin)
         return;
 
+    if (viz_plugin == env_plugin)
+    {
+        setEnvironmentPluginEnabled(enabled);
+        return;
+    }
+
     PluginMap::const_iterator plugin_it = plugins.find(viz_plugin);
     if (plugin_it == plugins.end())
         return;
@@ -481,6 +502,60 @@ void Vizkit3DWidget::setPluginEnabled(QObject* plugin, bool enabled)
 void Vizkit3DWidget::pluginActivityChanged(bool enabled)
 {
     return setPluginEnabled(QObject::sender(), enabled);
+}
+
+void Vizkit3DWidget::setEnvironmentPlugin(QObject* plugin)
+{
+    EnvPluginBase* env_plugin = dynamic_cast<EnvPluginBase*>(plugin);
+    if (!env_plugin)
+        throw std::invalid_argument("plugin given to setEnvironmentPlugin is not from a subclass of EnvPluginBase");
+
+    PluginMap::iterator it = plugins.find(env_plugin);
+    if (it == plugins.end())
+    {
+        addPlugin(env_plugin);
+        it = plugins.find(env_plugin);
+    }
+
+    clearEnvironmentPlugin();
+
+    it->second->removeChild(env_plugin->getRootNode());
+    env_plugin->getRefNode()->addChild(root);
+    this->env_plugin = env_plugin;
+    setEnvironmentPluginEnabled(env_plugin->isPluginEnabled());
+}
+
+void Vizkit3DWidget::setEnvironmentPluginEnabled(bool enabled)
+{
+    if (!env_plugin)
+        return;
+
+    osgViewer::View *view = getView(0);
+    if (enabled)
+        view->setSceneData(env_plugin->getRootNode());
+    else
+        view->setSceneData(root);
+    emit propertyChanged("environment");
+}
+
+bool Vizkit3DWidget::isEnvironmentPluginEnabled() const
+{
+    if (!env_plugin)
+        return false;
+    return getView(0)->getSceneData() != root;
+}
+
+void Vizkit3DWidget::clearEnvironmentPlugin()
+{
+    if (!env_plugin)
+        return;
+
+    setEnvironmentPluginEnabled(false);
+
+    env_plugin->getRefNode()->removeChild(root);
+    PluginMap::iterator it = plugins.find(env_plugin);
+    if (it != plugins.end())
+        it->second->addChild(env_plugin->getRootNode());
 }
 
 void Vizkit3DWidget::setCameraLookAt(double x, double y, double z)
@@ -691,7 +766,7 @@ void Vizkit3DWidget::setPluginDataFrameIntern(const QString& frame, QObject* plu
     PluginMap::iterator it = plugins.find(viz);
     if (it != plugins.end())
     {
-        if(viz->isPluginEnabled())
+        if(viz != env_plugin && viz->isPluginEnabled())
         {
             disableDataHandler(viz);
             it->second = node;
