@@ -1,7 +1,6 @@
 rock_find_qt4(QtOpenGL)
 include(RockRuby)
 
-rock_find_cmake(Boost REQUIRED COMPONENTS thread system)
 QT4_ADD_RESOURCES(PROPERTY_BROWSER_RESOURCES qtpropertybrowser/qtpropertybrowser.qrc)
 
 rock_library(vizkit3d
