@@ -50,8 +50,14 @@ osg::PositionAttitudeTransform *createFrame(const std::string &name,bool root=fa
     
     osg::Geode *text_geode = new osg::Geode;
     osgText::Text *text= new osgText::Text;
+    text->setAxisAlignment(osgText::Text::SCREEN);
     text->setText(name);
-    text->setCharacterSize(0.1);
+    text->setCharacterSizeMode(osgText::Text::SCREEN_COORDS);
+    text->setCharacterSize(24);
+
+    osg::ref_ptr<osg::StateSet> set = text_geode->getOrCreateStateSet();
+    set->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+
     if(root)
         text->setPosition(osg::Vec3d(0.05,-0.15,0));
     else
