@@ -115,6 +115,7 @@ namespace vizkit3d
             Q_PROPERTY( bool transformer READ isTransformer WRITE setTransformer)
             Q_ENUMS( CAMERA_MANIPULATORS )
             Q_PROPERTY( QStringList manipulator READ getAvailableCameraManipulators WRITE setCameraManipulator )
+            Q_PROPERTY( double transformerTextSize READ getTransformerTextSize WRITE setTransformerTextSize );
 
         public:
             Vizkit3DConfig(Vizkit3DWidget *parent);
@@ -137,6 +138,9 @@ namespace vizkit3d
 
             bool isEnvironmentPluginEnabled() const;
             void setEnvironmentPluginEnabled(bool enabled);
+
+            float getTransformerTextSize() const;
+            void setTransformerTextSize(float value);
 
             QColor getBackgroundColor()const;
             void setBackgroundColor(QColor color);
@@ -253,6 +257,8 @@ namespace vizkit3d
 
             bool isTransformer() const;
             void setTransformer(bool value);
+            float getTransformerTextSize() const;
+            void setTransformerTextSize(float value);
             bool isAxes() const;
             void setAxes(bool value);
 

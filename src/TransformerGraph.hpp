@@ -35,6 +35,16 @@ namespace vizkit3d
         static std::string getWorldName(const osg::Node &transformer);
 
         /**
+         * Sets the size of the frame annotations
+         */
+        static void setTextSize(osg::Node &transformer, float size);
+
+        /**
+         * Returns the size of the frame annotations
+         */
+        static float getTextSize(osg::Node &transformer);
+
+        /**
          * Adds a new coordinate frame to the graph. Use setTranformation to
          * change its location in the graph.
          *
