@@ -3,7 +3,7 @@ include(RockRuby)
 
 QT4_ADD_RESOURCES(PROPERTY_BROWSER_RESOURCES qtpropertybrowser/qtpropertybrowser.qrc)
 
-find_package(OpenSceneGraph REQUIRED osgManipulator osgViewer osgFX osgShadow osgParticle osgTerrain osgDB osgGA osgWidget osgText osgUtil)
+find_package(OpenSceneGraph REQUIRED osgManipulator osgViewer osgFX osgShadow osgParticle osgTerrain osgDB osgGA osgWidget osgText osgUtil osgQt)
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 link_directories(${OPENSCENEGRAPH_LIBRARY_DIRS})
 
