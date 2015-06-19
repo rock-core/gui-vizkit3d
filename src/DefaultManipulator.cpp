@@ -14,7 +14,7 @@ bool DefaultManipulator::performMovementRightMouseButton( const double eventTime
     float scale = 10.0f;
 
     moveRight(-scale * dx);
-    moveUp(scale * dy);
+    moveUp(-scale * dy);
     return true;
 }
 
