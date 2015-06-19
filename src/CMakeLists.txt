@@ -3,10 +3,6 @@ include(RockRuby)
 
 QT4_ADD_RESOURCES(PROPERTY_BROWSER_RESOURCES qtpropertybrowser/qtpropertybrowser.qrc)
 
-find_package(OpenSceneGraph REQUIRED osgManipulator osgViewer osgFX osgShadow osgParticle osgTerrain osgDB osgGA osgWidget osgText osgUtil osgQt)
-include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
-link_directories(${OPENSCENEGRAPH_LIBRARY_DIRS})
-
 rock_library(vizkit3d
     SOURCES
         QtThreadedWidget.cpp
@@ -51,9 +47,9 @@ rock_library(vizkit3d
         CoordinateFrame.hpp
         EnvPluginBase.hpp
         ${HEADERS_EXTRA}
-    LIBS ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${OPENSCENEGRAPH_LIBRARIES}
+    LIBS ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY}
     DEPS_CMAKE OpenGL
-    DEPS_PKGCONFIG ${DEPS_EXTRA})
+    DEPS_PKGCONFIG openscenegraph openscenegraph-osgQt ${DEPS_EXTRA})
 
 rock_library(vizkitwidgetloader
     MOC QVizkitWidgetLoader.cpp
