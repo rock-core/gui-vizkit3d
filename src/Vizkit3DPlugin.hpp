@@ -109,6 +109,8 @@ class Vizkit3DWidget;
  */
 class VizPluginBase : public QObject
 {
+    friend class PickHandler;
+
     Q_OBJECT
     Q_PROPERTY(QString vizkit3d_plugin_name READ getPluginName)
     Q_PROPERTY(bool enabled READ isPluginEnabled WRITE setPluginEnabled)
@@ -239,6 +241,10 @@ class VizPluginBase : public QObject
         */
         void clicked(float x, float y);
 
+       /**
+        * Signals when this plugin has been clicked. x,y,z are in world coordinates.
+        */
+        void picked(float x, float y,float z);
 
     protected:
 	/** override this function to update the visualisation.

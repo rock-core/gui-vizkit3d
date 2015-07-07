@@ -266,6 +266,9 @@ void PickHandler::pick(const osgGA::GUIEventAdapter& ea, osgViewer::View* viewer
                 float wy = (float)viewer->getCamera()->getViewport()->height() - _my;
                 float wx = _mx;
                 plugin_data->getPlugin()->click(wx, wy);
+
+		osg::Vec3 global = intersection.localIntersectionPoint * *intersection.matrix.get();
+                emit plugin_data->getPlugin()->picked(global.x(),global.y(),global.z());
                 break;
 	    }
             // setTrackedNode(viewer, node);
