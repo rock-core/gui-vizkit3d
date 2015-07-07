@@ -10,15 +10,16 @@ using namespace vizkit3d;
 
 /** this adapter is used to forward the update call to the plugin
  */
-struct VizPluginBase::CallbackAdapter : public osg::NodeCallback
+class VizPluginBase::CallbackAdapter : public osg::NodeCallback
 {
-    VizPluginBase* plugin;
-    CallbackAdapter( VizPluginBase* plugin ) : plugin( plugin ) {}
-    void operator()(osg::Node* node, osg::NodeVisitor* nv)
-    {
-	plugin->updateCallback( node );
-	osg::NodeCallback::operator()(node, nv);
-    }
+    public:
+        VizPluginBase* plugin;
+        CallbackAdapter( VizPluginBase* plugin ) : plugin( plugin ) {}
+        void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        {
+            plugin->updateCallback( node );
+            osg::NodeCallback::operator()(node, nv);
+        }
 };
 
 VizPluginBase::VizPluginBase(QObject *parent)
@@ -34,6 +35,7 @@ VizPluginBase::VizPluginBase(QObject *parent)
     rootNode->addChild(oldNodes);
 
     // reference counter we do not have to delete the data
+    // add picker callback
     vizNode->setUserData(new PickedUserData(this));
 }
 
