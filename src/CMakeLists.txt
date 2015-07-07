@@ -40,6 +40,7 @@ rock_library(vizkit3d
         AxesNode.hpp
         OsgVisitors.hpp
         QtThreadedWidget.hpp
+        Vizkit3DBase.hpp
         Vizkit3DPlugin.hpp
         Vizkit3DWidget.hpp
         QVizkitMainWindow.hpp

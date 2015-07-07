@@ -10,6 +10,7 @@
 #include <QRegExp>
 #include <algorithm>
 
+#include "Vizkit3DBase.hpp"
 #include "Vizkit3DWidget.hpp"
 #include "Vizkit3DPlugin.hpp"
 #include "PickHandler.hpp"
@@ -354,6 +355,7 @@ QWidget* Vizkit3DWidget::addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node
     camera->setClearColor(::osg::Vec4(0.2, 0.2, 0.6, 1.0) );
     camera->setViewport( new ::osg::Viewport(0, 0, traits->width, traits->height) );
     camera->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(traits->width)/static_cast<double>(traits->height), 1.0f, 10000.0f );
+    camera->setCullMask(~INVISIBLE_NODE_MASK);
 
     view->setSceneData(scene);
     view->addEventHandler( new osgViewer::StatsHandler );
@@ -362,7 +364,6 @@ QWidget* Vizkit3DWidget::addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node
     // pickhandler is for selecting objects in the opengl view
     PickHandler* pickHandler = new PickHandler();
     view->addEventHandler(pickHandler);
-
     return gw->getGLWidget();
 }
 
