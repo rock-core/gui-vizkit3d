@@ -885,7 +885,7 @@ void Vizkit3DWidget::setTransformation(const QString &source_frame,const QString
             it->first->setVisualizationFrame(it->first->getVisualizationFrame());
     }
 
-    if (!root_frame.isEmpty());
+    if(!root_frame.isEmpty())
         TransformerGraph::makeRoot(*getRootNode(), root_frame.toStdString());
 }
 

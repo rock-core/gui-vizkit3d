@@ -271,8 +271,7 @@ void VizPluginBase::setVisualizationFrame(const QString &frame)
 {
     if (!getWidget())
         return;
-
-    getWidget()->setPluginDataFrameIntern(frame,this);;
+    getWidget()->setPluginDataFrameIntern(frame,this);
     current_frame = frame;
     emit propertyChanged("frame");
 }
