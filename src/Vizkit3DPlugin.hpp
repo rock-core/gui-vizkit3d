@@ -116,7 +116,7 @@ class VizPluginBase : public QObject
     Q_PROPERTY(bool enabled READ isPluginEnabled WRITE setPluginEnabled)
     Q_PROPERTY(bool KeepOldData READ isKeepOldDataEnabled WRITE setKeepOldData)
     Q_PROPERTY(int MaxOldData READ getMaxOldData WRITE setMaxOldData)
-    Q_PROPERTY(QStringList frame READ getVisualizationFrames WRITE setVisualizationFrame)
+    Q_PROPERTY(QStringList frame READ getVisualizationFrames WRITE setVisualizationFrames)
     Q_PROPERTY(double scale READ getScale WRITE setScale)
 
     public:
@@ -203,7 +203,7 @@ class VizPluginBase : public QObject
 
         /** @overload Helper method to set the visualization frame from the Qt Property Browser
          */
-        void setVisualizationFrame(const QStringList &frames);
+        void setVisualizationFrames(const QStringList &frames);
 
         /** Set the name of the frame which is the origin of this plugin
          */
