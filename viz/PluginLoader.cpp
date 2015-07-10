@@ -1,7 +1,7 @@
 #include "../src/Vizkit3DPlugin.hpp"
 #include "GridVisualization.hpp"
 #include "TextureBoxVisualization.hpp"
-#include "RobotVisualization.hpp"
+#include "ModelVisualization.hpp"
 
 namespace vizkit3d {
     class QtPluginVizkit : public vizkit3d::VizkitPluginFactory {
@@ -20,7 +20,7 @@ namespace vizkit3d {
 	    QStringList *pluginNames = new QStringList();
 	    pluginNames->push_back("GridVisualization");
 	    pluginNames->push_back("TextureBoxVisualization");
-	    pluginNames->push_back("RobotVisualization");
+	    pluginNames->push_back("ModelVisualization");
 	    return pluginNames;
 	}
 	
@@ -31,8 +31,8 @@ namespace vizkit3d {
 	        plugin = new vizkit3d::GridVisualization();
 	    else if (pluginName == "TextureBoxVisualization")
 	        plugin = new vizkit3d::TextureBoxVisualization();
-	    else if (pluginName == "RobotVisualization")
-	        plugin = new vizkit3d::RobotVisualization();
+	    else if (pluginName == "ModelVisualization")
+	        plugin = new vizkit3d::ModelVisualization();
 	    return plugin;
         };
     };

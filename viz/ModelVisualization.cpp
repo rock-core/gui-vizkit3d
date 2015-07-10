@@ -1,4 +1,4 @@
-#include "RobotVisualization.hpp"
+#include "ModelVisualization.hpp"
 #include <vizkit3d/OsgVisitors.hpp>
 #include <osg/Geode>
 #include <osg/Switch>
@@ -12,17 +12,17 @@
 using namespace osg;
 namespace vizkit3d
 {
-    RobotVisualization::RobotVisualization(QObject* parent):
+    ModelVisualization::ModelVisualization(QObject* parent):
         vizkit3d::VizPluginBase(parent)
     {
         setDirty();
     }
 
-    RobotVisualization::~RobotVisualization()
+    ModelVisualization::~ModelVisualization()
     {
     }
 
-    ref_ptr<Node> RobotVisualization::createMainNode()
+    ref_ptr<Node> ModelVisualization::createMainNode()
     {
         Group* group = new Switch();
         ref_ptr<Geode> geode = new Geode();
@@ -34,7 +34,7 @@ namespace vizkit3d
         return group;
     }
 
-    void RobotVisualization::updateMainNode(::osg::Node* node)
+    void ModelVisualization::updateMainNode(::osg::Node* node)
     {
         osg::Group *group = node->asGroup();
         if(!group || group->getNumChildren() == 0)
@@ -78,7 +78,7 @@ namespace vizkit3d
         }
     }
 
-    void RobotVisualization::resetModel()
+    void ModelVisualization::resetModel()
     {
         boost::mutex::scoped_lock lock(updateMutex);
         JointMap::iterator iter = joint_map.begin();
@@ -87,12 +87,12 @@ namespace vizkit3d
         setDirty();
     }
 
-    QString RobotVisualization::getModelPath() const
+    QString ModelVisualization::getModelPath() const
     {
         return model_path;
     }
 
-    void RobotVisualization::setJointRotation(QString const& name,QQuaternion quat)
+    void ModelVisualization::setJointRotation(QString const& name,QQuaternion quat)
     {
         std::string str = name.toStdString();
         JointMap::iterator iter = joint_map.find(str);
@@ -125,7 +125,7 @@ namespace vizkit3d
         }
     }
 
-    void RobotVisualization::setModelPath(QString const& path)
+    void ModelVisualization::setModelPath(QString const& path)
     {
         osg::ref_ptr<osg::Node> node = osgDB::readNodeFile(path.toStdString());
         {

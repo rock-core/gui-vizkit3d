@@ -6,7 +6,7 @@
 namespace vizkit3d
 {
 
-    class RobotVisualization : public VizPluginBase
+    class ModelVisualization : public VizPluginBase
     {
         Q_OBJECT
         Q_PROPERTY(QString model_path READ getModelPath WRITE setModelPath)
@@ -16,8 +16,8 @@ namespace vizkit3d
         Q_PROPERTY(QVariant MaxOldData READ QVariant)
 
     public:
-	RobotVisualization(QObject* parent = NULL);
-	virtual ~RobotVisualization();
+	ModelVisualization(QObject* parent = NULL);
+	virtual ~ModelVisualization();
 
     public slots:
         /** Sets the path of the robot model (osg,ive,stl,... see openscenegraph doc.) and loads it

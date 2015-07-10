@@ -12,7 +12,7 @@ app = Qt::Application.new(ARGV)
 loader = Qt::UiLoader.new()
 widget = loader.createWidget("vizkit3d::Vizkit3DWidget")
 plugin = widget.loadPlugin("vizkit3d","GridVisualization")
-robot = widget.loadPlugin("vizkit3d","RobotVisualization")
+robot = widget.loadPlugin("vizkit3d","ModelVisualization")
 robot.setModelPath("robot2.ive")
 robot.setVisualizationFrame("rover")
 
