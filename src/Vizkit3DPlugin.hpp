@@ -119,7 +119,7 @@ class VizPluginBase : public QObject
 
     public:
         VizPluginBase(QObject *parent=NULL);
-        ~VizPluginBase();
+        virtual ~VizPluginBase();
 
         /** The underlying Vizkit3D Widget
          *
@@ -318,6 +318,9 @@ class VizPluginAddType
 {
     template <typename Type> friend class Vizkit3DPlugin;
 
+    public:
+    virtual ~VizPluginAddType() {}
+
     protected:
 	/** overide this method and set your internal state such that the next
 	 * call to updateMainNode will reflect that update.
@@ -338,6 +341,8 @@ class Vizkit3DPlugin : public VizPluginBase,
     public:
         Vizkit3DPlugin(QObject* parent = NULL)
             : VizPluginBase(parent) {}
+
+        virtual ~Vizkit3DPlugin() {}
 
 	/** updates the data to be visualised and marks the visualisation dirty
 	 * @param data const ref to data that is visualised
