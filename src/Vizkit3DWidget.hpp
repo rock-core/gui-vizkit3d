@@ -98,7 +98,9 @@ namespace vizkit3d
          * manipulator requires special setup. It is used internally by
          * setVisualizationFrame and setTrackedNode
          */
-        NODE_TRACKER_MANIPULATOR
+        NODE_TRACKER_MANIPULATOR,
+        /** No manipulator */
+        NO_MANIPULATOR
     };
 
     // configuration class
