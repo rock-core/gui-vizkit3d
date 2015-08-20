@@ -228,6 +228,14 @@ namespace vizkit3d
              */
             void setCameraManipulator(osg::ref_ptr<osgGA::CameraManipulator> manipulator, bool resetToDefaultHome = false);
 
+            enum GrabbingMode {
+                READ_PIXELS,
+                SINGLE_PBO,
+                DOUBLE_PBO,
+                TRIPLE_PBO
+            };
+
+
         public slots:
             void addPlugin(QObject* plugin, QObject* parent = NULL);
             void removePlugin(QObject* plugin);
@@ -292,11 +300,12 @@ namespace vizkit3d
 
             bool isAxesLabels() const;
             void setAxesLabels(bool value);
+
             /** Enables grabbing
              *
              * Must be called before grab()
              */
-            void enableGrabbing();
+            void enableGrabbing(GrabbingMode mode = SINGLE_PBO);
             /** Disables grabbing
              *
              * You will have to call enableGrabbing() again before you can use
@@ -424,7 +433,7 @@ namespace vizkit3d
             CAMERA_MANIPULATORS last_manipulator;
             CAMERA_MANIPULATORS current_manipulator;
 
-            osg::ref_ptr<osg::Referenced> captureHandler;
+            osg::ref_ptr<osg::Camera::DrawCallback> captureCallback;
             osg::ref_ptr<osg::Referenced> captureOperation;
     };
 }
