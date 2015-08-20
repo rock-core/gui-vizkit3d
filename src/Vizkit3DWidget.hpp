@@ -167,7 +167,7 @@ namespace vizkit3d
             static osg::Vec3d const DEFAULT_UP;
 
             friend class VizPluginBase;
-            Vizkit3DWidget(QWidget* parent = 0,const QString &world_name = "world_osg");
+            Vizkit3DWidget(QWidget* parent = 0,const QString &world_name = "world_osg",bool auto_update = true);
 
             /** Defined to avoid unnecessary dependencies in the headers
              *

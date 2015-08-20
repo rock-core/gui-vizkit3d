@@ -199,7 +199,7 @@ void Vizkit3DConfig::setCameraManipulator(QStringList const& manipulator)
     return getWidget()->setCameraManipulator(id);
 }
 
-Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name)
+Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool auto_update)
     : QWidget(parent)
     , env_plugin(NULL)
 {
@@ -253,7 +253,8 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name)
     current_frame = QString(root->getName().c_str());
 
     //start timer responsible for updating osg viewer
-    _timer.start(10);
+    if (auto_update)
+        _timer.start(10);
 }
 
 Vizkit3DWidget::~Vizkit3DWidget() {}
