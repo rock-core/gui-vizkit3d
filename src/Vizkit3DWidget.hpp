@@ -395,6 +395,9 @@ namespace vizkit3d
 
             CAMERA_MANIPULATORS last_manipulator;
             CAMERA_MANIPULATORS current_manipulator;
+
+            osg::ref_ptr<osg::Referenced> captureHandler;
+            osg::ref_ptr<osg::Referenced> captureOperation;
     };
 }
 #endif

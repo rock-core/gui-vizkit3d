@@ -279,40 +279,63 @@ QString Vizkit3DWidget::getVisualizationFrame() const
     return current_frame;
 }
 
+struct CaptureOperation : public osgViewer::ScreenCaptureHandler::CaptureOperation
+{
+    uint64_t frame_id;
+    QImage image;
+
+    CaptureOperation()
+        : frame_id(0) {}
+
+    void operator()(const osg::Image& image, const unsigned int)
+    {
+        frame_id++;
+
+        QImage::Format qtFormat;
+        if (image.getPixelFormat() == GL_BGR)
+            qtFormat = QImage::Format_RGB888;
+        else if (image.getPixelFormat() == GL_BGRA)
+            qtFormat = QImage::Format_ARGB32;
+        else if (image.getPixelFormat() == GL_RGB)
+            qtFormat = QImage::Format_RGB888;
+        else if (image.getPixelFormat() == GL_RGBA)
+            qtFormat = QImage::Format_ARGB32;
+        else
+            throw std::runtime_error("cannot interpret osg-provided image format " +
+                    boost::lexical_cast<std::string>(image.getPixelFormat()));
+
+        this->image = QImage(image.data(), image.s(), image.t(), qtFormat);
+    }
+
+};
+
 void Vizkit3DWidget::enableGrabbing()
 {
-    if (grabImage)
-        return; // already enabled
+    if (captureHandler)
+        return;
 
-    grabImage = new osg::Image;
-    getView(0)->getCamera()->attach(osg::Camera::COLOR_BUFFER, grabImage);
-    // We do it once here, as the image format is not set properly on first
-    // frame (we get RGBA on the first frame)
-    osg::Viewport* view = getView(0)->getCamera()->getViewport();
-    grabImage->readPixels(view->x(), view->y(), view->width(), view->height(), GL_BGRA, GL_UNSIGNED_BYTE);
+    CaptureOperation* op = new CaptureOperation;
+    captureOperation = op;
+    captureHandler   = new osgViewer::ScreenCaptureHandler(op, 1);
 }
 
 void Vizkit3DWidget::disableGrabbing()
 {
-    getView(0)->getCamera()->detach(osg::Camera::COLOR_BUFFER);
-    grabImage.release();
+    captureOperation = NULL;
+    captureHandler = NULL;
 }
 
 QImage Vizkit3DWidget::grab()
 {
-    if (!grabImage)
+    if (!captureHandler)
     {
         qWarning("you must call enableGrabbing() before grab()");
         return QImage();
     }
 
+    dynamic_cast<osgViewer::ScreenCaptureHandler&>(*captureHandler).captureNextFrame(*this);
     frame();
-
-    osg::Viewport* view = getView(0)->getCamera()->getViewport();
-    grabImage->readPixels(view->x(), view->y(), view->width(), view->height(), GL_BGRA, GL_UNSIGNED_BYTE);
-    grabImage->flipVertical();
-
-    return QImage(grabImage->data(), view->width(), view->height(), QImage::Format_ARGB32);
+    return static_cast<CaptureOperation&>(*captureOperation).image;
 };
 
 QWidget* Vizkit3DWidget::addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node* scene )
