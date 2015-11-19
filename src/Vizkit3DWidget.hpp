@@ -330,6 +330,13 @@ namespace vizkit3d
              */
             void clearEnvironmentPlugin();
 
+            /** Exports current scene to OSG scene file
+             *
+             * Opens file dialog and saves currently displayed scene to a
+             * OSG scene file.
+             */
+            void exportScene();
+
         signals:
             void addPlugins(QObject* plugin,QObject* parent);
             void removePlugins(QObject* plugin);

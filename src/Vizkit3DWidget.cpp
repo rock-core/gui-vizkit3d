@@ -8,6 +8,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QRegExp>
+#include <QFileDialog>
 #include <algorithm>
 
 #include "Vizkit3DWidget.hpp"
@@ -23,6 +24,7 @@
 
 #include <osg/PositionAttitudeTransform>
 #include <osgDB/ReadFile>
+#include <osgDB/WriteFile>
 #include <osgQt/GraphicsWindowQt>
 #include <osgViewer/ViewerEventHandlers>
 
@@ -234,12 +236,23 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name)
     widget->setObjectName(QString("View Widget"));
     splitter->addWidget(widget);
 
+    //Create Layout
+    QWidget* rightPaneWidget = new QWidget(parent);
+    QVBoxLayout* rightPaneLayout = new QVBoxLayout();
+    rightPaneWidget->setLayout(rightPaneLayout);
+    splitter->addWidget(rightPaneWidget);
+
     // create propertyBrowserWidget
     QPropertyBrowserWidget *propertyBrowserWidget = new QPropertyBrowserWidget( parent );
     propertyBrowserWidget->setObjectName("PropertyBrowser");
     propertyBrowserWidget->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
     propertyBrowserWidget->resize(200,600);
-    splitter->addWidget(propertyBrowserWidget);
+    rightPaneLayout->addWidget(propertyBrowserWidget);
+
+    // create export button
+    QPushButton *exportButton = new QPushButton( parent );
+    exportButton->setText("Export Scene");
+    rightPaneLayout->addWidget(exportButton);
 
     // add config object to the property browser
     Vizkit3DConfig *config =  new Vizkit3DConfig(this);
@@ -249,6 +262,7 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name)
     connect(this, SIGNAL(addPlugins(QObject*,QObject*)), this, SLOT(addPluginIntern(QObject*,QObject*)));
     connect(this, SIGNAL(removePlugins(QObject*)), this, SLOT(removePluginIntern(QObject*)));
     connect( &_timer, SIGNAL(timeout()), this, SLOT(update()) );
+    connect(exportButton, SIGNAL(clicked()), this, SLOT(exportScene()));
 
     current_frame = QString(root->getName().c_str());
 
@@ -1133,6 +1147,24 @@ void Vizkit3DWidget::setCameraManipulator(CAMERA_MANIPULATORS manipulatorType, b
     {
         current_frame = getRootVisualizationFrame();
         emit propertyChanged("frame");
+    }
+}
+
+void Vizkit3DWidget::exportScene() {
+    QDir directory;
+
+    QFileDialog dialog;
+    QString filename;
+
+    dialog.setDirectory( directory.currentPath() );
+    dialog.setFileMode(QFileDialog::AnyFile);
+    dialog.setNameFilter("OSG Scene files (*.osg *.osgb)");
+    dialog.setDefaultSuffix("osgb");
+    dialog.setWindowTitle("Export OSG scene");
+    if (dialog.exec()) {
+        QStringList filenames = dialog.selectedFiles();
+        filename = filenames.at(0);
+        osgDB::writeNodeFile(*root, filename.toStdString());
     }
 }
 
