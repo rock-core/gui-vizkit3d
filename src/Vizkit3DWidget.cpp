@@ -505,6 +505,9 @@ void Vizkit3DWidget::deregisterDataHandler(VizPluginBase* viz)
     if (it == plugins.end())
         throw std::runtime_error("trying to deregister a plugin that is not registered on this widget");
 
+    if (viz == env_plugin)
+        clearEnvironmentPlugin();
+
     disableDataHandler(viz);
     plugins.erase(it);
 }
