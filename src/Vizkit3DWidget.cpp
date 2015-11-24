@@ -34,6 +34,8 @@
 #include <osgGA/TrackballManipulator>
 #include <osgGA/MultiTouchTrackballManipulator>
 
+#include <vizkit3d/WindowCaptureCallback.hpp>
+
 using namespace vizkit3d;
 using namespace std;
 
@@ -200,7 +202,7 @@ void Vizkit3DConfig::setCameraManipulator(QStringList const& manipulator)
     return getWidget()->setCameraManipulator(id);
 }
 
-Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name)
+Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool auto_update)
     : QWidget(parent)
     , env_plugin(NULL)
 {
@@ -254,7 +256,8 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name)
     current_frame = QString(root->getName().c_str());
 
     //start timer responsible for updating osg viewer
-    _timer.start(10);
+    if (auto_update)
+        _timer.start(10);
 }
 
 Vizkit3DWidget::~Vizkit3DWidget() {}
@@ -279,40 +282,79 @@ QString Vizkit3DWidget::getVisualizationFrame() const
     return current_frame;
 }
 
-void Vizkit3DWidget::enableGrabbing()
+struct ImageGrabOperation : public vizkit3d::CaptureOperation
 {
-    if (grabImage)
-        return; // already enabled
+    uint64_t frame_id;
+    QImage image;
 
-    grabImage = new osg::Image;
-    getView(0)->getCamera()->attach(osg::Camera::COLOR_BUFFER, grabImage);
-    // We do it once here, as the image format is not set properly on first
-    // frame (we get RGBA on the first frame)
-    osg::Viewport* view = getView(0)->getCamera()->getViewport();
-    grabImage->readPixels(view->x(), view->y(), view->width(), view->height(), GL_BGRA, GL_UNSIGNED_BYTE);
+    ImageGrabOperation()
+        : frame_id(0) {}
+
+    void operator()(const osg::Image& image, const unsigned int)
+    {
+        frame_id++;
+
+        QImage::Format qtFormat;
+        if (image.getPixelFormat() == GL_BGR)
+            qtFormat = QImage::Format_RGB888;
+        else if (image.getPixelFormat() == GL_BGRA)
+            qtFormat = QImage::Format_ARGB32;
+        else
+            throw std::runtime_error("cannot interpret osg-provided image format " +
+                    boost::lexical_cast<std::string>(image.getPixelFormat()));
+
+        QImage img(image.data(), image.s(), image.t(), qtFormat);
+        this->image = img.mirrored(false, true);
+    }
+};
+
+void Vizkit3DWidget::enableGrabbing(GrabbingMode mode)
+{
+    if (captureCallback)
+        return;
+
+    WindowCaptureCallback* callback = new WindowCaptureCallback(-1,
+            mode, WindowCaptureCallback::END_FRAME, GL_BACK, GL_BGR);
+    ImageGrabOperation* op = new ImageGrabOperation;
+    callback->setCaptureOperation(op);
+
+    captureCallback  = callback;
+    captureOperation = op;
+
+    // If in multi-pbo mode, we have to grab a few frames "for starter" to make
+    // sure that grab() will always return a valid image
+    int count = 0;
+    if (mode == DOUBLE_PBO)
+        count = 1;
+    else if (mode == TRIPLE_PBO)
+        count = 2;
+    if (count > 0)
+    {
+        getView(0)->getCamera()->setFinalDrawCallback(captureCallback);
+        for (int i = 0; i < count; ++i)
+            frame();
+        getView(0)->getCamera()->setFinalDrawCallback(0);
+    }
 }
 
 void Vizkit3DWidget::disableGrabbing()
 {
-    getView(0)->getCamera()->detach(osg::Camera::COLOR_BUFFER);
-    grabImage.release();
+    captureOperation = NULL;
+    captureCallback = NULL;
 }
 
 QImage Vizkit3DWidget::grab()
 {
-    if (!grabImage)
+    if (!captureCallback)
     {
         qWarning("you must call enableGrabbing() before grab()");
         return QImage();
     }
 
+    getView(0)->getCamera()->setFinalDrawCallback(captureCallback);
     frame();
-
-    osg::Viewport* view = getView(0)->getCamera()->getViewport();
-    grabImage->readPixels(view->x(), view->y(), view->width(), view->height(), GL_BGRA, GL_UNSIGNED_BYTE);
-    grabImage->flipVertical();
-
-    return QImage(grabImage->data(), view->width(), view->height(), QImage::Format_ARGB32);
+    getView(0)->getCamera()->setFinalDrawCallback(0);
+    return static_cast<ImageGrabOperation&>(*captureOperation).image;
 };
 
 QWidget* Vizkit3DWidget::addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node* scene )
