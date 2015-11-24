@@ -5,7 +5,6 @@ QT4_ADD_RESOURCES(PROPERTY_BROWSER_RESOURCES qtpropertybrowser/qtpropertybrowser
 
 rock_library(vizkit3d
     SOURCES
-        WindowCaptureCallback.cpp
         QtThreadedWidget.cpp
         NodeLink.cpp
         ColorConversionHelper.cpp

@@ -34,8 +34,6 @@
 #include <osgGA/TrackballManipulator>
 #include <osgGA/MultiTouchTrackballManipulator>
 
-#include <vizkit3d/WindowCaptureCallback.hpp>
-
 using namespace vizkit3d;
 using namespace std;
 
@@ -282,12 +280,12 @@ QString Vizkit3DWidget::getVisualizationFrame() const
     return current_frame;
 }
 
-struct ImageGrabOperation : public vizkit3d::CaptureOperation
+struct CaptureOperation : public osgViewer::ScreenCaptureHandler::CaptureOperation
 {
     uint64_t frame_id;
     QImage image;
 
-    ImageGrabOperation()
+    CaptureOperation()
         : frame_id(0) {}
 
     void operator()(const osg::Image& image, const unsigned int)
@@ -299,62 +297,46 @@ struct ImageGrabOperation : public vizkit3d::CaptureOperation
             qtFormat = QImage::Format_RGB888;
         else if (image.getPixelFormat() == GL_BGRA)
             qtFormat = QImage::Format_ARGB32;
+        else if (image.getPixelFormat() == GL_RGB)
+            qtFormat = QImage::Format_RGB888;
+        else if (image.getPixelFormat() == GL_RGBA)
+            qtFormat = QImage::Format_ARGB32;
         else
             throw std::runtime_error("cannot interpret osg-provided image format " +
                     boost::lexical_cast<std::string>(image.getPixelFormat()));
 
-        QImage img(image.data(), image.s(), image.t(), qtFormat);
-        this->image = img.mirrored(false, true);
+        this->image = QImage(image.data(), image.s(), image.t(), qtFormat);
     }
+
 };
 
-void Vizkit3DWidget::enableGrabbing(GrabbingMode mode)
+void Vizkit3DWidget::enableGrabbing()
 {
-    if (captureCallback)
+    if (captureHandler)
         return;
 
-    WindowCaptureCallback* callback = new WindowCaptureCallback(-1,
-            mode, WindowCaptureCallback::END_FRAME, GL_BACK, GL_BGR);
-    ImageGrabOperation* op = new ImageGrabOperation;
-    callback->setCaptureOperation(op);
-
-    captureCallback  = callback;
+    CaptureOperation* op = new CaptureOperation;
     captureOperation = op;
-
-    // If in multi-pbo mode, we have to grab a few frames "for starter" to make
-    // sure that grab() will always return a valid image
-    int count = 0;
-    if (mode == DOUBLE_PBO)
-        count = 1;
-    else if (mode == TRIPLE_PBO)
-        count = 2;
-    if (count > 0)
-    {
-        getView(0)->getCamera()->setFinalDrawCallback(captureCallback);
-        for (int i = 0; i < count; ++i)
-            frame();
-        getView(0)->getCamera()->setFinalDrawCallback(0);
-    }
+    captureHandler   = new osgViewer::ScreenCaptureHandler(op, 1);
 }
 
 void Vizkit3DWidget::disableGrabbing()
 {
     captureOperation = NULL;
-    captureCallback = NULL;
+    captureHandler = NULL;
 }
 
 QImage Vizkit3DWidget::grab()
 {
-    if (!captureCallback)
+    if (!captureHandler)
     {
         qWarning("you must call enableGrabbing() before grab()");
         return QImage();
     }
 
-    getView(0)->getCamera()->setFinalDrawCallback(captureCallback);
+    dynamic_cast<osgViewer::ScreenCaptureHandler&>(*captureHandler).captureNextFrame(*this);
     frame();
-    getView(0)->getCamera()->setFinalDrawCallback(0);
-    return static_cast<ImageGrabOperation&>(*captureOperation).image;
+    return static_cast<CaptureOperation&>(*captureOperation).image;
 };
 
 QWidget* Vizkit3DWidget::addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node* scene )
