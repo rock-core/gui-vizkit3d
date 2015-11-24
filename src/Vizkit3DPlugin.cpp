@@ -257,7 +257,7 @@ QString VizPluginBase::getVisualizationFrame() const
 
 // same as setVisualizationFrame but is not emitting a signal because
 // this is called from the property browser
-void VizPluginBase::setVisualizationFrames(const QStringList &frames)
+void VizPluginBase::setVisualizationFrameFromList(const QStringList &frames)
 {
     if (frames.empty())
         return;
