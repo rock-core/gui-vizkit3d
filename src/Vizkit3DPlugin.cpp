@@ -10,15 +10,16 @@ using namespace vizkit3d;
 
 /** this adapter is used to forward the update call to the plugin
  */
-struct VizPluginBase::CallbackAdapter : public osg::NodeCallback
+class VizPluginBase::CallbackAdapter : public osg::NodeCallback
 {
-    VizPluginBase* plugin;
-    CallbackAdapter( VizPluginBase* plugin ) : plugin( plugin ) {}
-    void operator()(osg::Node* node, osg::NodeVisitor* nv)
-    {
-	plugin->updateCallback( node );
-	osg::NodeCallback::operator()(node, nv);
-    }
+    public:
+        VizPluginBase* plugin;
+        CallbackAdapter( VizPluginBase* plugin ) : plugin( plugin ) {}
+        void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        {
+            plugin->updateCallback( node );
+            osg::NodeCallback::operator()(node, nv);
+        }
 };
 
 VizPluginBase::VizPluginBase(QObject *parent)
@@ -34,6 +35,7 @@ VizPluginBase::VizPluginBase(QObject *parent)
     rootNode->addChild(oldNodes);
 
     // reference counter we do not have to delete the data
+    // add picker callback
     vizNode->setUserData(new PickedUserData(this));
 }
 
@@ -255,20 +257,21 @@ QString VizPluginBase::getVisualizationFrame() const
 
 // same as setVisualizationFrame but is not emitting a signal because
 // this is called from the property browser
-void VizPluginBase::setVisualizationFrame(const QStringList &frames)
+void VizPluginBase::setVisualizationFrameFromList(const QStringList &frames)
 {
     if (frames.empty())
         return;
-    
-    setVisualizationFrame(frames.front());
+    if (!getWidget())
+        return;
+    getWidget()->setPluginDataFrameIntern(frames.front(),this);
+    current_frame = frames.front();
 }
 
 void VizPluginBase::setVisualizationFrame(const QString &frame)
 {
     if (!getWidget())
         return;
-
-    getWidget()->setPluginDataFrameIntern(frame,this);;
+    getWidget()->setPluginDataFrameIntern(frame,this);
     current_frame = frame;
     emit propertyChanged("frame");
 }

@@ -1,7 +1,9 @@
 #include "GridNode.hpp"
+#include "Vizkit3DBase.hpp"
 
 #include <osg/PositionAttitudeTransform>
 #include <osg/Point>
+#include <osg/ShapeDrawable>
 #include <osgText/Text>
 #include <boost/lexical_cast.hpp>
 
@@ -80,6 +82,15 @@ namespace vizkit3d
         ::osg::StateSet* stategeode = geode->getOrCreateStateSet();
         stategeode->setMode( GL_LIGHTING, ::osg::StateAttribute::OFF );
         geode->addDrawable(geom);
+
+        // add invisible plane to catch click events
+        ::osg::ref_ptr< ::osg::Box> box= new ::osg::Box(::osg::Vec3(0,0,0),size_x,size_y,0.01);
+        ::osg::ref_ptr< ::osg::ShapeDrawable> shape = new ::osg::ShapeDrawable(box);
+        ::osg::ref_ptr< ::osg::Geode> geode2 = new ::osg::Geode();
+        geode2->addDrawable(shape);
+        geode2->setNodeMask(INVISIBLE_NODE_MASK);
+        transform->addChild(geode2);
+
         return (::osg::Node*)transform;
     }
 }
