@@ -10,6 +10,8 @@
 
 #include <osgGA/CameraManipulator>
 
+#include <osgViz/OsgViz.hpp>
+
 namespace osgQt { class GraphicsWindowQt;}
 namespace vizkit3d
 {
@@ -178,7 +180,7 @@ namespace vizkit3d
             QStringList getAvailableCameraManipulators() const;
     };
 
-    class QDESIGNER_WIDGET_EXPORT Vizkit3DWidget : public QWidget, public osgViewer::CompositeViewer
+    class QDESIGNER_WIDGET_EXPORT Vizkit3DWidget : public QWidget
     {
         Q_OBJECT
         public:
@@ -381,8 +383,10 @@ namespace vizkit3d
             void disableDataHandler(VizPluginBase *viz);
             osg::Group *createSceneGraph(const QString &world_name);
 
-            QWidget* addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node* scene );
-            osgQt::GraphicsWindowQt* createGraphicsWindow( int x, int y, int w, int h, const std::string& name="", bool windowDecoration=false );
+//            QWidget* addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node* scene );
+//            osgQt::GraphicsWindowQt* createGraphicsWindow( int x, int y, int w, int h, const std::string& name="", bool windowDecoration=false );
+
+            osgviz::OsgViz* osgviz;
 
         private:
             //holds the scene
