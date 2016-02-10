@@ -302,7 +302,7 @@ namespace vizkit3d
              * You must call enableGrabbing() first. Will return an empty image
              * if you did not do so.
              */
-            QImage grab();
+            QImage grab(unsigned int viewIndex = 0);
 
             QString findPluginPath(QString plugin_name);
             QString findLibPath(QString lib_name);
@@ -387,6 +387,8 @@ namespace vizkit3d
             osgQt::GraphicsWindowQt* createGraphicsWindow( int x, int y, int w, int h, const std::string& name="", bool windowDecoration=false );
 
             osgviz::OsgViz* osgviz;
+            osgviz::Window* window;
+
 
         private:
             //holds the scene
@@ -422,6 +424,8 @@ namespace vizkit3d
 
             osg::ref_ptr<osg::Referenced> captureHandler;
             osg::ref_ptr<osg::Referenced> captureOperation;
+
+
     };
 }
 #endif

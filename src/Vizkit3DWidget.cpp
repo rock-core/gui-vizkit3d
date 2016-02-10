@@ -245,11 +245,8 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
     osg::ref_ptr<osgQt::GraphicsWindowQt> win = createGraphicsWindow(0,0,800,600);
     osg::ref_ptr<osg::GraphicsContext> gc = dynamic_cast<osg::GraphicsContext*>(win.get());
 
-    int winid = osgviz->createWindow(windowConfig,gc);
-
-
-
-
+    int osgvizWindowID = osgviz->createWindow(windowConfig,gc);
+    window = osgviz->getWindowManager()->getWindowByID(osgvizWindowID);
 
     // create osg widget
     //QWidget* widget = addViewWidget(win, root);
@@ -275,6 +272,15 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
     connect( &_timer, SIGNAL(timeout()), this, SLOT(update()) );
 
     current_frame = QString(root->getName().c_str());
+
+
+//    osgviz->
+
+    //    camera->setClearColor(::osg::Vec4(0.2, 0.2, 0.6, 1.0) );
+    //    camera->setViewport( new ::osg::Viewport(0, 0, traits->width, traits->height) );
+    //    camera->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(traits->width)/static_cast<double>(traits->height), 1.0f, 10000.0f );
+    //    camera->setCullMask(~INVISIBLE_NODE_MASK);
+
 
     //start timer responsible for updating osg viewer
     if (auto_update)
@@ -336,32 +342,33 @@ struct CaptureOperation : public osgViewer::ScreenCaptureHandler::CaptureOperati
 void Vizkit3DWidget::enableGrabbing()
 {
 
-//    if (captureHandler)
-//        return;
-//
-//    CaptureOperation* op = new CaptureOperation;
-//    captureOperation = op;
-//    captureHandler   = new osgViewer::ScreenCaptureHandler(op, 1);
+    if (captureHandler)
+        return;
+
+    CaptureOperation* op = new CaptureOperation;
+    captureOperation = op;
+    captureHandler   = new osgViewer::ScreenCaptureHandler(op, 1);
 
 }
 
 void Vizkit3DWidget::disableGrabbing()
 {
-//    captureOperation = NULL;
-//    captureHandler = NULL;
+    captureOperation = NULL;
+    captureHandler = NULL;
 }
 
-QImage Vizkit3DWidget::grab()
+QImage Vizkit3DWidget::grab(unsigned int viewIndex)
 {
-//    if (!captureHandler)
-//    {
-//        qWarning("you must call enableGrabbing() before grab()");
-//        return QImage();
-//    }
-//
-//    dynamic_cast<osgViewer::ScreenCaptureHandler&>(*captureHandler).captureNextFrame(*this);
-//    frame();
-//    return static_cast<CaptureOperation&>(*captureOperation).image;
+    if (!captureHandler)
+    {
+        qWarning("you must call enableGrabbing() before grab()");
+        return QImage();
+    }
+
+    dynamic_cast<osgViewer::ScreenCaptureHandler&>(*captureHandler).captureNextFrame(*window);
+    osgviz->update();
+    return static_cast<CaptureOperation&>(*captureOperation).image;
+
 };
 
 //QWidget* Vizkit3DWidget::addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node* scene )
@@ -592,22 +599,24 @@ void Vizkit3DWidget::setEnvironmentPlugin(QObject* plugin)
 
 void Vizkit3DWidget::setEnvironmentPluginEnabled(bool enabled)
 {
-//    if (!env_plugin)
-//        return;
-//
-//    osgViewer::View *view = getView(0);
-//    if (enabled)
-//        view->setSceneData(env_plugin->getRootNode());
-//    else
-//        view->setSceneData(root);
-//    emit propertyChanged("environment");
+    if (!env_plugin)
+        return;
+
+
+    osgViewer::View *view = window->getView(0);
+    if (enabled)
+        view->setSceneData(env_plugin->getRootNode());
+    else
+        view->setSceneData(root);
+    emit propertyChanged("environment");
 }
 
 bool Vizkit3DWidget::isEnvironmentPluginEnabled() const
 {
-//    if (!env_plugin)
-//        return false;
-//    return getView(0)->getSceneData() != root;
+    if (!env_plugin)
+        return false;
+
+    return window->getView(0)->getSceneData() != root;
 }
 
 void Vizkit3DWidget::clearEnvironmentPlugin()
