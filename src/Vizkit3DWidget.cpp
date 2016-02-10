@@ -241,13 +241,22 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
     windowConfig.height = 600;
     windowConfig.title = "rock-display";
 
-    int winid = osgviz->createWindow(windowConfig);
+
+    osg::ref_ptr<osgQt::GraphicsWindowQt> win = createGraphicsWindow(0,0,800,600);
+    osg::ref_ptr<osg::GraphicsContext> gc = dynamic_cast<osg::GraphicsContext*>(win.get());
+
+    int winid = osgviz->createWindow(windowConfig,gc);
+
+
+
+
 
     // create osg widget
-//    QWidget* widget = addViewWidget(createGraphicsWindow(0,0,800,600), root);
-//    widget->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
-//    widget->setObjectName(QString("View Widget"));
-//    splitter->addWidget(widget);
+    //QWidget* widget = addViewWidget(win, root);
+    QWidget* widget = win->getGLWidget();
+    widget->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
+    widget->setObjectName(QString("View Widget"));
+    splitter->addWidget(widget);
 
     // create propertyBrowserWidget
     QPropertyBrowserWidget *propertyBrowserWidget = new QPropertyBrowserWidget( parent );
@@ -380,23 +389,24 @@ QImage Vizkit3DWidget::grab()
 //    return gw->getGLWidget();
 //}
 //
-//osgQt::GraphicsWindowQt* Vizkit3DWidget::createGraphicsWindow( int x, int y, int w, int h, const std::string& name, bool windowDecoration)
-//{
-//    ::osg::DisplaySettings* ds = ::osg::DisplaySettings::instance().get();
-//    ::osg::ref_ptr< ::osg::GraphicsContext::Traits> traits = new ::osg::GraphicsContext::Traits;
-//    traits->windowName = name;
-//    traits->windowDecoration = windowDecoration;
-//    traits->x = x;
-//    traits->y = y;
-//    traits->width = w;
-//    traits->height = h;
-//    traits->doubleBuffer = true;
-//    traits->alpha = ds->getMinimumNumAlphaBits();
-//    traits->stencil = ds->getMinimumNumStencilBits();
-//    traits->sampleBuffers = ds->getMultiSamples();
-//    traits->samples = ds->getNumMultiSamples();
-//    return new osgQt::GraphicsWindowQt(traits.get());
-//}
+
+osgQt::GraphicsWindowQt* Vizkit3DWidget::createGraphicsWindow( int x, int y, int w, int h, const std::string& name, bool windowDecoration)
+{
+    ::osg::DisplaySettings* ds = ::osg::DisplaySettings::instance().get();
+    ::osg::ref_ptr< ::osg::GraphicsContext::Traits> traits = new ::osg::GraphicsContext::Traits;
+    traits->windowName = name;
+    traits->windowDecoration = windowDecoration;
+    traits->x = x;
+    traits->y = y;
+    traits->width = w;
+    traits->height = h;
+    traits->doubleBuffer = true;
+    traits->alpha = ds->getMinimumNumAlphaBits();
+    traits->stencil = ds->getMinimumNumStencilBits();
+    traits->sampleBuffers = ds->getMultiSamples();
+    traits->samples = ds->getNumMultiSamples();
+    return new osgQt::GraphicsWindowQt(traits.get());
+}
 
 void Vizkit3DWidget::paintEvent( QPaintEvent* event )
 {

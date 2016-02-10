@@ -384,7 +384,7 @@ namespace vizkit3d
             osg::Group *createSceneGraph(const QString &world_name);
 
 //            QWidget* addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node* scene );
-//            osgQt::GraphicsWindowQt* createGraphicsWindow( int x, int y, int w, int h, const std::string& name="", bool windowDecoration=false );
+            osgQt::GraphicsWindowQt* createGraphicsWindow( int x, int y, int w, int h, const std::string& name="", bool windowDecoration=false );
 
             osgviz::OsgViz* osgviz;
 
