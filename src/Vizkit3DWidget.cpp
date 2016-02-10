@@ -36,7 +36,6 @@
 #include <osgGA/TrackballManipulator>
 #include <osgGA/MultiTouchTrackballManipulator>
 
-
 using namespace vizkit3d;
 using namespace std;
 
@@ -219,22 +218,9 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
     layout->addWidget(splitter);
     this->setLayout(layout);
 
-    // set threading model
-    //setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
-
-    if (getenv("VIZKIT_GL_DEBUG") && (std::string(getenv("VIZKIT_GL_DEBUG")) == "1"))
-    {
-        osg::setNotifyLevel(osg::DEBUG_INFO);
-        //setRealizeOperation(new EnableGLDebugOperation());
-    }
-    // disable the default setting of viewer.done() by pressing Escape.
-    //setKeyEventSetsDone(0);
-
-    // create root scene node
-    root = createSceneGraph(world_name);
 
     osgviz = osgviz::OsgViz::getInstance();
-    osgviz->addChild(root);
+
 
     osgviz::WindowConfig windowConfig;
     windowConfig.width = 800;
@@ -247,6 +233,23 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
 
     int osgvizWindowID = osgviz->createWindow(windowConfig,gc);
     window = osgviz->getWindowManager()->getWindowByID(osgvizWindowID);
+
+
+    // set threading model
+    window->setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
+
+    if (getenv("VIZKIT_GL_DEBUG") && (std::string(getenv("VIZKIT_GL_DEBUG")) == "1"))
+    {
+        osg::setNotifyLevel(osg::DEBUG_INFO);
+        window->setRealizeOperation(new EnableGLDebugOperation());
+    }
+    // disable the default setting of viewer.done() by pressing Escape.
+    window->setKeyEventSetsDone(0);
+
+    // create root scene node
+    root = createSceneGraph(world_name);
+
+    osgviz->setScene(root);
 
     // create osg widget
     //QWidget* widget = addViewWidget(win, root);
@@ -266,21 +269,19 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
     Vizkit3DConfig *config =  new Vizkit3DConfig(this);
     addProperties(config,NULL);
 
+    //setup camera
+    osg::Camera* camera = window->getView()->getCamera();
+    camera->setClearColor(::osg::Vec4(0.2, 0.2, 0.6, 1.0) );
+    //camera->setViewport( new ::osg::Viewport(0, 0, traits->width, traits->height) );
+    //camera->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(traits->width)/static_cast<double>(traits->height), 1.0f, 10000.0f );
+    camera->setCullMask(~INVISIBLE_NODE_MASK);
+
     //connect signals and slots
     connect(this, SIGNAL(addPlugins(QObject*,QObject*)), this, SLOT(addPluginIntern(QObject*,QObject*)));
     connect(this, SIGNAL(removePlugins(QObject*)), this, SLOT(removePluginIntern(QObject*)));
     connect( &_timer, SIGNAL(timeout()), this, SLOT(update()) );
 
     current_frame = QString(root->getName().c_str());
-
-
-//    osgviz->
-
-    //    camera->setClearColor(::osg::Vec4(0.2, 0.2, 0.6, 1.0) );
-    //    camera->setViewport( new ::osg::Viewport(0, 0, traits->width, traits->height) );
-    //    camera->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(traits->width)/static_cast<double>(traits->height), 1.0f, 10000.0f );
-    //    camera->setCullMask(~INVISIBLE_NODE_MASK);
-
 
     //start timer responsible for updating osg viewer
     if (auto_update)
@@ -341,14 +342,12 @@ struct CaptureOperation : public osgViewer::ScreenCaptureHandler::CaptureOperati
 
 void Vizkit3DWidget::enableGrabbing()
 {
-
     if (captureHandler)
         return;
 
     CaptureOperation* op = new CaptureOperation;
     captureOperation = op;
     captureHandler   = new osgViewer::ScreenCaptureHandler(op, 1);
-
 }
 
 void Vizkit3DWidget::disableGrabbing()
@@ -368,7 +367,6 @@ QImage Vizkit3DWidget::grab(unsigned int viewIndex)
     dynamic_cast<osgViewer::ScreenCaptureHandler&>(*captureHandler).captureNextFrame(*window);
     osgviz->update();
     return static_cast<CaptureOperation&>(*captureOperation).image;
-
 };
 
 //QWidget* Vizkit3DWidget::addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node* scene )
@@ -602,12 +600,10 @@ void Vizkit3DWidget::setEnvironmentPluginEnabled(bool enabled)
     if (!env_plugin)
         return;
 
-
-    osgViewer::View *view = window->getView(0);
     if (enabled)
-        view->setSceneData(env_plugin->getRootNode());
+        osgviz->setScene(env_plugin->getRootNode());
     else
-        view->setSceneData(root);
+        osgviz->setScene(root);
     emit propertyChanged("environment");
 }
 
@@ -615,8 +611,7 @@ bool Vizkit3DWidget::isEnvironmentPluginEnabled() const
 {
     if (!env_plugin)
         return false;
-
-    return window->getView(0)->getSceneData() != root;
+    return osgviz->getScene() != root;
 }
 
 void Vizkit3DWidget::clearEnvironmentPlugin()
@@ -725,17 +720,17 @@ void Vizkit3DWidget::changeCameraView(const osg::Vec3* lookAtPos, const osg::Vec
 
 QColor Vizkit3DWidget::getBackgroundColor()const
 {
-//    const osgViewer::View *view = getView(0);
-//    assert(view);
-//    osg::Vec4 color = view->getCamera()->getClearColor();
-//    return QColor(color.r()*255,color.g()*255,color.b()*255,color.a()*255);
+    const osgViewer::View *view = window->getView();
+    assert(view);
+    osg::Vec4 color = view->getCamera()->getClearColor();
+    return QColor(color.r()*255,color.g()*255,color.b()*255,color.a()*255);
 }
 
 void Vizkit3DWidget::setBackgroundColor(QColor color)
 {
-//    osgViewer::View *view = getView(0);
-//    assert(view);
-//    view->getCamera()->setClearColor(::osg::Vec4(color.red()/255.0,color.green()/255.0,color.blue()/255.0,1.0));
+    osgViewer::View *view = window->getView();
+    assert(view);
+    view->getCamera()->setClearColor(::osg::Vec4(color.red()/255.0,color.green()/255.0,color.blue()/255.0,1.0));
 }
 
 /**
