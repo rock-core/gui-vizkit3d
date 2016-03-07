@@ -889,6 +889,13 @@ void Vizkit3DWidget::setTransformation(const QString &source_frame,const QString
         TransformerGraph::makeRoot(*getRootNode(), root_frame.toStdString());
 }
 
+void Vizkit3DWidget::removeFrame(const QString& frame)
+{
+    const bool worked = TransformerGraph::removeFrame(*getRootNode(), frame.toStdString());
+    if(!worked)
+      std::cerr << "WARN: Unable to remove frame " << frame.toStdString() << std::endl;
+}
+
 void Vizkit3DWidget::setRootFrame(QString frame)
 {
     TransformerGraph::makeRoot(*getRootNode(), frame.toStdString());
@@ -1060,19 +1067,19 @@ QObject* Vizkit3DWidget::loadPlugin(QString lib_name,QString plugin_name)
     QStringList plugin_strings = lib_name.split("@");
     if(plugin_strings.size() == 2)
     {
-        lib_name = plugin_strings.at(0);
-        plugin_name = plugin_strings.at(1);
+        plugin_name = plugin_strings.at(0);
+        lib_name = plugin_strings.at(1);
     }
 
     //if no lib_name is given try to find it from plugin_name
     if(lib_name.isEmpty() && !plugin_name.isEmpty())
         lib_name = findPluginPath(plugin_name);
-
+    
     //check if the lib name is a path
     QFileInfo file_info(lib_name);
     QString path;
     if(file_info.isFile())
-        path = file_info.absolutePath();
+        path = file_info.absoluteFilePath();
     else
         path = findLibPath(lib_name);
 
