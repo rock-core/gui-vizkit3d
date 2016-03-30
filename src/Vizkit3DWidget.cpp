@@ -611,7 +611,7 @@ bool Vizkit3DWidget::isEnvironmentPluginEnabled() const
 {
     if (!env_plugin)
         return false;
-    return osgviz->getScene() != root;
+    return osgviz->getChild() != root;
 }
 
 void Vizkit3DWidget::clearEnvironmentPlugin()
