@@ -207,6 +207,10 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
     : QWidget(parent)
     , env_plugin(NULL)
 {
+
+    //currently only this is supproted
+    current_manipulator = TERRAIN_MANIPULATOR;
+
     //create layout
     //objects will be owned by the parent widget (this)
     QVBoxLayout* layout = new QVBoxLayout;
@@ -271,9 +275,6 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
     addProperties(config,NULL);
 
     //setup camera
-    //currently only this is supproted
-    setCameraManipulator(TERRAIN_MANIPULATOR);
-
     osg::Camera* camera = window->getView()->getCamera();
     camera->setClearColor(::osg::Vec4(0.2, 0.2, 0.6, 1.0) );
     //camera->setViewport( new ::osg::Viewport(0, 0, traits->width, traits->height) );
