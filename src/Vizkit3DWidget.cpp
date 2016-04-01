@@ -219,6 +219,10 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
     this->setLayout(layout);
 
 
+    osg::ref_ptr<osgQt::GraphicsWindowQt> win = createGraphicsWindow(0,0,800,600);
+    osg::ref_ptr<osg::GraphicsContext> gc = dynamic_cast<osg::GraphicsContext*>(win.get());
+
+
     osgviz = osgviz::OsgViz::getInstance();
 
 
@@ -227,9 +231,6 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
     windowConfig.height = 600;
     windowConfig.title = "rock-display";
 
-
-    osg::ref_ptr<osgQt::GraphicsWindowQt> win = createGraphicsWindow(0,0,800,600);
-    osg::ref_ptr<osg::GraphicsContext> gc = dynamic_cast<osg::GraphicsContext*>(win.get());
 
     int osgvizWindowID = osgviz->createWindow(windowConfig,gc);
     window = osgviz->getWindowManager()->getWindowByID(osgvizWindowID);
