@@ -17,8 +17,7 @@ using namespace vizkit3d;
 
 PickHandler::PickHandler():
     _mx(0.0),_my(0.0),
-    _usePolytopeIntersector(false),
-    _useWindowCoordinates(false) {}
+    _usePolytopeIntersector(true) {}
 
 PickHandler::~PickHandler() {}
 
@@ -108,16 +107,6 @@ bool PickHandler::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
                 osg::notify(osg::NOTICE)<<"Using LineSegmentIntersector"<<std::endl;
                 }
             }
-            else if (ea.getKey()=='c')
-            {
-                _useWindowCoordinates = !_useWindowCoordinates;
-                if (_useWindowCoordinates)
-                {
-                osg::notify(osg::NOTICE)<<"Using window coordinates for picking"<<std::endl;
-                } else {
-                osg::notify(osg::NOTICE)<<"Using projection coordiates for picking"<<std::endl;
-                }
-            }
             else
             {
                 keyFunctionMap::iterator itr = keyFuncMap.find(ea.getKey());
@@ -169,28 +158,17 @@ void PickHandler::pick(const osgGA::GUIEventAdapter& ea, osgViewer::View* viewer
 
     if (_usePolytopeIntersector)
     {
-        osgUtil::PolytopeIntersector* picker;
-        if (_useWindowCoordinates)
-        {
-            // use window coordinates
-            // remap the mouse x,y into viewport coordinates.
-            osg::Viewport* viewport = viewer->getCamera()->getViewport();
-            double mx = viewport->x() + (int)((double )viewport->width()*(ea.getXnormalized()*0.5+0.5));
-            double my = viewport->y() + (int)((double )viewport->height()*(ea.getYnormalized()*0.5+0.5));
+        //projection space is [-1 ... 1], thus we can directly use the normalized
+        //mouse coordinates
+        double mx = ea.getXnormalized();
+        double my = ea.getYnormalized();
+        double w = 0.01;
+        double h = 0.01;
+        osg::ref_ptr<osgUtil::PolytopeIntersector> picker = new osgUtil::PolytopeIntersector( osgUtil::Intersector::PROJECTION, mx-w, my-h, mx+w, my+h );
+        // Using this setting, a single drawable will appear at most once while calculating intersections.
+        picker->setIntersectionLimit(osgUtil::Intersector::LIMIT_ONE_PER_DRAWABLE);
 
-            // half width, height.
-            double w = 5.0f;
-            double h = 5.0f;
-            picker = new osgUtil::PolytopeIntersector( osgUtil::Intersector::WINDOW, mx-w, my-h, mx+w, my+h );
-        } else {
-            double mx = ea.getXnormalized();
-            double my = ea.getYnormalized();
-            double w = 0.05;
-            double h = 0.05;
-            picker = new osgUtil::PolytopeIntersector( osgUtil::Intersector::PROJECTION, mx-w, my-h, mx+w, my+h );
-        }
         osgUtil::IntersectionVisitor iv(picker);
-
         viewer->getCamera()->accept(iv);
 
         if (picker->containsIntersections())
@@ -198,44 +176,26 @@ void PickHandler::pick(const osgGA::GUIEventAdapter& ea, osgViewer::View* viewer
             for(std::multiset<osgUtil::PolytopeIntersector::Intersection>::iterator it = picker->getIntersections().begin();
               it != picker->getIntersections().end(); it++)
             {
-          const osgUtil::PolytopeIntersector::Intersection &intersection = *it;
+                const osgUtil::PolytopeIntersector::Intersection &intersection = *it;
 
-          /*
-          osg::notify(osg::NOTICE)<<"Picked "<<intersection.localIntersectionPoint<<std::endl
-              <<"  Distance to ref. plane "<<intersection.distance
-              <<", max. dist "<<intersection.maxDistance
-              <<", primitive index "<<intersection.primitiveIndex
-              <<", numIntersectionPoints "
-              <<intersection.numIntersectionPoints
-              <<std::endl;
-              */
-          const osg::NodePath& nodePath = intersection.nodePath;
-          node = (nodePath.size()>=1)?nodePath[nodePath.size()-1]:0;
+                const osg::NodePath& nodePath = intersection.nodePath;
+                node = (nodePath.size()>=1)?nodePath[nodePath.size()-1]:0;
+                osg::notify(osg::NOTICE)<< "NODE2: " << node->getName() << std::endl;
+                //osg::Matrixd l2w = osg::computeLocalToWorld( nodePath );
+                //osg::Vec3 global = *intersection.matrix.get() * intersection.localIntersectionPoint;
+                osg::Vec3 global = intersection.localIntersectionPoint * *intersection.matrix.get();
 
-          //osg::Matrixd l2w = osg::computeLocalToWorld( nodePath );
-          //osg::Vec3 global = *intersection.matrix.get() * intersection.localIntersectionPoint;
-          osg::Vec3 global = intersection.localIntersectionPoint * *intersection.matrix.get();
-
-          QVector3D globalPoint( global.x(), global.y(), global.z());
-          emit picked(globalPoint);
+                QVector3D globalPoint( global.x(), global.y(), global.z());
+                emit picked(globalPoint);
             }
         }
     }
     else
     {
-        osgUtil::LineSegmentIntersector* picker;
-        if (!_useWindowCoordinates)
-        {
-            // use non dimensional coordinates - in projection/clip space
-            picker = new osgUtil::LineSegmentIntersector( osgUtil::Intersector::PROJECTION, ea.getXnormalized(),ea.getYnormalized() );
-        } else {
-            // use window coordinates
-            // remap the mouse x,y into viewport coordinates.
-            osg::Viewport* viewport = viewer->getCamera()->getViewport();
-            float mx = viewport->x() + (int)((float)viewport->width()*(ea.getXnormalized()*0.5f+0.5f));
-            float my = viewport->y() + (int)((float)viewport->height()*(ea.getYnormalized()*0.5f+0.5f));
-            picker = new osgUtil::LineSegmentIntersector( osgUtil::Intersector::WINDOW, mx, my );
-        }
+        osg::ref_ptr<osgUtil::LineSegmentIntersector> picker;
+        // use non dimensional coordinates - in projection/clip space
+        picker = new osgUtil::LineSegmentIntersector( osgUtil::Intersector::PROJECTION, ea.getXnormalized(),ea.getYnormalized() );
+
         osgUtil::IntersectionVisitor iv(picker);
 
         viewer->getCamera()->accept(iv);
@@ -246,7 +206,7 @@ void PickHandler::pick(const osgGA::GUIEventAdapter& ea, osgViewer::View* viewer
 
             osg::NodePath& nodePath = intersection.nodePath;
             node = (nodePath.size()>=1)?nodePath[nodePath.size()-1]:0;
-
+            osg::notify(osg::NOTICE)<< "NODE: " << node->getName() << std::endl;
             // see if the object has a user object which is derived from pickcallback
             PickedCallback *pc = dynamic_cast<PickedCallback*>(node->getUserData());
             if( pc )
@@ -271,7 +231,7 @@ void PickHandler::pick(const osgGA::GUIEventAdapter& ea, osgViewer::View* viewer
                 emit plugin_data->getPlugin()->picked(global.x(),global.y(),global.z());
                 break;
             }
-            //setTrackedNode(viewer, node);
+            // setTrackedNode(viewer, node);
         }
     }
 }

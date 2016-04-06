@@ -66,7 +66,6 @@ class PickHandler : public QObject, public osgGA::GUIEventHandler
 
         float _mx,_my;
         bool _usePolytopeIntersector;
-        bool _useWindowCoordinates;
 
         typedef std::map<int, functionStatusType > keyFunctionMap;
         keyFunctionMap keyFuncMap;
