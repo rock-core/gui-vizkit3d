@@ -152,10 +152,6 @@ void PickHandler::pick(const osgGA::GUIEventAdapter& ea, osgViewer::View* viewer
     osg::Node* scene = viewer->getSceneData();
     if (!scene) return;
 
-    osg::notify(osg::NOTICE)<<std::endl;
-
-    osg::Node* node = 0;
-
     if (_usePolytopeIntersector)
     {
         //projection space is [-1 ... 1], thus we can directly use the normalized
@@ -164,76 +160,76 @@ void PickHandler::pick(const osgGA::GUIEventAdapter& ea, osgViewer::View* viewer
         double my = ea.getYnormalized();
         double w = 0.01;
         double h = 0.01;
-        osg::ref_ptr<osgUtil::PolytopeIntersector> picker = new osgUtil::PolytopeIntersector( osgUtil::Intersector::PROJECTION, mx-w, my-h, mx+w, my+h );
-        // Using this setting, a single drawable will appear at most once while calculating intersections.
-        picker->setIntersectionLimit(osgUtil::Intersector::LIMIT_ONE_PER_DRAWABLE);
+        osg::ref_ptr<osgUtil::PolytopeIntersector> picker;
+        picker = new osgUtil::PolytopeIntersector( osgUtil::Intersector::PROJECTION, mx-w, my-h, mx+w, my+h );
+        picker->setIntersectionLimit(osgUtil::Intersector::LIMIT_ONE_PER_DRAWABLE);// a single drawable will appear at most once while calculating intersections.
 
         osgUtil::IntersectionVisitor iv(picker);
         viewer->getCamera()->accept(iv);
 
         if (picker->containsIntersections())
         {
-            for(std::multiset<osgUtil::PolytopeIntersector::Intersection>::iterator it = picker->getIntersections().begin();
-              it != picker->getIntersections().end(); it++)
-            {
-                const osgUtil::PolytopeIntersector::Intersection &intersection = *it;
-
-                const osg::NodePath& nodePath = intersection.nodePath;
-                node = (nodePath.size()>=1)?nodePath[nodePath.size()-1]:0;
-                osg::notify(osg::NOTICE)<< "NODE2: " << node->getName() << std::endl;
-                //osg::Matrixd l2w = osg::computeLocalToWorld( nodePath );
-                //osg::Vec3 global = *intersection.matrix.get() * intersection.localIntersectionPoint;
-                osg::Vec3 global = intersection.localIntersectionPoint * *intersection.matrix.get();
-
-                QVector3D globalPoint( global.x(), global.y(), global.z());
-                emit picked(globalPoint);
-            }
+            const osgUtil::PolytopeIntersector::Intersection intersection = picker->getFirstIntersection();
+            const osg::NodePath& nodePath = intersection.nodePath;
+            osg::Vec3 global = intersection.localIntersectionPoint * *intersection.matrix.get();
+            pickNodePath(nodePath, global, viewer);
         }
     }
     else
     {
         osg::ref_ptr<osgUtil::LineSegmentIntersector> picker;
+
         // use non dimensional coordinates - in projection/clip space
         picker = new osgUtil::LineSegmentIntersector( osgUtil::Intersector::PROJECTION, ea.getXnormalized(),ea.getYnormalized() );
-
+        // Using this setting, a single drawable will appear at most once while calculating intersections.
+        picker->setIntersectionLimit(osgUtil::Intersector::LIMIT_ONE_PER_DRAWABLE);
         osgUtil::IntersectionVisitor iv(picker);
-
         viewer->getCamera()->accept(iv);
 
         if (picker->containsIntersections())
         {
             osgUtil::LineSegmentIntersector::Intersection intersection = picker->getFirstIntersection();
-
-            osg::NodePath& nodePath = intersection.nodePath;
-            node = (nodePath.size()>=1)?nodePath[nodePath.size()-1]:0;
-            osg::notify(osg::NOTICE)<< "NODE: " << node->getName() << std::endl;
-            // see if the object has a user object which is derived from pickcallback
-            PickedCallback *pc = dynamic_cast<PickedCallback*>(node->getUserData());
-            if( pc )
-                pc->picked();
-
-            for(int i = nodePath.size()-1; i >= 0; i--)
-            {
-                osg::Node *node = nodePath[i];
-                osg::Referenced *user_data = node->getUserData();
-                if (!user_data)
-                    continue;
-                PickedUserData *plugin_data = dynamic_cast<PickedUserData*>(user_data);
-                if(!plugin_data)
-                    continue;
-
-                // Transform OSG viewport coordinates to QWidget coordinates (invert y axis)
-                float wy = (float)viewer->getCamera()->getViewport()->height() - _my;
-                float wx = _mx;
-                plugin_data->getPlugin()->click(wx, wy);
-
-                osg::Vec3 global = intersection.localIntersectionPoint * *intersection.matrix.get();
-                emit plugin_data->getPlugin()->picked(global.x(),global.y(),global.z());
-                break;
-            }
-            // setTrackedNode(viewer, node);
+            const osg::NodePath& nodePath = intersection.nodePath;
+            const osg::Vec3 global = intersection.localIntersectionPoint * *intersection.matrix.get();
+            pickNodePath(nodePath, global, viewer);
         }
     }
+}
+
+void PickHandler::pickNodePath(const osg::NodePath& nodePath, osg::Vec3 global,
+                               osgViewer::View* viewer) const
+{
+    if(nodePath.empty())
+      return;
+    
+    osg::Node* node = nodePath[nodePath.size()-1];
+    osg::notify(osg::NOTICE)<< "NODE: " << node->getName() << std::endl;
+    // see if the object has a user object which is derived from pickcallback
+    PickedCallback *pc = dynamic_cast<PickedCallback*>(node->getUserData());
+    if( pc )
+        pc->picked();
+
+    for(int i = nodePath.size()-1; i >= 0; i--)
+    {
+        osg::Node *node = nodePath[i];
+        osg::Referenced *user_data = node->getUserData();
+        if (!user_data)
+            continue;
+        PickedUserData *plugin_data = dynamic_cast<PickedUserData*>(user_data);
+        if(!plugin_data)
+            continue;
+
+        // Transform OSG viewport coordinates to QWidget coordinates (invert y axis)
+        float wy = (float)viewer->getCamera()->getViewport()->height() - _my;
+        float wx = _mx;
+        plugin_data->getPlugin()->click(wx, wy);
+        emit plugin_data->getPlugin()->picked(global.x(),global.y(),global.z());
+        break;
+    }  
+    
+    const QVector3D globalPoint( global.x(), global.y(), global.z());
+    emit picked(globalPoint);
+    emit pickedNodePath(nodePath);
 }
 
 void PickHandler::setTrackedNode(osgViewer::View* viewer, osg::ref_ptr< osg::Node > node)

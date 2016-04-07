@@ -13,7 +13,6 @@
 #include "Vizkit3DBase.hpp"
 #include "Vizkit3DWidget.hpp"
 #include "Vizkit3DPlugin.hpp"
-#include "PickHandler.hpp"
 #include "QPropertyBrowserWidget.hpp"
 #include "AxesNode.hpp"
 #include "OsgVisitors.hpp"
@@ -35,6 +34,8 @@
 #include <osgGA/TerrainManipulator>
 #include <osgGA/TrackballManipulator>
 #include <osgGA/MultiTouchTrackballManipulator>
+#include <osg/ShapeDrawable>
+#include <osg/BlendFunc>
 
 using namespace vizkit3d;
 using namespace std;
@@ -231,6 +232,14 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
 
     // create root scene node
     root = createSceneGraph(world_name);
+    
+    //create geode that will be used as marker for the current selection
+    selectorGeode = new osg::Geode();
+    osg::ShapeDrawable* sphere = new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(), 0.2f));
+    sphere->setColor(osg::Vec4(1.0f, 0.0f, 0.0f, 0.3f));
+    sphere->getOrCreateStateSet()->setMode(GL_BLEND,osg::StateAttribute::ON);
+    selectorGeode->addDrawable(sphere);
+    
 
     // create osg widget
     QWidget* widget = addViewWidget(createGraphicsWindow(0,0,800,600), root);
@@ -252,7 +261,8 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
     //connect signals and slots
     connect(this, SIGNAL(addPlugins(QObject*,QObject*)), this, SLOT(addPluginIntern(QObject*,QObject*)));
     connect(this, SIGNAL(removePlugins(QObject*)), this, SLOT(removePluginIntern(QObject*)));
-    connect( &_timer, SIGNAL(timeout()), this, SLOT(update()) );
+    connect(&_timer, SIGNAL(timeout()), this, SLOT(update()) );
+    connect(&pickHandler, SIGNAL(pickedNodePath(const osg::NodePath&)), this, SLOT(pickNodePath(const osg::NodePath&)));
 
     current_frame = QString(root->getName().c_str());
 
@@ -362,8 +372,7 @@ QWidget* Vizkit3DWidget::addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node
     setCameraManipulator(TERRAIN_MANIPULATOR);
 
     // pickhandler is for selecting objects in the opengl view
-    PickHandler* pickHandler = new PickHandler();
-    view->addEventHandler(pickHandler);
+    view->addEventHandler(&pickHandler);
     return gw->getGLWidget();
 }
 
@@ -1196,4 +1205,59 @@ void Vizkit3DWidget::setCameraManipulator(CAMERA_MANIPULATORS manipulatorType, b
         emit propertyChanged("frame");
     }
 }
+
+void Vizkit3DWidget::pickNodePath(const osg::NodePath& path)
+{
+    for(int i = 0; i < path.size(); ++i)
+    {
+        std::cout << path[i]->className() << " | " << path[i]->getName() << std::endl;
+    }
+    
+    const osg::Node* clickedNode = path.back();
+    
+    //ignore links created by the transformer graph.
+    //if the user clicks on a link, nothing happens
+    if(strcmp(clickedNode->className(), "Geode") == 0 && clickedNode->getName() == "link")
+    {
+        return;
+    }
+    
+    //FIXME handle plugins as well
+    //walk backwards in the graph structure and search for the first interessting
+    //node
+    for(int i = path.size() - 1; i >= 0; --i)
+    {
+        const osg::Node* node = path[i];
+        
+        //check if it is a plugin
+        const PickedUserData* plugin_data = dynamic_cast<const PickedUserData*>(node->getUserData());
+        if(plugin_data != NULL)
+        {
+            //FIXME  maybe emit something
+        }
+        
+        //check if it is a frame
+        if(strcmp(node->className(), "PositionAttitudeTransform") == 0 &&
+           TransformerGraph::hasFrame(*getRootNode(), node->getName()))
+        { 
+            emit framePicked(QString::fromStdString(node->getName()));
+          break;
+        }
+    } 
+}
+
+void Vizkit3DWidget::setFrameHighlight(const QString& frame, const bool highlight)
+{
+    osg::ref_ptr<osg::Group> group = TransformerGraph::getFrameGroup(*getRootNode(), frame.toStdString());
+    if(highlight)
+    {
+        group->addChild(selectorGeode);
+    }
+    else
+    {
+        //FIXME not sure if this breaks if
+        group->removeChild(selectorGeode);
+    }
+}
+
 

@@ -2,6 +2,7 @@
 #define __VIZKIT_QVIZKITWIDGET__
 
 #include "Vizkit3DPlugin.hpp"
+#include "PickHandler.hpp"
 #include <osgViewer/CompositeViewer>
 
 #include <QtDesigner/QDesignerExportWidget>
@@ -247,7 +248,10 @@ namespace vizkit3d
             QStringList* getVisualizationFramesRuby() const;
             QStringList getVisualizationFrames() const;
             QString getVisualizationFrame() const;
-
+            
+            /**Highlight the given frame*/
+            void setFrameHighlight(const QString& frame, const bool highlight);
+            
             /**
              * Sets frame plugin data for a given plugin.
              * The pluging data frame is the frame in which the 
@@ -352,11 +356,15 @@ namespace vizkit3d
              * remove the plugin itself
              */
             void clearEnvironmentPlugin();
-
+            
+           
         signals:
             void addPlugins(QObject* plugin,QObject* parent);
             void removePlugins(QObject* plugin);
             void propertyChanged(QString propertyName);
+            
+            /**Emitted when the user picks (clicks on) a frame */
+            void framePicked(const QString& frame) const;
 
         protected:
             virtual void paintEvent( QPaintEvent* event );
@@ -368,6 +376,7 @@ namespace vizkit3d
             void pluginActivityChanged(bool enabled);
             void pluginChildrenChanged();
             void addProperties(QObject* plugin,QObject *parent=NULL);
+            void pickNodePath(const osg::NodePath& path);
 
         private:
             // Helper method for setPluginEnabled
@@ -421,6 +430,10 @@ namespace vizkit3d
 
             osg::ref_ptr<osg::Referenced> captureHandler;
             osg::ref_ptr<osg::Referenced> captureOperation;
+            
+            //geode used to mark the currently highlighted node
+            osg::ref_ptr<osg::Geode> selectorGeode;
+            PickHandler pickHandler;
     };
 }
 #endif

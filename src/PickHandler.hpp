@@ -56,10 +56,18 @@ class PickHandler : public QObject, public osgGA::GUIEventHandler
         void pick(const osgGA::GUIEventAdapter& ea, osgViewer::View* viewer);
 
     signals:
-        void picked(const QVector3D& coord);
+        void picked(const QVector3D& coord) const;
+        /**Is emitted whenenver the user picks a node.
+         * @p path The path from the root node to the picked node*/
+        void pickedNodePath(const osg::NodePath& path) const;
 
     protected:
         void setTrackedNode(osgViewer::View* viewer, osg::ref_ptr< osg::Node > node);
+        
+        /** @param nodePath NodePath to the picked node
+         *  @param global  global coordinates of the clicked point*/
+        void pickNodePath(const osg::NodePath& nodePath, osg::Vec3 global, 
+                          osgViewer::View* viewer) const;
 
         void wireFrameModeOn(osg::Node *srcNode);
         void wireFrameModeOff(osg::Node *srcNode);
