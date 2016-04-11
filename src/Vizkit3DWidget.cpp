@@ -206,7 +206,7 @@ void Vizkit3DConfig::setCameraManipulator(QStringList const& manipulator)
 
 Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool auto_update)
     : QWidget(parent)
-    , env_plugin(NULL)
+    , env_plugin(NULL), pickHandler(new PickHandler())
 {
     //create layout
     //objects will be owned by the parent widget (this)
@@ -262,7 +262,7 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
     connect(this, SIGNAL(addPlugins(QObject*,QObject*)), this, SLOT(addPluginIntern(QObject*,QObject*)));
     connect(this, SIGNAL(removePlugins(QObject*)), this, SLOT(removePluginIntern(QObject*)));
     connect(&_timer, SIGNAL(timeout()), this, SLOT(update()) );
-    connect(&pickHandler, SIGNAL(pickedNodePath(const osg::NodePath&)), this, SLOT(pickNodePath(const osg::NodePath&)));
+    connect(pickHandler.get(), SIGNAL(pickedNodePath(const osg::NodePath&)), this, SLOT(pickNodePath(const osg::NodePath&)));
 
     current_frame = QString(root->getName().c_str());
 
@@ -372,7 +372,7 @@ QWidget* Vizkit3DWidget::addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node
     setCameraManipulator(TERRAIN_MANIPULATOR);
 
     // pickhandler is for selecting objects in the opengl view
-    view->addEventHandler(&pickHandler);
+    view->addEventHandler(pickHandler.get());
     return gw->getGLWidget();
 }
 
@@ -1255,7 +1255,6 @@ void Vizkit3DWidget::setFrameHighlight(const QString& frame, const bool highligh
     }
     else
     {
-        //FIXME not sure if this breaks if
         group->removeChild(selectorGeode);
     }
 }

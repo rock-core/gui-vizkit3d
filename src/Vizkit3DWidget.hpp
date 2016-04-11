@@ -433,7 +433,7 @@ namespace vizkit3d
             
             //geode used to mark the currently highlighted node
             osg::ref_ptr<osg::Geode> selectorGeode;
-            PickHandler pickHandler;
+            osg::ref_ptr<PickHandler> pickHandler;
     };
 }
 #endif
