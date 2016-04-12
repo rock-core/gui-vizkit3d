@@ -1250,7 +1250,7 @@ void Vizkit3DWidget::setFrameHighlight(const QString& frame, const bool highligh
 {
     osg::ref_ptr<osg::Group> group = TransformerGraph::getFrameGroup(*getRootNode(), frame.toStdString());
     if(group == NULL)
-      throw std::runtime_error("Cannot highlight frame " + frame.toStdString() + ". Frame doesn't exist.");
+      throw std::runtime_error("Cannot un/highlight frame " + frame.toStdString() + ". Frame doesn't exist.");
     
     if(highlight)
         group->addChild(selectorGeode);
