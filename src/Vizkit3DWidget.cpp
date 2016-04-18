@@ -205,7 +205,7 @@ void Vizkit3DConfig::setCameraManipulator(QStringList const& manipulator)
     return getWidget()->setCameraManipulator(id);
 }
 
-Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool auto_update)
+Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,int width,int height,const QString &world_name,bool auto_update)
     : QWidget(parent)
     , env_plugin(NULL)
 {
@@ -235,7 +235,7 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
     root = createSceneGraph(world_name);
 
     // create osg widget
-    QWidget* widget = addViewWidget(createGraphicsWindow(0,0,800,600), root);
+    QWidget* widget = addViewWidget(createGraphicsWindow(0,0,width,height), root);
     widget->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
     widget->setObjectName(QString("View Widget"));
     splitter->addWidget(widget);
