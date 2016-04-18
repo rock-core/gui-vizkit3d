@@ -924,6 +924,11 @@ QString Vizkit3DWidget::getWorldName()const
     return QString(TransformerGraph::getWorldName(*getRootNode()).c_str());
 }
 
+void Vizkit3DWidget::setWorldName(const QString& name)
+{
+    TransformerGraph::setWorldName(*getRootNode(), name.toStdString());
+}
+
 bool Vizkit3DWidget::isTransformer() const
 {
     return TransformerGraph::areFrameAnnotationVisible(*getRootNode());

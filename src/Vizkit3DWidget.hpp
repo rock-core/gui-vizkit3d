@@ -265,6 +265,7 @@ namespace vizkit3d
                     const QVector3D &position, const QQuaternion &orientation);
             void getTransformation(const QString &source_frame,const QString &target_frame, QVector3D &position, QQuaternion &orientation)const;
             QString getWorldName()const;
+            void setWorldName(const QString& name);
             
             /**Removes @p frame from the visualization */
             void removeFrame(const QString& frame);
