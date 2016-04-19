@@ -926,7 +926,20 @@ QString Vizkit3DWidget::getWorldName()const
 
 void Vizkit3DWidget::setWorldName(const QString& name)
 {
+    const QString oldWorldName = getWorldName();
     TransformerGraph::setWorldName(*getRootNode(), name.toStdString());
+    PluginMap::iterator it = plugins.begin();
+    
+    //find all plugins that use the old world name as visualization frame
+    //and update them. Otherwise the old world name might be re-added when
+    //setting transformations
+    for(;it != plugins.end();++it)
+    {
+      if(it->first->getVisualizationFrame() == oldWorldName)
+      {
+        it->first->setVisualizationFrame(name);
+      }
+    }
 }
 
 bool Vizkit3DWidget::isTransformer() const
