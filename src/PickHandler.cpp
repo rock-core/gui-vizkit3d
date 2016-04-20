@@ -203,7 +203,6 @@ void PickHandler::pickNodePath(const osg::NodePath& nodePath, osg::Vec3 global,
       return;
     
     osg::Node* node = nodePath[nodePath.size()-1];
-    osg::notify(osg::NOTICE)<< "NODE: " << node->getName() << std::endl;
     // see if the object has a user object which is derived from pickcallback
     PickedCallback *pc = dynamic_cast<PickedCallback*>(node->getUserData());
     if( pc )
