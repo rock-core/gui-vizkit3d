@@ -1276,4 +1276,20 @@ void Vizkit3DWidget::setFrameHighlight(const QString& frame, const bool highligh
         group->removeChild(selectorGeode);
 }
 
+void Vizkit3DWidget::clear()
+{
+    //remove plugins, while loop because removing invalidates iterators
+    while(plugins.size() > 0)
+    {
+        removePlugin(plugins.begin()->first);
+    }
+    
+    //remove frames
+    const std::vector<std::string> frames = TransformerGraph::getFrameNames(*getRootNode());
+    for(unsigned i = 0; i < frames.size(); ++i)
+    {
+        //removeFrame internally skips the world frame
+        TransformerGraph::removeFrame(*getRootNode(), frames[i]);
+    }
+}
 

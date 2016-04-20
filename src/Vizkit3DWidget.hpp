@@ -243,7 +243,10 @@ namespace vizkit3d
             /** Require the given frame to be directly attached to the root
              */
             void setRootFrame(QString frame);
-
+            
+            /*Removes all plugins and all frames except the world frame.*/
+            void clear();
+                        
             // we have to use a pointer here otherwise qt ruby is crashing
             QStringList* getVisualizationFramesRuby() const;
             QStringList getVisualizationFrames() const;
