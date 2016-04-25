@@ -129,15 +129,15 @@ class VizPluginBase : public QObject
          */
         Vizkit3DWidget* getWidget() const;
 
-	/** @return true if the plugins internal state has been updated */
-	virtual bool isDirty() const;
-	/** mark the internal state as modified */
-	void setDirty();
+        /** @return true if the plugins internal state has been updated */
+        virtual bool isDirty() const;
+        /** mark the internal state as modified */
+        void setDirty();
 
-	/** @return a pointer to the internal Group that is used to maintain the
-         * plugin's nodes */
-	osg::ref_ptr<osg::Group> getVizNode() const;
-	osg::ref_ptr<osg::Group> getRootNode() const;
+        /** @return a pointer to the internal Group that is used to maintain the
+                * plugin's nodes */
+        osg::ref_ptr<osg::Group> getVizNode() const;
+        osg::ref_ptr<osg::Group> getRootNode() const;
 
         /**
          * @return a vector of QDockWidgets provided by this class.
@@ -155,8 +155,8 @@ class VizPluginBase : public QObject
         */
         virtual void setPluginEnabled(bool enabled);
 
-	/** @return the name of the plugin */
-	virtual const QString getPluginName() const;
+        /** @return the name of the plugin */
+        virtual const QString getPluginName() const;
         virtual void setPluginName(const QString &name);
 
         /**
@@ -176,11 +176,11 @@ class VizPluginBase : public QObject
         void setKeepOldData(bool value);
         bool isKeepOldDataEnabled();
 
-	/**
-	 * Clears the visualization of the plugin
-	 * */
-	virtual void clearVisualization();
-	
+        /**
+          * Clears the visualization of the plugin
+          * */
+        virtual void clearVisualization();
+
         /**
         * deletes all copies of the osg graph which were genereted by keepCurrentViz
         */
@@ -189,7 +189,7 @@ class VizPluginBase : public QObject
         int getMaxOldData()const {return max_old_data;};
         void setMaxOldData(int value);
 
-	void setPose(const QVector3D &position, const QQuaternion &orientation);
+        void setPose(const QVector3D &position, const QQuaternion &orientation);
 
         /** Returns the list of available visualization frames
          *
@@ -247,15 +247,15 @@ class VizPluginBase : public QObject
         void picked(float x, float y,float z);
 
     protected:
-	/** override this function to update the visualisation.
-	 * @param node contains a point to the node which can be modified.
-	 */
-	virtual void updateMainNode(osg::Node* node) = 0;
+        /** override this function to update the visualisation.
+          * @param node contains a point to the node which can be modified.
+          */
+        virtual void updateMainNode(osg::Node* node) = 0;
 
-	/** override this method to provide your own main node.
-	 * @return node derived from osg::Group
-	 */ 
-	virtual osg::ref_ptr<osg::Node> createMainNode();
+        /** override this method to provide your own main node.
+          * @return node derived from osg::Group
+          */ 
+        virtual osg::ref_ptr<osg::Node> createMainNode();
 
         /** override this method to provide your own QDockWidgets.
          * The QDockWidgets will automatically attached to the main window.
@@ -267,19 +267,19 @@ class VizPluginBase : public QObject
          */ 
         virtual osg::ref_ptr<osg::Node> cloneCurrentViz();
 
-	/** lock this mutex outside updateMainNode if you update the internal
-	 * state of the visualization.
-	 */ 
-	boost::mutex updateMutex;
+        /** lock this mutex outside updateMainNode if you update the internal
+          * state of the visualization.
+          */ 
+        boost::mutex updateMutex;
 
         std::vector<QDockWidget*> dockWidgets;
         QString vizkit3d_plugin_name;
         VizPluginRubyAdapterCollection adapterCollection;
 
     private:
-	class CallbackAdapter;
-	osg::ref_ptr<osg::NodeCallback> nodeCallback;
-	void updateCallback(osg::Node* node);
+        class CallbackAdapter;
+        osg::ref_ptr<osg::NodeCallback> nodeCallback;
+        void updateCallback(osg::Node* node);
 
         osg::ref_ptr<osg::Node> mainNode;               //node which is used by the child class
         osg::ref_ptr<osg::Group> rootNode;              //node which is the osg root node of the pluign 
@@ -292,8 +292,8 @@ class VizPluginBase : public QObject
         //orientation of the viznode
         QQuaternion orientation;
 
-	bool isAttached;
-	bool dirty;
+        bool isAttached;
+        bool dirty;
         bool plugin_enabled;
         bool keep_old_data;
         unsigned int max_old_data;

@@ -35,6 +35,11 @@ namespace vizkit3d
         static std::string getWorldName(const osg::Node &transformer);
 
         /**
+         * Sets the name of the world (root) frame.
+         */
+        static void setWorldName(osg::Node &transformer, const std::string &name);
+
+        /**
          * Sets the size of the frame annotations
          */
         static void setTextSize(osg::Node &transformer, float size);

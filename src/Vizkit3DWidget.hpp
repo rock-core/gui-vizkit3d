@@ -2,6 +2,7 @@
 #define __VIZKIT_QVIZKITWIDGET__
 
 #include "Vizkit3DPlugin.hpp"
+#include "PickHandler.hpp"
 #include <osgViewer/CompositeViewer>
 
 #include <QtDesigner/QDesignerExportWidget>
@@ -242,12 +243,18 @@ namespace vizkit3d
             /** Require the given frame to be directly attached to the root
              */
             void setRootFrame(QString frame);
-
+            
+            /*Removes all plugins and all frames except the world frame.*/
+            void clear();
+                        
             // we have to use a pointer here otherwise qt ruby is crashing
             QStringList* getVisualizationFramesRuby() const;
             QStringList getVisualizationFrames() const;
             QString getVisualizationFrame() const;
-
+            
+            /**Highlight the given frame*/
+            void setFrameHighlight(const QString& frame, const bool highlight);
+            
             /**
              * Sets frame plugin data for a given plugin.
              * The pluging data frame is the frame in which the 
@@ -261,6 +268,10 @@ namespace vizkit3d
                     const QVector3D &position, const QQuaternion &orientation);
             void getTransformation(const QString &source_frame,const QString &target_frame, QVector3D &position, QQuaternion &orientation)const;
             QString getWorldName()const;
+            void setWorldName(const QString& name);
+            
+            /**Removes @p frame from the visualization */
+            void removeFrame(const QString& frame);
 
             void setCameraLookAt(double x, double y, double z);
             void setCameraEye(double x, double y, double z);
@@ -349,11 +360,15 @@ namespace vizkit3d
              * remove the plugin itself
              */
             void clearEnvironmentPlugin();
-
+            
+           
         signals:
             void addPlugins(QObject* plugin,QObject* parent);
             void removePlugins(QObject* plugin);
             void propertyChanged(QString propertyName);
+            
+            /**Emitted when the user picks (clicks on) a frame */
+            void framePicked(const QString& frame) const;
 
         protected:
             virtual void paintEvent( QPaintEvent* event );
@@ -365,6 +380,7 @@ namespace vizkit3d
             void pluginActivityChanged(bool enabled);
             void pluginChildrenChanged();
             void addProperties(QObject* plugin,QObject *parent=NULL);
+            void pickNodePath(const osg::NodePath& path);
 
         private:
             // Helper method for setPluginEnabled
@@ -418,6 +434,10 @@ namespace vizkit3d
 
             osg::ref_ptr<osg::Referenced> captureHandler;
             osg::ref_ptr<osg::Referenced> captureOperation;
+            
+            //geode used to mark the currently highlighted node
+            osg::ref_ptr<osg::Geode> selectorGeode;
+            osg::ref_ptr<PickHandler> pickHandler;
     };
 }
 #endif

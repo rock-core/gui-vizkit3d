@@ -407,6 +407,13 @@ std::string TransformerGraph::getWorldName(const osg::Node &transformer)
     return std::string(transformer.getName());
 }
 
+void TransformerGraph::setWorldName(osg::Node &transformer, const std::string &name)
+{
+    transformer.setName(name);
+    osgText::Text* text = getFrameText(&transformer);
+    text->setText(name);
+}
+
 void TransformerGraph::setTextSize(osg::Node &transformer, float size)
 {
     TextSizeSetter::set(transformer, size);
