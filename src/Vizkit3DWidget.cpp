@@ -239,7 +239,9 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
     sphere->setColor(osg::Vec4(1.0f, 0.0f, 0.0f, 0.3f));
     sphere->getOrCreateStateSet()->setMode(GL_BLEND,osg::StateAttribute::ON);
     selectorGeode->addDrawable(sphere);
-    
+    osg::StateSet* set = selectorGeode->getOrCreateStateSet();
+    set->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+    set->setAttributeAndModes(new osg::BlendFunc(GL_SRC_ALPHA ,GL_ONE_MINUS_SRC_ALPHA), osg::StateAttribute::ON); 
 
     // create osg widget
     QWidget* widget = addViewWidget(createGraphicsWindow(0,0,800,600), root);
