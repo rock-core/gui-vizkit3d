@@ -922,6 +922,13 @@ void Vizkit3DWidget::setTransformation(const QString &source_frame,const QString
         TransformerGraph::makeRoot(*getRootNode(), root_frame.toStdString());
 }
 
+void Vizkit3DWidget::removeFrame(const QString& frame)
+{
+    const bool worked = TransformerGraph::removeFrame(*getRootNode(), frame.toStdString());
+    if(!worked)
+      std::cerr << "WARN: Unable to remove frame " << frame.toStdString() << std::endl;
+}
+
 void Vizkit3DWidget::setRootFrame(QString frame)
 {
     TransformerGraph::makeRoot(*getRootNode(), frame.toStdString());
