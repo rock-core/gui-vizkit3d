@@ -2,6 +2,7 @@
 #define __VIZKIT_QVIZKITWIDGET__
 
 #include "Vizkit3DPlugin.hpp"
+#include "ClickHandler.hpp"
 #include <osgViewer/CompositeViewer>
 
 #include <QtDesigner/QDesignerExportWidget>
@@ -372,6 +373,10 @@ namespace vizkit3d
             void addProperties(QObject* plugin,QObject *parent=NULL);
 
         private:
+            
+            /**Register the click handler to the given frame */
+            void registerClickHandler(const std::string& frame);
+            
             // Helper method for setPluginEnabled
             void enableEnvironmentPlugin();
             // Helper method for setPluginEnabled
@@ -427,6 +432,11 @@ namespace vizkit3d
 
             osg::ref_ptr<osg::Referenced> captureHandler;
             osg::ref_ptr<osg::Referenced> captureOperation;
+            osg::ref_ptr<osgQt::GraphicsWindowQt> graphicsWindowQt;
+            osg::ref_ptr<osg::GraphicsContext> graphicsWindowQtgc;
+            /**One clickhandler per frame. first=frame id, second = handler */
+            typedef std::map<std::string, ClickHandler> ClickHandlerMap;
+            ClickHandlerMap clickHandlers; 
     };
 }
 #endif

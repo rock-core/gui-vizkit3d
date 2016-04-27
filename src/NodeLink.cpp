@@ -1,6 +1,9 @@
 #include "NodeLink.hpp"
+#include "NullClickObject.hpp"
+
 
 #include <osg/Point>
+#include <osgViz/plugins/Object.h>
 #include <assert.h>
 #include <iostream>
 #include <stdexcept>
@@ -52,7 +55,7 @@ namespace vizkit
     ::osg::Node* NodeLink::create(::osg::Node *node1, ::osg::Node *node2, const ::osg::Vec4 &color)
     {
         assert(node1 && node2);
-
+        osgviz::Object* object = new NullClickObject(); //click events should not propagate through nodelinks
         ::osg::Geode* geode = new ::osg::Geode();
         geode->setName(node2->getName());
         ::osg::Geometry* geometry = new ::osg::Geometry();
@@ -89,6 +92,8 @@ namespace vizkit
 
         NodeCallback *callback = new NodeCallback(node1,node2);
         geode->setUpdateCallback(callback);
-        return (::osg::Node*)geode;
+        object->addChild(geode);
+        
+        return (::osg::Node*)object;
     }
 }

@@ -19,6 +19,7 @@
 #include "OsgVisitors.hpp"
 #include "TransformerGraph.hpp"
 #include "EnableGLDebugOperation.hpp"
+#include "ClickHandler.hpp"
 #include <boost/lexical_cast.hpp>
 #include <vizkit3d/EnvPluginBase.hpp>
 
@@ -223,8 +224,8 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
     this->setLayout(layout);
 
 
-    osg::ref_ptr<osgQt::GraphicsWindowQt> win = createGraphicsWindow(0,0,800,600);
-    osg::ref_ptr<osg::GraphicsContext> gc = dynamic_cast<osg::GraphicsContext*>(win.get());
+    graphicsWindowQt = createGraphicsWindow(0,0,800,600);
+    graphicsWindowQtgc = dynamic_cast<osg::GraphicsContext*>(graphicsWindowQt.get());
 
 
     osgviz = osgviz::OsgViz::getInstance();
@@ -236,7 +237,7 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
     windowConfig.title = "rock-display";
 
 
-    int osgvizWindowID = osgviz->createWindow(windowConfig,gc);
+    int osgvizWindowID = osgviz->createWindow(windowConfig,graphicsWindowQtgc);
     window = osgviz->getWindowManager()->getWindowByID(osgvizWindowID);
 
 
@@ -258,7 +259,7 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
 
     // create osg widget
     //QWidget* widget = addViewWidget(win, root);
-    QWidget* widget = win->getGLWidget();
+    QWidget* widget = graphicsWindowQt->getGLWidget();
     widget->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
     widget->setObjectName(QString("View Widget"));
     splitter->addWidget(widget);
@@ -293,7 +294,9 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
         _timer.start(10);
 }
 
-Vizkit3DWidget::~Vizkit3DWidget() {}
+Vizkit3DWidget::~Vizkit3DWidget() {
+    osgviz->destroyWindow(0);
+}
 
 //qt ruby is crashing if we use none pointer here
 QStringList* Vizkit3DWidget::getVisualizationFramesRuby() const
@@ -518,6 +521,20 @@ void Vizkit3DWidget::registerDataHandler(VizPluginBase* viz)
     plugins.insert(make_pair(viz, initial_parent));
 }
 
+void Vizkit3DWidget::registerClickHandler(const string& frame)
+{
+  osgviz::Object* obj = TransformerGraph::getFrameOsgVizObject(*getRootNode(), frame);
+  if(obj == NULL)
+      throw std::runtime_error("Cannot register click handler");
+
+  ClickHandlerMap::iterator it = clickHandlers.find(frame);
+  if(it == clickHandlers.end())
+  {
+      clickHandlers[frame].setClickedObject(obj);
+      obj->addClickableCallback(&(clickHandlers[frame]));
+  }
+}
+  
 void Vizkit3DWidget::deregisterDataHandler(VizPluginBase* viz)
 {
     PluginMap::iterator it = plugins.find(viz);
@@ -670,57 +687,57 @@ void Vizkit3DWidget::setSmallFeatureCullingPixelSize(float val)
 
 void Vizkit3DWidget::getCameraView(QVector3D& lookAtPos, QVector3D& eyePos, QVector3D& upVector)
 {
-//    osg::Vec3d eye, lookAt, up;
-//
-//    osgViewer::View *view = getView(0);
-//    assert(view);
-//    view->getCamera()->getViewMatrixAsLookAt(eye, lookAt, up);
-//
-//    eyePos.setX(eye.x());
-//    eyePos.setY(eye.y());
-//    eyePos.setZ(eye.z());
-//    lookAtPos.setX(lookAt.x());
-//    lookAtPos.setY(lookAt.y());
-//    lookAtPos.setZ(lookAt.z());
-//    upVector.setX(up.x());
-//    upVector.setY(up.y());
-//    upVector.setZ(up.z());
+    osg::Vec3d eye, lookAt, up;
+
+    osgViewer::View *view = window->getView(0);
+    assert(view);
+    view->getCamera()->getViewMatrixAsLookAt(eye, lookAt, up);
+
+    eyePos.setX(eye.x());
+    eyePos.setY(eye.y());
+    eyePos.setZ(eye.z());
+    lookAtPos.setX(lookAt.x());
+    lookAtPos.setY(lookAt.y());
+    lookAtPos.setZ(lookAt.z());
+    upVector.setX(up.x());
+    upVector.setY(up.y());
+    upVector.setZ(up.z());
 }
 
 void Vizkit3DWidget::changeCameraView(const osg::Vec3* lookAtPos, const osg::Vec3* eyePos, const osg::Vec3* upVector)
 {
-//    osgViewer::View *view = getView(0);
-//    assert(view);
-//
-//    osgGA::CameraManipulator* manipulator = dynamic_cast<osgGA::CameraManipulator*>(view->getCameraManipulator());
-//    if (!manipulator)
-//    {
-//        osg::Vec3d eye, center, up;
-//        view->getCamera()->getViewMatrixAsLookAt(eye, center, up);
-//        if (lookAtPos)
-//            center = *lookAtPos;
-//        if (eyePos)
-//            eye = *eyePos;
-//        if (upVector)
-//            up = *upVector;
-//        view->getCamera()->setViewMatrixAsLookAt(eye, center, up);
-//    }
-//    else
-//    {
-//        osg::Vec3d eye, center, up;
-//        manipulator->getHomePosition(eye, center, up);
-//
-//        if (lookAtPos)
-//            center = *lookAtPos;
-//        if (eyePos)
-//            eye = *eyePos;
-//        if (upVector)
-//            up = *upVector;
-//
-//        //set new values
-//        manipulator->setHomePosition(eye, center, up);
-//        view->home();
-//    }
+    osgViewer::View *view = window->getView(0);
+    assert(view);
+
+    osgGA::CameraManipulator* manipulator = dynamic_cast<osgGA::CameraManipulator*>(view->getCameraManipulator());
+    if (!manipulator)
+    {
+        osg::Vec3d eye, center, up;
+        view->getCamera()->getViewMatrixAsLookAt(eye, center, up);
+        if (lookAtPos)
+            center = *lookAtPos;
+        if (eyePos)
+            eye = *eyePos;
+        if (upVector)
+            up = *upVector;
+        view->getCamera()->setViewMatrixAsLookAt(eye, center, up);
+    }
+    else
+    {
+        osg::Vec3d eye, center, up;
+        manipulator->getHomePosition(eye, center, up);
+
+        if (lookAtPos)
+            center = *lookAtPos;
+        if (eyePos)
+            eye = *eyePos;
+        if (upVector)
+            up = *upVector;
+
+        //set new values
+        manipulator->setHomePosition(eye, center, up);
+        view->home();
+    }
 }
 
 QColor Vizkit3DWidget::getBackgroundColor()const
@@ -850,6 +867,7 @@ void Vizkit3DWidget::setPluginDataFrameIntern(const QString& frame, QObject* plu
         throw std::runtime_error("setPluginDataFrame called with something that is not a vizkit3d plugin");
 
     TransformerGraph::addFrame(*getRootNode(),frame.toStdString());
+    registerClickHandler(frame.toStdString());
     osg::Group* node = TransformerGraph::getFrameGroup(*getRootNode(),frame.toStdString());
     assert(node);
     PluginMap::iterator it = plugins.find(viz);
@@ -910,8 +928,14 @@ void Vizkit3DWidget::setTransformation(const QString &source_frame,const QString
                                          osg::Quat(quat.x(),quat.y(),quat.z(),quat.scalar()),
                                          osg::Vec3d(position.x(),position.y(),position.z()));
 
+    //if a new frame was added
     if(count != getVisualizationFrames().size())
     {
+        //there is no way to determine which frame was new
+        //checking for duplicate handlers will be done elsewhere
+        registerClickHandler(source_frame.toStdString());
+        registerClickHandler(target_frame.toStdString());
+        
         emit propertyChanged("frame");
         PluginMap::iterator it = plugins.begin();
         for(;it != plugins.end();++it)
@@ -1160,23 +1184,23 @@ CAMERA_MANIPULATORS Vizkit3DWidget::getCameraManipulator() const
 
 void Vizkit3DWidget::setCameraManipulator(osg::ref_ptr<osgGA::CameraManipulator> manipulator, bool resetToDefaultHome)
 {
-//    osgViewer::View *view = getView(0);
-//    assert(view);
-//
-//    osg::Vec3d
-//        eye = DEFAULT_EYE,
-//        center = DEFAULT_CENTER,
-//        up = DEFAULT_UP;
-//
-//    osgGA::CameraManipulator* current = view->getCameraManipulator();
-//    if (!resetToDefaultHome && current)
-//        current->getHomePosition(eye, center, up);
-//
-//    if (manipulator)
-//        manipulator->setHomePosition(eye, center, up);
-//
-//    view->setCameraManipulator(manipulator);
-//    view->home();
+    osgViewer::View *view = window->getView(0);
+    assert(view);
+
+    osg::Vec3d
+        eye = DEFAULT_EYE,
+        center = DEFAULT_CENTER,
+        up = DEFAULT_UP;
+
+    osgGA::CameraManipulator* current = view->getCameraManipulator();
+    if (!resetToDefaultHome && current)
+        current->getHomePosition(eye, center, up);
+
+    if (manipulator)
+        manipulator->setHomePosition(eye, center, up);
+
+    view->setCameraManipulator(manipulator);
+    view->home();
 }
 
 void Vizkit3DWidget::setCameraManipulator(QString manipulator, bool resetToDefaultHome)
