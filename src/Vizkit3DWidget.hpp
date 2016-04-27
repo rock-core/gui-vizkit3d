@@ -424,6 +424,8 @@ namespace vizkit3d
 
             osg::ref_ptr<osg::Referenced> captureHandler;
             osg::ref_ptr<osg::Referenced> captureOperation;
+            osg::ref_ptr<osgQt::GraphicsWindowQt> graphicsWindowQt;
+            osg::ref_ptr<osg::GraphicsContext> graphicsWindowQtgc;
     };
 }
 #endif
