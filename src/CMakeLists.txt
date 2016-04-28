@@ -51,7 +51,6 @@ rock_library(vizkit3d
         CoordinateFrame.hpp
         EnvPluginBase.hpp
         DefaultManipulator.hpp
-        NullClickObject.hpp
         ${HEADERS_EXTRA}
     LIBS ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY}
     DEPS_CMAKE OpenGL
