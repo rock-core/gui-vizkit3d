@@ -23,6 +23,7 @@ rock_library(vizkit3d
         PickHandler.cpp
         Vizkit3DWidget.cpp
         QVizkitMainWindow.cpp
+        ClickHandler.hpp
         qtpropertybrowser/qteditorfactory.cpp
         qtpropertybrowser/qtvariantproperty.cpp
         qtpropertybrowser/qtpropertymanager.cpp
@@ -50,7 +51,6 @@ rock_library(vizkit3d
         CoordinateFrame.hpp
         EnvPluginBase.hpp
         DefaultManipulator.hpp
-        ClickHandler.hpp
         NullClickObject.hpp
         ${HEADERS_EXTRA}
     LIBS ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY}

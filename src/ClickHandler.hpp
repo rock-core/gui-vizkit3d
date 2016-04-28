@@ -3,12 +3,15 @@
 
 #include <osgViz/interfaces/Clickable.h>
 #include <osgViz/plugins/Object.h>
+#include <QObject>
 
 namespace vizkit3d
 {
 
-class ClickHandler : public osgviz::Clickable
+/** Turns osgviz click events into qt signals */
+class ClickHandler : public QObject, public osgviz::Clickable
 {
+  Q_OBJECT
 public:
     ClickHandler(const osgviz::Object* clickedObject);
     ClickHandler();
@@ -22,6 +25,11 @@ public:
     virtual bool dragged(const int& buttonMask, const osg::Vec2d& cursor,
                         const osg::Vec3d& world, const osg::Vec3d& local, 
                         Clickable* object, osgviz::WindowInterface* window = 0);
+    
+signals:
+    void objectClicked(int buttonMask, const osg::Vec2d& cursor,
+                       const osg::Vec3d& world, const osg::Vec3d& local,
+                       const osgviz::Object* clickedObject);
 private:
     const osgviz::Object* clickedObject;
 };

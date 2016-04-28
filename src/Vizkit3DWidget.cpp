@@ -530,8 +530,15 @@ void Vizkit3DWidget::registerClickHandler(const string& frame)
   ClickHandlerMap::iterator it = clickHandlers.find(frame);
   if(it == clickHandlers.end())
   {
-      clickHandlers[frame].setClickedObject(obj);
-      obj->addClickableCallback(&(clickHandlers[frame]));
+      clickHandlers[frame].reset(new ClickHandler());
+      clickHandlers[frame]->setClickedObject(obj);
+      obj->addClickableCallback(clickHandlers[frame].get());
+
+      connect(clickHandlers[frame].get(), SIGNAL(objectClicked(int, const osg::Vec2d&,
+                                                               const osg::Vec3d&, const osg::Vec3d&,
+                                                               const osgviz::Object*)),
+              this, SLOT(frameClicked(int, const osg::Vec2d&, const osg::Vec3d&,
+                                      const osg::Vec3d&, const osgviz::Object*)));
   }
 }
   
@@ -1253,4 +1260,12 @@ void Vizkit3DWidget::setCameraManipulator(CAMERA_MANIPULATORS manipulatorType, b
         emit propertyChanged("frame");
     }
 }
+
+void Vizkit3DWidget::frameClicked(int buttonMask, const osg::Vec2d& cursor,
+                                  const osg::Vec3d& world, const osg::Vec3d& local,
+                                  const osgviz::Object* clickedObject)
+{
+  std::cout << "QT FRAME CLICKED EVENT "  << clickedObject->getName() << std::endl;
+}
+
 

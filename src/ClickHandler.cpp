@@ -22,7 +22,7 @@ bool ClickHandler::clicked(const int& buttonMask, const osg::Vec2d& cursor,
                            const osg::Vec3d& world, const osg::Vec3d& local,
                            osgviz::Clickable* object, osgviz::WindowInterface* window)
 {
-    std::cout << "clicked frame" << clickedObject->getName() << std::endl;
+    emit objectClicked(buttonMask, cursor, world, local, clickedObject);
     return true;
 }
 
