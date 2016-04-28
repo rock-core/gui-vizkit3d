@@ -10,9 +10,11 @@
 #include <QTimer>
 
 #include <osgGA/CameraManipulator>
-
+#include <osgManipulator/Dragger>
 #include <osgViz/OsgViz.hpp>
+#include <osgViz/windows/EventHandlers/ManipulationClickHandler.h>
 #include <boost/shared_ptr.hpp>
+
 
 namespace osgQt { class GraphicsWindowQt;}
 namespace vizkit3d
@@ -440,10 +442,9 @@ namespace vizkit3d
             osg::ref_ptr<osg::Referenced> captureOperation;
             osg::ref_ptr<osgQt::GraphicsWindowQt> graphicsWindowQt;
             osg::ref_ptr<osg::GraphicsContext> graphicsWindowQtgc;
-            /**One clickhandler per frame. first=frame id, second = handler.
-             * Has to be shared_ptr because ClickHandler cannot be copied.*/
-            typedef std::map<std::string, boost::shared_ptr<ClickHandler> > ClickHandlerMap;
-            ClickHandlerMap clickHandlers; 
+            
+            osg::ref_ptr<osgviz::ManipulationClickHandler> clickHandler;
+            
     };
 }
 #endif

@@ -206,7 +206,7 @@ void Vizkit3DConfig::setCameraManipulator(QStringList const& manipulator)
 
 Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool auto_update)
     : QWidget(parent)
-    , env_plugin(NULL)
+    , env_plugin(NULL), clickHandler(new osgviz::ManipulationClickHandler)
 {
 
     //currently only this is supproted
@@ -527,19 +527,8 @@ void Vizkit3DWidget::registerClickHandler(const string& frame)
   if(obj == NULL)
       throw std::runtime_error("Cannot register click handler");
 
-  ClickHandlerMap::iterator it = clickHandlers.find(frame);
-  if(it == clickHandlers.end())
-  {
-      clickHandlers[frame].reset(new ClickHandler());
-      clickHandlers[frame]->setClickedObject(obj);
-      obj->addClickableCallback(clickHandlers[frame].get());
-
-      connect(clickHandlers[frame].get(), SIGNAL(objectClicked(int, const osg::Vec2d&,
-                                                               const osg::Vec3d&, const osg::Vec3d&,
-                                                               const osgviz::Object*)),
-              this, SLOT(frameClicked(int, const osg::Vec2d&, const osg::Vec3d&,
-                                      const osg::Vec3d&, const osgviz::Object*)));
-  }
+  if(!obj->hasClickableCallback(clickHandler.get()))
+    obj->addClickableCallback(clickHandler.get());
 }
   
 void Vizkit3DWidget::deregisterDataHandler(VizPluginBase* viz)
