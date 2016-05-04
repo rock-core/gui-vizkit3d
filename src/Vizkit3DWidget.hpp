@@ -14,6 +14,8 @@
 #include <osgViz/OsgViz.hpp>
 #include <osgViz/windows/EventHandlers/ManipulationClickHandler.h>
 #include <boost/shared_ptr.hpp>
+#include <base/Eigen.hpp>
+
 
 
 namespace osgQt { class GraphicsWindowQt;}
@@ -363,6 +365,14 @@ namespace vizkit3d
             void addPlugins(QObject* plugin,QObject* parent);
             void removePlugins(QObject* plugin);
             void propertyChanged(QString propertyName);
+            
+            /** This signal is emitted when the user wants to move a frame.
+             *  The actual moving of the frame has to be done by the handler
+             *  of this event.
+             * @p translation the translation relative to @p frame.*/
+            void frameTranslated(const QString& frame, const base::Vector3d& translation);
+            /** @p rotation the rotation relative to @p frame */
+            void frameRotated(const QString& frame, const base::Quaterniond& rotation);
 
         protected:
             virtual void paintEvent( QPaintEvent* event );
@@ -402,6 +412,7 @@ namespace vizkit3d
 //            QWidget* addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node* scene );
             osgQt::GraphicsWindowQt* createGraphicsWindow( int x, int y, int w, int h, const std::string& name="", bool windowDecoration=false );
 
+            
             osgviz::OsgViz* osgviz;
             osgviz::Window* window;
 
@@ -444,6 +455,15 @@ namespace vizkit3d
             osg::ref_ptr<osg::GraphicsContext> graphicsWindowQtgc;
             
             osg::ref_ptr<osgviz::ManipulationClickHandler> clickHandler;
+            
+            struct ObjectTranslateHandler
+            {
+                ObjectTranslateHandler(Vizkit3DWidget& widget) : widget(widget){}
+                void operator()(const osgviz::Object* obj,
+                                const osg::Vec3d& translation);
+                Vizkit3DWidget& widget;//the widget that this handler belongs to
+            }translateHandler;
+            
             
     };
 }

@@ -20,6 +20,7 @@
 #include "TransformerGraph.hpp"
 #include "EnableGLDebugOperation.hpp"
 #include "ClickHandler.hpp"
+#include <osgViz/plugins/Object.h>
 #include <boost/lexical_cast.hpp>
 #include <vizkit3d/EnvPluginBase.hpp>
 
@@ -206,9 +207,10 @@ void Vizkit3DConfig::setCameraManipulator(QStringList const& manipulator)
 
 Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool auto_update)
     : QWidget(parent)
-    , env_plugin(NULL), clickHandler(new osgviz::ManipulationClickHandler)
+    , env_plugin(NULL), clickHandler(new osgviz::ManipulationClickHandler),
+    translateHandler(*this)
 {
-
+    clickHandler->objectTranslated.connect(translateHandler);
     //currently only this is supproted
     current_manipulator = TERRAIN_MANIPULATOR;
 
@@ -1256,5 +1258,21 @@ void Vizkit3DWidget::frameClicked(int buttonMask, const osg::Vec2d& cursor,
 {
   std::cout << "QT FRAME CLICKED EVENT "  << clickedObject->getName() << std::endl;
 }
+
+void Vizkit3DWidget::ObjectTranslateHandler::operator()(const osgviz::Object* obj,
+                                                        const osg::Vec3d& translation)
+{
+    const std::string frame = obj->getName();
+    if(TransformerGraph::hasFrame(*widget.getRootNode(), frame))
+    {
+        const base::Vector3d vec(translation.x(), translation.y(), translation.z());
+        emit widget.frameTranslated(QString::fromStdString(frame), vec);
+    }
+    else
+    {
+        std::cerr << "Dragged object that is not a frame: " << frame << std::endl;
+    }
+}
+
 
 
