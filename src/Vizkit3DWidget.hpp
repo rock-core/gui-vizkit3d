@@ -8,12 +8,12 @@
 #include <QtDesigner/QDesignerExportWidget>
 #include <QVector3D>
 #include <QTimer>
+#include <QQuaternion>
 
 #include <osgGA/CameraManipulator>
 #include <osgManipulator/Dragger>
 #include <osgViz/OsgViz.hpp>
 #include <boost/shared_ptr.hpp>
-#include <base/Eigen.hpp>
 
 
 namespace osgviz { class ManipulationClickHandler;}
@@ -370,9 +370,9 @@ namespace vizkit3d
              *  The actual moving of the frame has to be done by the handler
              *  of this event.
              * @p translation the translation relative to @p frame.*/
-            void frameTranslated(const QString& frame, const base::Vector3d& translation);
+            void frameTranslated(const QString& frame, const QVector3D& translation);
             /** @p rotation the rotation relative to @p frame */
-            void frameRotated(const QString& frame, const base::Quaterniond& rotation);
+            void frameRotated(const QString& frame, const QQuaternion& rotation);
 
         protected:
             virtual void paintEvent( QPaintEvent* event );

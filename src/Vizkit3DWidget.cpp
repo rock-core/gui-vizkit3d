@@ -1266,7 +1266,7 @@ void Vizkit3DWidget::ObjectTranslateHandler::operator()(const osgviz::Object* ob
     const std::string frame = obj->getName();
     if(TransformerGraph::hasFrame(*widget.getRootNode(), frame))
     {
-        const base::Vector3d vec(translation.x(), translation.y(), translation.z());
+        QVector3D vec(translation.x(), translation.y(), translation.z());
         emit widget.frameTranslated(QString::fromStdString(frame), vec);
     }
     else
