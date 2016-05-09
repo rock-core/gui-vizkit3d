@@ -29,6 +29,7 @@
 #include <osgQt/GraphicsWindowQt>
 #include <osgViewer/ViewerEventHandlers>
 
+#include <osgViz/plugins/ManipulationClickHandler/ManipulationClickHandler.h>
 #include <vizkit3d/DefaultManipulator.hpp>
 #include <osgGA/FirstPersonManipulator>
 #include <osgGA/FlightManipulator>

@@ -12,11 +12,11 @@
 #include <osgGA/CameraManipulator>
 #include <osgManipulator/Dragger>
 #include <osgViz/OsgViz.hpp>
-#include <osgViz/windows/EventHandlers/ManipulationClickHandler.h>
 #include <boost/shared_ptr.hpp>
 #include <base/Eigen.hpp>
 
 
+namespace osgviz { class ManipulationClickHandler;}
 
 namespace osgQt { class GraphicsWindowQt;}
 namespace vizkit3d
