@@ -370,9 +370,8 @@ namespace vizkit3d
              *  The actual moving of the frame has to be done by the handler
              *  of this event.
              * @p translation the translation relative to @p frame.*/
-            void frameTranslated(const QString& frame, const QVector3D& translation);
-            /** @p rotation the rotation relative to @p frame */
-            void frameRotated(const QString& frame, const QQuaternion& rotation);
+            void frameMoved(const QString& frame, const QVector3D& translation,
+                            const QQuaternion& rotation);
 
         protected:
             virtual void paintEvent( QPaintEvent* event );
@@ -456,13 +455,16 @@ namespace vizkit3d
             
             osg::ref_ptr<osgviz::ManipulationClickHandler> clickHandler;
             
-            struct ObjectTranslateHandler
+            struct ObjectMovedHandler
             {
-                ObjectTranslateHandler(Vizkit3DWidget& widget) : widget(widget){}
+                ObjectMovedHandler(Vizkit3DWidget& widget) : widget(widget){}
+                /** @param obj The object that has been moved.
+                 *  @param motionMatrix Motion of the object relative to the 
+                 *                      current object position. */
                 void operator()(const osgviz::Object* obj,
-                                const osg::Vec3d& translation);
+                                const osg::Matrix& motionMatrix);
                 Vizkit3DWidget& widget;//the widget that this handler belongs to
-            }translateHandler;
+            }movedHandler;
             
             
     };

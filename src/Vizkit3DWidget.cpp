@@ -209,9 +209,9 @@ void Vizkit3DConfig::setCameraManipulator(QStringList const& manipulator)
 Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool auto_update)
     : QWidget(parent)
     , env_plugin(NULL), clickHandler(new osgviz::ManipulationClickHandler),
-    translateHandler(*this)
+    movedHandler(*this)
 {
-    clickHandler->objectTranslated.connect(translateHandler);
+    clickHandler->objectMoved.connect(movedHandler);
     //currently only this is supproted
     current_manipulator = TERRAIN_MANIPULATOR;
 
@@ -1260,14 +1260,17 @@ void Vizkit3DWidget::frameClicked(int buttonMask, const osg::Vec2d& cursor,
   std::cout << "QT FRAME CLICKED EVENT "  << clickedObject->getName() << std::endl;
 }
 
-void Vizkit3DWidget::ObjectTranslateHandler::operator()(const osgviz::Object* obj,
-                                                        const osg::Vec3d& translation)
+void Vizkit3DWidget::ObjectMovedHandler::operator()(const osgviz::Object* obj,
+                                                        const osg::Matrix& motion)
 {
     const std::string frame = obj->getName();
     if(TransformerGraph::hasFrame(*widget.getRootNode(), frame))
     {
-        QVector3D vec(translation.x(), translation.y(), translation.z());
-        emit widget.frameTranslated(QString::fromStdString(frame), vec);
+        const osg::Vec3d trans = motion.getTrans();
+        const osg::Quat rot = motion.getRotate();
+        const QVector3D qTrans(trans.x(), trans.y(), trans.z());
+        const QQuaternion qRot(rot.w(), rot.x(), rot.y(), rot.z());
+        emit widget.frameMoved(QString::fromStdString(frame), qTrans, qRot);
     }
     else
     {
