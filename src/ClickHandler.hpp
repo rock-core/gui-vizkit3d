@@ -20,11 +20,13 @@ public:
     
     virtual bool clicked(const int& buttonMask, const osg::Vec2d& cursor,
                         const osg::Vec3d& world, const osg::Vec3d& local,
-                        Clickable* object, osgviz::WindowInterface* window = 0);
+                        Clickable* object, const int modKeyMask,
+                         osgviz::WindowInterface* window = 0);
 
     virtual bool dragged(const int& buttonMask, const osg::Vec2d& cursor,
                         const osg::Vec3d& world, const osg::Vec3d& local, 
-                        Clickable* object, osgviz::WindowInterface* window = 0);
+                        Clickable* object, const int modKeyMask,
+                         osgviz::WindowInterface* window = 0);
     
 signals:
     void objectClicked(int buttonMask, const osg::Vec2d& cursor,
