@@ -38,6 +38,8 @@ namespace vizkit3d
          * Returns the name of the wold (root) frame.
          */
         static std::string getWorldName(const osg::Node &transformer);
+        
+        static void setWorldName(osg::Node &transformer, const std::string &name);
 
         /**
          * Sets the size of the frame annotations

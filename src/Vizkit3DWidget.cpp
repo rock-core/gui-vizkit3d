@@ -1339,5 +1339,40 @@ void Vizkit3DWidget::selectFrame(const QString& frame, const bool suppressSignal
     }     
 }
 
+void Vizkit3DWidget::clear()
+{
+    //remove plugins, is while loop because removing invalidates iterators
+    while(plugins.size() > 0)
+    {
+        removePlugin(plugins.begin()->first);
+    }
+    
+    //remove frames
+    const std::vector<std::string> frames = TransformerGraph::getFrameNames(*getRootNode());
+    for(unsigned i = 0; i < frames.size(); ++i)
+    {
+        //removeFrame internally skips the world frame
+        TransformerGraph::removeFrame(*getRootNode(), frames[i]);
+    }
+}
+
+void Vizkit3DWidget::setWorldName(const QString& name)
+{
+    const QString oldWorldName = getWorldName();
+    TransformerGraph::setWorldName(*getRootNode(), name.toStdString());
+    PluginMap::iterator it = plugins.begin();
+    
+    //find all plugins that use the old world name as visualization frame
+    //and update them. Otherwise the old world name might be re-added when
+    //setting transformations
+    for(;it != plugins.end();++it)
+    {
+      if(it->first->getVisualizationFrame() == oldWorldName)
+      {
+        it->first->setVisualizationFrame(name);
+      }
+    }
+}
+
 
 

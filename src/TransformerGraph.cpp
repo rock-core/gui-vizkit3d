@@ -644,3 +644,11 @@ void TransformerGraph::detachNode(osg::Node &transformer,osg::Node &node)
     NodeRemover::remove(transformer,&node);
 }
 
+void TransformerGraph::setWorldName(osg::Node &transformer, const std::string &name)
+{
+    transformer.setName(name);
+    osgText::Text* text = getFrameText(&transformer);
+    text->setText(name);
+}
+
+
