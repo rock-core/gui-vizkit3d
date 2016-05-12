@@ -13,8 +13,7 @@
 #include <osgGA/CameraManipulator>
 #include <osgManipulator/Dragger>
 #include <osgViz/OsgViz.hpp>
-#include <boost/shared_ptr.hpp>
-
+#include <boost/signals2/connection.hpp>
 
 namespace osgviz { class ManipulationClickHandler;}
 
@@ -272,6 +271,11 @@ namespace vizkit3d
             
             /**Removes @p frame from the visualization */
             void removeFrame(const QString& frame);
+            
+            /**Select @p frame. This is the same as if the user clicked the frame.
+             * @param suppressSignal If true the frameSelected signal will not be
+             *                       emitted.*/
+            void selectFrame(const QString& frame, const bool suppressSignal);
 
             void setCameraLookAt(double x, double y, double z);
             void setCameraEye(double x, double y, double z);
@@ -369,9 +373,20 @@ namespace vizkit3d
             /** This signal is emitted when the user wants to move a frame.
              *  The actual moving of the frame has to be done by the handler
              *  of this event.
-             * @p translation the translation relative to @p frame.*/
+             * @p translation the translation relative to @p frame.
+             * @p rotation    the rotation relative to @p frame.*/
             void frameMoved(const QString& frame, const QVector3D& translation,
                             const QQuaternion& rotation);
+            
+            /** This signal is emitted while the user is dragging or rotating a
+             *  frame. This event is intendet to update gui elements. Do 
+             *  **not** update transformations while handling this event.*/
+            void frameMoving(const QString& frame, const QVector3D& translation,
+                            const QQuaternion& rotation);
+            
+            /** This signal is emitted when the user selects a frame in the
+             *  3d view.*/
+            void frameSelected(const QString frame);
 
         protected:
             virtual void paintEvent( QPaintEvent* event );
@@ -384,11 +399,6 @@ namespace vizkit3d
             void pluginChildrenChanged();
             void addProperties(QObject* plugin,QObject *parent=NULL);
             
-            /**Invoked whenever the user clicks on a frame */
-            void frameClicked(int buttonMask, const osg::Vec2d& cursor,
-                             const osg::Vec3d& world, const osg::Vec3d& local,
-                             const osgviz::Object* clickedObject);
-
         private:
             
             /**Register the click handler to the given frame */
@@ -455,6 +465,7 @@ namespace vizkit3d
             
             osg::ref_ptr<osgviz::ManipulationClickHandler> clickHandler;
             
+            //TODO replace with lambda once c++11 is used
             struct ObjectMovedHandler
             {
                 ObjectMovedHandler(Vizkit3DWidget& widget) : widget(widget){}
@@ -466,7 +477,26 @@ namespace vizkit3d
                 Vizkit3DWidget& widget;//the widget that this handler belongs to
             }movedHandler;
             
+            struct ObjectMovingHandler
+            {
+                ObjectMovingHandler(Vizkit3DWidget& widget) : widget(widget){}
+                void operator()(const osgviz::Object* obj,
+                                const osg::Matrix& motionMatrix);
+                Vizkit3DWidget& widget;//the widget that this handler belongs to
+            }movingHandler;
             
+            struct ObjectSelectedHandler
+            {
+                ObjectSelectedHandler(Vizkit3DWidget& widget) : widget(widget){}
+                void operator()(const osgviz::Object* obj);
+                /**Does address comparision */
+                bool operator==(const ObjectSelectedHandler& other) const;
+                Vizkit3DWidget& widget;//the widget that this handler belongs to
+            }selectedHandler;    
+            
+            /**Connection between selectedHandler and it's signal.
+             * Used to temporarly block the slot*/
+            boost::signals2::connection selectedObjectConnection;
     };
 }
 #endif

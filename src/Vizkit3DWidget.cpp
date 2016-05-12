@@ -209,10 +209,12 @@ void Vizkit3DConfig::setCameraManipulator(QStringList const& manipulator)
 Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool auto_update)
     : QWidget(parent)
     , env_plugin(NULL), clickHandler(new osgviz::ManipulationClickHandler),
-    movedHandler(*this)
+    movedHandler(*this), movingHandler(*this), selectedHandler(*this)
 {
     clickHandler->objectMoved.connect(movedHandler);
-    //currently only this is supproted
+    clickHandler->objectMoving.connect(movingHandler);
+    selectedObjectConnection = clickHandler->objectSelected.connect(selectedHandler);
+    //currently only this is supported
     current_manipulator = TERRAIN_MANIPULATOR;
 
     //create layout
@@ -1253,13 +1255,6 @@ void Vizkit3DWidget::setCameraManipulator(CAMERA_MANIPULATORS manipulatorType, b
     }
 }
 
-void Vizkit3DWidget::frameClicked(int buttonMask, const osg::Vec2d& cursor,
-                                  const osg::Vec3d& world, const osg::Vec3d& local,
-                                  const osgviz::Object* clickedObject)
-{
-  std::cout << "QT FRAME CLICKED EVENT "  << clickedObject->getName() << std::endl;
-}
-
 void Vizkit3DWidget::ObjectMovedHandler::operator()(const osgviz::Object* obj,
                                                         const osg::Matrix& motion)
 {
@@ -1274,8 +1269,74 @@ void Vizkit3DWidget::ObjectMovedHandler::operator()(const osgviz::Object* obj,
     }
     else
     {
-        std::cerr << "Dragged object that is not a frame: " << frame << std::endl;
+        std::cerr << "Dragged object is not a frame: " << frame << std::endl;
     }
+}
+
+void Vizkit3DWidget::ObjectMovingHandler::operator()(const osgviz::Object* obj,
+                                                        const osg::Matrix& motion)
+{
+    const std::string frame = obj->getName();
+    if(TransformerGraph::hasFrame(*widget.getRootNode(), frame))
+    {
+        const osg::Vec3d trans = motion.getTrans();
+        const osg::Quat rot = motion.getRotate();
+        const QVector3D qTrans(trans.x(), trans.y(), trans.z());
+        const QQuaternion qRot(rot.w(), rot.x(), rot.y(), rot.z());
+        emit widget.frameMoving(QString::fromStdString(frame), qTrans, qRot);
+    }
+    else
+    {
+        std::cerr << "Dragged object is not a frame: " << frame << std::endl;
+    }
+}
+
+void Vizkit3DWidget::ObjectSelectedHandler::operator()(const osgviz::Object* obj)
+{    
+    const std::string frame = obj->getName();
+    if(TransformerGraph::hasFrame(*widget.getRootNode(), frame))
+    {
+        emit widget.frameSelected(QString::fromStdString(frame));
+    }
+    else
+    {
+        std::cerr << "Selected object that is not a frame: " << frame << std::endl;
+    }   
+}
+
+bool Vizkit3DWidget::ObjectSelectedHandler::operator==(const Vizkit3DWidget::ObjectSelectedHandler& other) const
+{
+    //to disconnect slots we need to be able to identify them, therefore they
+    //need to be comparable
+    return this == &other;
+}
+
+
+void Vizkit3DWidget::selectFrame(const QString& frame, const bool suppressSignal)
+{
+    if(TransformerGraph::hasFrame(*getRootNode(), frame.toStdString()))
+    {
+        osgviz::Object* obj = TransformerGraph::getFrameOsgVizObject(*getRootNode(),
+                                                                     frame.toStdString());
+        if(obj != NULL)
+        {
+            if(suppressSignal)
+            {
+                boost::signals2::shared_connection_block block(selectedObjectConnection);
+                clickHandler->selectObject(obj);
+            }
+            else
+            {
+                clickHandler->selectObject(obj);
+            }
+        }
+        else
+          std::cerr << "Cannot select frame: " << frame.toStdString() << std::endl;
+    }
+    else
+    {
+        std::cerr << frame.toStdString() << " doesn't exist!" << std::endl;
+    }     
 }
 
 
