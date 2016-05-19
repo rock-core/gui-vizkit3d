@@ -2,7 +2,6 @@
 #define __VIZKIT_QVIZKITWIDGET__
 
 #include "Vizkit3DPlugin.hpp"
-#include "ClickHandler.hpp"
 #include <osgViewer/CompositeViewer>
 
 #include <QtDesigner/QDesignerExportWidget>
@@ -368,6 +367,10 @@ namespace vizkit3d
             
             /*Removes all plugins and all frames except the world frame.*/
             void clear();
+            
+            /**If set to true rotation and translation manipulators will be shown
+             * when a frame is clicked. Default: false*/
+            void setEnabledManipulators(const bool value);
 
         signals:
             void addPlugins(QObject* plugin,QObject* parent);
@@ -501,6 +504,7 @@ namespace vizkit3d
             /**Connection between selectedHandler and it's signal.
              * Used to temporarly block the slot*/
             boost::signals2::connection selectedObjectConnection;
+            
     };
 }
 #endif

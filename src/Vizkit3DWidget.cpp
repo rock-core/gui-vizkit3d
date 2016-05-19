@@ -19,7 +19,6 @@
 #include "OsgVisitors.hpp"
 #include "TransformerGraph.hpp"
 #include "EnableGLDebugOperation.hpp"
-#include "ClickHandler.hpp"
 #include <osgViz/plugins/Object.h>
 #include <boost/lexical_cast.hpp>
 #include <vizkit3d/EnvPluginBase.hpp>
@@ -211,6 +210,7 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
     , env_plugin(NULL), clickHandler(new osgviz::ManipulationClickHandler),
     movedHandler(*this), movingHandler(*this), selectedHandler(*this)
 {
+    setEnabledManipulators(false);
     clickHandler->objectMoved.connect(movedHandler);
     clickHandler->objectMoving.connect(movingHandler);
     selectedObjectConnection = clickHandler->objectSelected.connect(selectedHandler);
@@ -1373,6 +1373,12 @@ void Vizkit3DWidget::setWorldName(const QString& name)
       }
     }
 }
+
+void Vizkit3DWidget::setEnabledManipulators(const bool value)
+{
+  //TODO
+}
+
 
 
 
