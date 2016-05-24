@@ -1376,7 +1376,7 @@ void Vizkit3DWidget::setWorldName(const QString& name)
 
 void Vizkit3DWidget::setEnabledManipulators(const bool value)
 {
-  //TODO
+    clickHandler->setEnabled(value);
 }
 
 
