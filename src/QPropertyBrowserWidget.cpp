@@ -182,7 +182,11 @@ void QPropertyBrowserWidget::propertyChangedInGUI(QtProperty* property, const QV
         {
             // emulate string list by using enums
             QStringList list;
-            list << prop->attributeValue("enumNames").toStringList().at(val.toInt());
+            const QStringList names = prop->attributeValue("enumNames").toStringList();
+            if(names.size() > 0)
+            {
+              list << names.at(val.toInt());
+            }
             propertyToObject[property]->setProperty(property->propertyName().toStdString().c_str(), QVariant(list));
         }
         else
