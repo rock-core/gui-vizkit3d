@@ -12,5 +12,6 @@
     <depend package="qt4-opengl" />
     <depend package="boost" />
     <depend package="base/cmake" />
+    <depend package="tools/orocos" />
     <!--    <depend package="qt-designer" /> !-->
 </package>
