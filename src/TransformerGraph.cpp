@@ -7,7 +7,7 @@
 #include <osg/NodeVisitor>
 #include <osg/Switch>
 #include <osgText/Text>
-#include <osgViz/plugins/Object.h>
+#include <osgViz/Object.h>
 #include <stdexcept>
 #include <assert.h>
 #include <iostream>
