@@ -3,7 +3,7 @@
 
 
 #include <osg/Point>
-#include <osgViz/plugins/Object.h>
+#include <osgViz/Object.h>
 #include <assert.h>
 #include <iostream>
 #include <stdexcept>
