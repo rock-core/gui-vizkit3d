@@ -19,7 +19,7 @@
 #include "OsgVisitors.hpp"
 #include "TransformerGraph.hpp"
 #include "EnableGLDebugOperation.hpp"
-#include <osgViz/plugins/Object.h>
+#include <osgViz/Object.h>
 #include <boost/lexical_cast.hpp>
 #include <vizkit3d/EnvPluginBase.hpp>
 
