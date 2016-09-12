@@ -263,7 +263,6 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
     osgviz->setScene(root);
 
     // create osg widget
-    //QWidget* widget = addViewWidget(win, root);
     QWidget* widget = graphicsWindowQt->getGLWidget();
     widget->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
     widget->setObjectName(QString("View Widget"));
@@ -382,31 +381,6 @@ QImage Vizkit3DWidget::grab(unsigned int viewIndex)
     return static_cast<CaptureOperation&>(*captureOperation).image;
 };
 
-//QWidget* Vizkit3DWidget::addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node* scene )
-//{
-//    osgViewer::View* view = new osgViewer::View;
-//    addView(view);
-//
-//    ::osg::Camera* camera = view->getCamera();
-//    camera->setGraphicsContext( gw );
-//
-//    const ::osg::GraphicsContext::Traits* traits = gw->getTraits();
-//
-//    camera->setClearColor(::osg::Vec4(0.2, 0.2, 0.6, 1.0) );
-//    camera->setViewport( new ::osg::Viewport(0, 0, traits->width, traits->height) );
-//    camera->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(traits->width)/static_cast<double>(traits->height), 1.0f, 10000.0f );
-//    camera->setCullMask(~INVISIBLE_NODE_MASK);
-//
-//    view->setSceneData(scene);
-//    view->addEventHandler( new osgViewer::StatsHandler );
-//    setCameraManipulator(TERRAIN_MANIPULATOR);
-//
-//    // pickhandler is for selecting objects in the opengl view
-//    PickHandler* pickHandler = new PickHandler();
-//    view->addEventHandler(pickHandler);
-//    return gw->getGLWidget();
-//}
-//
 
 osgQt::GraphicsWindowQt* Vizkit3DWidget::createGraphicsWindow( int x, int y, int w, int h, const std::string& name, bool windowDecoration)
 {
