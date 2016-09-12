@@ -13,7 +13,6 @@
 #include "Vizkit3DBase.hpp"
 #include "Vizkit3DWidget.hpp"
 #include "Vizkit3DPlugin.hpp"
-#include "PickHandler.hpp"
 #include "QPropertyBrowserWidget.hpp"
 #include "AxesNode.hpp"
 #include "OsgVisitors.hpp"

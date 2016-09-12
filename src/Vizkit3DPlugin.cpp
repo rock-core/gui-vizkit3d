@@ -4,7 +4,6 @@
 
 #include "Vizkit3DPlugin.hpp"
 #include "Vizkit3DWidget.hpp"
-#include "PickHandler.hpp"
 
 using namespace vizkit3d;
 
