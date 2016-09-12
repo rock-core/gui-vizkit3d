@@ -52,7 +52,8 @@ rock_library(vizkit3d
         ${HEADERS_EXTRA}
     LIBS ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY}
     DEPS_CMAKE OpenGL
-    DEPS_PKGCONFIG openscenegraph openscenegraph-osgQt ${DEPS_EXTRA})
+    DEPS_PKGCONFIG openscenegraph openscenegraph-osgQt osgViz
+                   PrimitivesFactory ManipulationClickHandler ${DEPS_EXTRA})
 
 rock_library(vizkitwidgetloader
     MOC QVizkitWidgetLoader.cpp
