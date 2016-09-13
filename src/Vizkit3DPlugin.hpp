@@ -127,7 +127,7 @@ class VizPluginBase : public QObject
          * May be NULL if the plugin is e.g. built as a child of another plugin
          */
         Vizkit3DWidget* getWidget() const;
-
+    
         /** @return true if the plugins internal state has been updated */
         virtual bool isDirty() const;
         /** mark the internal state as modified */

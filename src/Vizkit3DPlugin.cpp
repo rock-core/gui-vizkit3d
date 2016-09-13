@@ -147,7 +147,7 @@ void VizPluginBase::updateCallback(osg::Node* node)
     {
         mainNode = createMainNode();
         vizNode->addChild(mainNode);
-	isAttached = true;
+        isAttached = true;
     }
 
     if(isDirty())
@@ -156,7 +156,7 @@ void VizPluginBase::updateCallback(osg::Node* node)
         vizNode->setPosition(osg::Vec3d(position.x(), position.y(), position.z()));
         vizNode->setAttitude(osg::Quat(orientation.x(), orientation.y(), orientation.z(), orientation.scalar()));
 
-	updateMainNode(mainNode);
+    updateMainNode(mainNode);
         if(keep_old_data)
         {
             oldNodes->addChild(cloneCurrentViz());
@@ -164,11 +164,11 @@ void VizPluginBase::updateCallback(osg::Node* node)
                 oldNodes->removeChild(0,oldNodes->getNumChildren() -max_old_data);
         }
         if(!isAttached)
-	{
-	    vizNode->addChild(mainNode);
-	    isAttached = true;
-	}
-	dirty = false;
+    {
+        vizNode->addChild(mainNode);
+        isAttached = true;
+    }
+    dirty = false;
     }
 }
 
@@ -261,7 +261,7 @@ void VizPluginBase::setVisualizationFrameFromList(const QStringList &frames)
     if (frames.empty())
         return;
     if (!getWidget())
-        return;
+        return; 
     getWidget()->setPluginDataFrameIntern(frames.front(),this);
     current_frame = frames.front();
 }
