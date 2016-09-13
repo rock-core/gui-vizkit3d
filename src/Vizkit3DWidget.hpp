@@ -209,7 +209,7 @@ namespace vizkit3d
              *   to be reported in getCameraManipulatorName (and therefore in
              *   the property browser view)
              */
-            void setTrackedNode(osg::Node* node, QString tracked_object_name);
+            void setTrackedNode(osg::Node* node, const QString& tracked_object_name);
             /** @overload sets the camera to track this plugins's root position
              *
              * The tracked object name is <Plugin plugin_name>

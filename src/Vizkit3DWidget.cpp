@@ -227,7 +227,8 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
     layout->addWidget(splitter);
     this->setLayout(layout);
 
-
+    last_manipulator = vizkit3d::DEFAULT_MANIPULATOR;
+    
     graphicsWindowQt = createGraphicsWindow(0,0,800,600);
     graphicsWindowQtgc = dynamic_cast<osg::GraphicsContext*>(graphicsWindowQt.get());
 
@@ -415,27 +416,27 @@ osg::Group* Vizkit3DWidget::getRootNode() const
     return root;
 }
 
-void Vizkit3DWidget::setTrackedNode( VizPluginBase* plugin )
+void Vizkit3DWidget::setTrackedNode(VizPluginBase* plugin)
 {
-//    return setTrackedNode(plugin->getRootNode(), QString("<Plugin %1>").arg(plugin->getPluginName()));
+   return setTrackedNode(plugin->getRootNode(), QString("<Plugin %1>").arg(plugin->getPluginName()));
 }
 
-void Vizkit3DWidget::setTrackedNode( osg::Node* node, QString tracked_object_name )
+void Vizkit3DWidget::setTrackedNode(osg::Node* node,const QString& tracked_object_name)
 {
-//    osgViewer::View *view = getView(0);
-//    assert(view);
-//
-//    osgGA::NodeTrackerManipulator* manipulator = new osgGA::NodeTrackerManipulator;
-//    view->setCameraManipulator(manipulator);
-//    manipulator->setTrackNode(node);
-//    manipulator->setHomePosition(osg::Vec3(-5, 0, 5), osg::Vec3(0,0,0), osg::Vec3(0,0,1));
-//    manipulator->setTrackerMode(osgGA::NodeTrackerManipulator::NODE_CENTER);
-//    if (current_manipulator != NODE_TRACKER_MANIPULATOR)
-//        last_manipulator = current_manipulator;
-//    current_manipulator = NODE_TRACKER_MANIPULATOR;
-//    view->home();
-//    this->tracked_object_name = tracked_object_name;
-//    emit propertyChanged("manipulator");
+    osgViewer::View *view = window->getView(0);
+    assert(view);
+
+    osgGA::NodeTrackerManipulator* manipulator = new osgGA::NodeTrackerManipulator;
+    view->setCameraManipulator(manipulator);
+    manipulator->setTrackNode(node);
+    manipulator->setHomePosition(osg::Vec3(-5, 0, 5), osg::Vec3(0,0,0), osg::Vec3(0,0,1));
+    manipulator->setTrackerMode(osgGA::NodeTrackerManipulator::NODE_CENTER);
+    if (current_manipulator != NODE_TRACKER_MANIPULATOR)
+        last_manipulator = current_manipulator;
+    current_manipulator = NODE_TRACKER_MANIPULATOR;
+    view->home();
+    this->tracked_object_name = tracked_object_name;
+    emit propertyChanged("manipulator");
 }
 
 
@@ -875,8 +876,6 @@ void Vizkit3DWidget::setVisualizationFrame(const QString& frame)
         return;
     }
 
-//    osgViewer::View *view = getView(0);
-//    assert(view);
     // the following is not working if the directly track the transformation 
     // therefore use a child
     osg::Node *node = TransformerGraph::getFrameGroup(*getRootNode(),frame.toStdString());
