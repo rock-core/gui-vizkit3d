@@ -504,14 +504,5 @@ class VizPluginAdapter : public Vizkit3DPlugin<T>
     osg::ref_ptr<osg::Node> ownNode;
 };
 
-class PickedUserData : public osg::Referenced
-{
-    public:
-        PickedUserData(VizPluginBase* plugin){ this->plugin = plugin; }
-        VizPluginBase* getPlugin() { return plugin; }
-    private:
-        VizPluginBase* plugin;
-};
-
 }
 #endif

@@ -32,10 +32,6 @@ VizPluginBase::VizPluginBase(QObject *parent)
     rootNode->addChild(vizNode);
     oldNodes = new osg::Group();
     rootNode->addChild(oldNodes);
-
-    // reference counter we do not have to delete the data
-    // add picker callback
-    vizNode->setUserData(new PickedUserData(this));
 }
 
 VizPluginBase::~VizPluginBase()
