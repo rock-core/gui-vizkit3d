@@ -1,11 +1,31 @@
 #include <osg/Group>
 #include <typeinfo>
 #include <cxxabi.h>
+#include <osgViz/Object.h>
+#include <osgViz/interfaces/Clickable.h>
 
 #include "Vizkit3DPlugin.hpp"
 #include "Vizkit3DWidget.hpp"
 
 using namespace vizkit3d;
+
+
+class ClickHandler : public osgviz::Clickable
+{
+    VizPluginBase& plugin;
+public:
+    ClickHandler(VizPluginBase& plugin) : plugin(plugin){};
+    
+    virtual bool clicked(const int &buttonMask, const osg::Vec2d &cursor,
+                       const osg::Vec3d &world, const osg::Vec3d &local,
+                       Clickable* object, const int modifierMask,
+                       osgviz::WindowInterface* window = NULL)
+    {
+        plugin.click((float)cursor.x(), (float)cursor.y());
+        plugin.pick((float)world.x(), (float)world.y(), (float)world.z());
+    }
+
+};
 
 /** this adapter is used to forward the update call to the plugin
  */
@@ -25,7 +45,8 @@ VizPluginBase::VizPluginBase(QObject *parent)
     : QObject(parent), oldNodes(NULL), isAttached(false), dirty( false ),  plugin_enabled(true),
     keep_old_data(false),max_old_data(100)
 {
-    rootNode = new osg::Group();
+    rootNode = new osgviz::Object();
+    rootNode->addClickableCallback(new ClickHandler(*this));
     nodeCallback = new CallbackAdapter(this);
     rootNode->setUpdateCallback(nodeCallback);
     vizNode = new osg::PositionAttitudeTransform();
@@ -89,8 +110,13 @@ void VizPluginBase::click(float x,float y)
             container = container->parentWidget();
         }
     }
-
 }
+
+void VizPluginBase::pick(float x, float y, float z)
+{
+    emit picked(x, y, z);
+}
+
 
 void VizPluginBase::setPose(const QVector3D &position, const QQuaternion &orientation)
 {

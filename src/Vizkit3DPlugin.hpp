@@ -10,6 +10,11 @@
 
 #include <boost/thread/mutex.hpp>
 
+namespace osgviz 
+{
+    class Object;
+}
+
 namespace vizkit3d
 {
 /** 
@@ -162,6 +167,9 @@ class VizPluginBase : public QObject
          * Emits signal 'clicked(float, float)' if the plugin has a Vizkit3DWidget as an ancestor.
          */
         virtual void click(float x,float y);
+        
+        /**Emits signal picked() */
+        virtual void pick(float x, float y, float z);
 
         /**
         * @return an instance of the ruby adapter collection.
@@ -281,7 +289,7 @@ class VizPluginBase : public QObject
         void updateCallback(osg::Node* node);
 
         osg::ref_ptr<osg::Node> mainNode;               //node which is used by the child class
-        osg::ref_ptr<osg::Group> rootNode;              //node which is the osg root node of the pluign 
+        osg::ref_ptr<osgviz::Object> rootNode;              //node which is the osg root node of the pluign 
         osg::ref_ptr<osg::PositionAttitudeTransform> vizNode; //node which describes the transformation between rootNode and mainNode
         osg::ref_ptr<osg::Group> oldNodes;              //node which is the root node for all old visualization graphs of the plugin  
 
