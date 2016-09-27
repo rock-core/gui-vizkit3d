@@ -532,8 +532,8 @@ void Vizkit3DWidget::registerClickHandler(const string& frame)
   if(obj == NULL)
       throw std::runtime_error("Cannot register click handler");
 
-  if(!obj->hasClickableCallback(clickHandler.get()))
-    obj->addClickableCallback(clickHandler.get());
+  if(!obj->hasClickableCallback(clickHandler))
+    obj->addClickableCallback(clickHandler);
 }
   
 void Vizkit3DWidget::deregisterDataHandler(VizPluginBase* viz)

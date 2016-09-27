@@ -470,7 +470,7 @@ namespace vizkit3d
             osg::ref_ptr<osgQt::GraphicsWindowQt> graphicsWindowQt;
             osg::ref_ptr<osg::GraphicsContext> graphicsWindowQtgc;
             
-            osg::ref_ptr<osgviz::ManipulationClickHandler> clickHandler;
+            std::shared_ptr<osgviz::ManipulationClickHandler> clickHandler;
             
             //TODO replace with lambda once c++11 is used
             struct ObjectMovedHandler
