@@ -13,7 +13,6 @@
 #include "Vizkit3DBase.hpp"
 #include "Vizkit3DWidget.hpp"
 #include "Vizkit3DPlugin.hpp"
-#include "PickHandler.hpp"
 #include "QPropertyBrowserWidget.hpp"
 #include "AxesNode.hpp"
 #include "OsgVisitors.hpp"
@@ -228,7 +227,8 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
     layout->addWidget(splitter);
     this->setLayout(layout);
 
-
+    last_manipulator = vizkit3d::DEFAULT_MANIPULATOR;
+    
     graphicsWindowQt = createGraphicsWindow(0,0,800,600);
     graphicsWindowQtgc = dynamic_cast<osg::GraphicsContext*>(graphicsWindowQt.get());
 
@@ -263,7 +263,6 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
     osgviz->setScene(root);
 
     // create osg widget
-    //QWidget* widget = addViewWidget(win, root);
     QWidget* widget = graphicsWindowQt->getGLWidget();
     widget->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
     widget->setObjectName(QString("View Widget"));
@@ -382,31 +381,6 @@ QImage Vizkit3DWidget::grab(unsigned int viewIndex)
     return static_cast<CaptureOperation&>(*captureOperation).image;
 };
 
-//QWidget* Vizkit3DWidget::addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node* scene )
-//{
-//    osgViewer::View* view = new osgViewer::View;
-//    addView(view);
-//
-//    ::osg::Camera* camera = view->getCamera();
-//    camera->setGraphicsContext( gw );
-//
-//    const ::osg::GraphicsContext::Traits* traits = gw->getTraits();
-//
-//    camera->setClearColor(::osg::Vec4(0.2, 0.2, 0.6, 1.0) );
-//    camera->setViewport( new ::osg::Viewport(0, 0, traits->width, traits->height) );
-//    camera->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(traits->width)/static_cast<double>(traits->height), 1.0f, 10000.0f );
-//    camera->setCullMask(~INVISIBLE_NODE_MASK);
-//
-//    view->setSceneData(scene);
-//    view->addEventHandler( new osgViewer::StatsHandler );
-//    setCameraManipulator(TERRAIN_MANIPULATOR);
-//
-//    // pickhandler is for selecting objects in the opengl view
-//    PickHandler* pickHandler = new PickHandler();
-//    view->addEventHandler(pickHandler);
-//    return gw->getGLWidget();
-//}
-//
 
 osgQt::GraphicsWindowQt* Vizkit3DWidget::createGraphicsWindow( int x, int y, int w, int h, const std::string& name, bool windowDecoration)
 {
@@ -442,27 +416,27 @@ osg::Group* Vizkit3DWidget::getRootNode() const
     return root;
 }
 
-void Vizkit3DWidget::setTrackedNode( VizPluginBase* plugin )
+void Vizkit3DWidget::setTrackedNode(VizPluginBase* plugin)
 {
-//    return setTrackedNode(plugin->getRootNode(), QString("<Plugin %1>").arg(plugin->getPluginName()));
+   return setTrackedNode(plugin->getRootNode(), QString("<Plugin %1>").arg(plugin->getPluginName()));
 }
 
-void Vizkit3DWidget::setTrackedNode( osg::Node* node, QString tracked_object_name )
+void Vizkit3DWidget::setTrackedNode(osg::Node* node,const QString& tracked_object_name)
 {
-//    osgViewer::View *view = getView(0);
-//    assert(view);
-//
-//    osgGA::NodeTrackerManipulator* manipulator = new osgGA::NodeTrackerManipulator;
-//    view->setCameraManipulator(manipulator);
-//    manipulator->setTrackNode(node);
-//    manipulator->setHomePosition(osg::Vec3(-5, 0, 5), osg::Vec3(0,0,0), osg::Vec3(0,0,1));
-//    manipulator->setTrackerMode(osgGA::NodeTrackerManipulator::NODE_CENTER);
-//    if (current_manipulator != NODE_TRACKER_MANIPULATOR)
-//        last_manipulator = current_manipulator;
-//    current_manipulator = NODE_TRACKER_MANIPULATOR;
-//    view->home();
-//    this->tracked_object_name = tracked_object_name;
-//    emit propertyChanged("manipulator");
+    osgViewer::View *view = window->getView(0);
+    assert(view);
+
+    osgGA::NodeTrackerManipulator* manipulator = new osgGA::NodeTrackerManipulator;
+    view->setCameraManipulator(manipulator);
+    manipulator->setTrackNode(node);
+    manipulator->setHomePosition(osg::Vec3(-5, 0, 5), osg::Vec3(0,0,0), osg::Vec3(0,0,1));
+    manipulator->setTrackerMode(osgGA::NodeTrackerManipulator::NODE_CENTER);
+    if (current_manipulator != NODE_TRACKER_MANIPULATOR)
+        last_manipulator = current_manipulator;
+    current_manipulator = NODE_TRACKER_MANIPULATOR;
+    view->home();
+    this->tracked_object_name = tracked_object_name;
+    emit propertyChanged("manipulator");
 }
 
 
@@ -679,12 +653,7 @@ void Vizkit3DWidget::collapsePropertyBrowser()
 }
 
 
-void Vizkit3DWidget::setSmallFeatureCullingPixelSize(float val)
-{
-//    osgViewer::View *view = getView(0);
-//    assert(view);
-//    view->getCamera()->setSmallFeatureCullingPixelSize(val);
-}
+
 
 void Vizkit3DWidget::getCameraView(QVector3D& lookAtPos, QVector3D& eyePos, QVector3D& upVector)
 {
@@ -902,8 +871,6 @@ void Vizkit3DWidget::setVisualizationFrame(const QString& frame)
         return;
     }
 
-//    osgViewer::View *view = getView(0);
-//    assert(view);
     // the following is not working if the directly track the transformation 
     // therefore use a child
     osg::Node *node = TransformerGraph::getFrameGroup(*getRootNode(),frame.toStdString());

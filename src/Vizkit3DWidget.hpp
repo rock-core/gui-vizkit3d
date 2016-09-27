@@ -209,7 +209,7 @@ namespace vizkit3d
              *   to be reported in getCameraManipulatorName (and therefore in
              *   the property browser view)
              */
-            void setTrackedNode(osg::Node* node, QString tracked_object_name);
+            void setTrackedNode(osg::Node* node, const QString& tracked_object_name);
             /** @overload sets the camera to track this plugins's root position
              *
              * The tracked object name is <Plugin plugin_name>
@@ -281,8 +281,6 @@ namespace vizkit3d
             void setCameraEye(double x, double y, double z);
             void setCameraUp(double x, double y, double z);
             void getCameraView(QVector3D& eye, QVector3D& lookAt, QVector3D& up);
-
-            void setSmallFeatureCullingPixelSize(float val);
 
             QColor getBackgroundColor()const;
             void setBackgroundColor(QColor color);
@@ -425,7 +423,6 @@ namespace vizkit3d
             void disableDataHandler(VizPluginBase *viz);
             osg::Group *createSceneGraph(const QString &world_name);
 
-//            QWidget* addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node* scene );
             osgQt::GraphicsWindowQt* createGraphicsWindow( int x, int y, int w, int h, const std::string& name="", bool windowDecoration=false );
 
             

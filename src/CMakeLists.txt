@@ -19,7 +19,6 @@ rock_library(vizkit3d
         ${PROPERTY_BROWSER_RESOURCES} 
     MOC
         Vizkit3DPlugin.cpp 
-        PickHandler.cpp
         Vizkit3DWidget.cpp
         QVizkitMainWindow.cpp
         qtpropertybrowser/qteditorfactory.cpp
@@ -44,7 +43,6 @@ rock_library(vizkit3d
         Vizkit3DPlugin.hpp
         Vizkit3DWidget.hpp
         QVizkitMainWindow.hpp
-        PickHandler.hpp
         ColorConversionHelper.hpp
         CoordinateFrame.hpp
         EnvPluginBase.hpp
