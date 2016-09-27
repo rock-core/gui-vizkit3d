@@ -1,6 +1,7 @@
 #include <osg/Group>
 #include <typeinfo>
 #include <cxxabi.h>
+#include <memory>
 #include <osgViz/Object.h>
 #include <osgViz/interfaces/Clickable.h>
 
@@ -46,7 +47,8 @@ VizPluginBase::VizPluginBase(QObject *parent)
     keep_old_data(false),max_old_data(100)
 {
     rootNode = new osgviz::Object();
-    rootNode->addClickableCallback(new ClickHandler(*this));
+    std::shared_ptr<ClickHandler> handler(new ClickHandler(*this));
+    rootNode->addClickableCallback(handler);
     nodeCallback = new CallbackAdapter(this);
     rootNode->setUpdateCallback(nodeCallback);
     vizNode = new osg::PositionAttitudeTransform();
