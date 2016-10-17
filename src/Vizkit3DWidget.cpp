@@ -1086,7 +1086,7 @@ QStringList* Vizkit3DWidget::getAvailablePlugins()
     return plugins;
 }
 
-QObject* Vizkit3DWidget::loadPlugin(QString lib_name,QString plugin_name)
+QObject* Vizkit3DWidget::createPlugin(QString lib_name, QString plugin_name)
 {
     //check if the plugin name is encoded into the lib_name
     QStringList plugin_strings = lib_name.split("@");
@@ -1133,6 +1133,13 @@ QObject* Vizkit3DWidget::loadPlugin(QString lib_name,QString plugin_name)
                       lib->getAvailablePlugins()->join(", ").toStdString() << std::endl;
         return NULL;
     }
+    return plugin;
+}
+
+
+QObject* Vizkit3DWidget::loadPlugin(QString lib_name, QString plugin_name)
+{
+    QObject* plugin = createPlugin(lib_name, plugin_name);
     addPlugin(plugin);
     return plugin;
 }

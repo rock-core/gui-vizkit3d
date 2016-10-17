@@ -317,6 +317,9 @@ namespace vizkit3d
 
             QString findPluginPath(QString plugin_name);
             QString findLibPath(QString lib_name);
+            
+            /**Creates the specified plugin but dos **not** add it to this widget */
+            QObject* createPlugin(QString lib_name,QString plugin_name);
             QObject* loadPlugin(QString lib_name,QString plugin_name);
             QStringList* getAvailablePlugins();
 
