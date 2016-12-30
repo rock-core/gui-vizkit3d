@@ -2,12 +2,20 @@
 #define __VIZKIT_QVIZKITWIDGET__
 
 #include "Vizkit3DPlugin.hpp"
-#include <osgViewer/CompositeViewer>
 
 #include <QtDesigner/QDesignerExportWidget>
 #include <QVector3D>
 #include <QTimer>
 
+// disable tons of waringins in osg
+// this is only valid for the rest of this 
+// file
+#if defined(__clang__)
+    #pragma clang system_header
+#elif defined(__GNUC__) || defined(__GNUG__)
+    #pragma GCC system_header
+#endif
+#include <osgViewer/CompositeViewer>
 #include <osgGA/CameraManipulator>
 
 namespace osgQt { class GraphicsWindowQt;}
