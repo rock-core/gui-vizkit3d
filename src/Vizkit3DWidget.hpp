@@ -245,6 +245,8 @@ namespace vizkit3d
              */
             QString getRootVisualizationFrame() const;
 
+            void displayTransformGraph() const;
+
             /** @deprecated the update parameter is unused now, use
              * setVisualizationFrame(QString) instead
              */

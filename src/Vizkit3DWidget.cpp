@@ -926,6 +926,19 @@ QString Vizkit3DWidget::getWorldName()const
     return QString(TransformerGraph::getWorldName(*getRootNode()).c_str());
 }
 
+void Vizkit3DWidget::displayTransformGraph() const
+{
+    TransformerGraph::GraphDescription description = TransformerGraph::getGraphDescription(*getRootNode());
+    std::cerr << description.size() << " edges in transform graph" << std::endl;
+    std::cerr << "Root frame: " << getRootVisualizationFrame().toStdString() << std::endl;
+    for (list<TransformerGraph::EdgeDescription>::const_iterator it = description.begin();
+            it != description.end(); ++it)
+    {
+        std::cout << "  " << it->first << " -> " << it->second << std::endl;
+    }
+
+}
+
 bool Vizkit3DWidget::isTransformer() const
 {
     return TransformerGraph::areFrameAnnotationVisible(*getRootNode());
