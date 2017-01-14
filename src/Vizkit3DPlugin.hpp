@@ -1,9 +1,7 @@
 #ifndef __VIZKIT3D_VIZPLUGIN_HPP__
 #define __VIZKIT3D_VIZPLUGIN_HPP__
 
-#include <QtCore>
-#include <QtGui>
-
+#include <QtWidgets>
 #include <osg/NodeCallback>
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
@@ -275,6 +273,11 @@ class VizPluginBase : public QObject
         std::vector<QDockWidget*> dockWidgets;
         QString vizkit3d_plugin_name;
         VizPluginRubyAdapterCollection adapterCollection;
+
+	/** Returns an invalid QVariant 
+	 * used to invalidate properties
+	 */ 
+	QVariant _invalidate()const;
 
     private:
 	class CallbackAdapter;

@@ -3,6 +3,21 @@
 
 #include <vizkit3d/Vizkit3DPlugin.hpp>
 
+// disable tons of waringins in osg
+// this is only valid for the rest of this 
+// file
+#if defined(__clang__)
+    #pragma clang system_header
+#elif defined(__GNUC__) || defined(__GNUG__)
+    #pragma GCC system_header
+#endif
+#include <osg/Geode>
+#include <osg/Switch>
+#include <osg/ShapeDrawable>
+#include <osg/PositionAttitudeTransform>
+#include <osgDB/ReadFile>
+#include <osg/MatrixTransform>
+
 namespace vizkit3d
 {
 
@@ -11,9 +26,9 @@ namespace vizkit3d
         Q_OBJECT
         Q_PROPERTY(QString model_path READ getModelPath WRITE setModelPath)
 
-        // invalidate parent properties
-        Q_PROPERTY(QVariant KeepOldData READ QVariant)
-        Q_PROPERTY(QVariant MaxOldData READ QVariant)
+        // invalidate parent properties by setting them to an invalid QVairant
+        Q_PROPERTY(QVariant MaxOldData READ _invalidate)
+	Q_PROPERTY(QVariant KeepOldData READ _invalidate)
 
     public:
 	ModelVisualization(QObject* parent = NULL);

@@ -58,7 +58,6 @@ class QtVariantProperty;
 
 class QtVariantPropertyPrivate
 {
-    QtVariantProperty *q_ptr;
 public:
     QtVariantPropertyPrivate(QtVariantPropertyManager *m) : manager(m) {}
 

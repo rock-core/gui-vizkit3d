@@ -42,8 +42,7 @@
 #define QTTREEPROPERTYBROWSER_H
 
 #include "qtpropertybrowser.h"
-#include <QtGui/QTreeWidget>
-#include <QtGui/QItemDelegate>
+#include <QtWidgets>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE

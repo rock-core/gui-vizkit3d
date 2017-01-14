@@ -30,7 +30,7 @@ void QPropertyBrowserWidget::addGlobalProperties(QObject* obj, const QStringList
     
     for(int i = 1 ; i < metaObj->propertyCount(); i++)
     {
-        if(property_list.contains(QString::fromAscii(metaObj->property(i).name())))
+        if(property_list.contains(QString::fromLatin1(metaObj->property(i).name())))
         {
             QtVariantProperty* property = variantManager->addProperty(metaObj->property(i).type(), metaObj->property(i).name());
             if(property == 0)

@@ -4,7 +4,7 @@
 #include "Vizkit3DWidget.hpp"
 
 #include <QMainWindow>
-#include <QtDesigner/QDesignerExportWidget>
+#include <QtUiPlugin/QDesignerExportWidget>
 
 namespace vizkit3d {
 

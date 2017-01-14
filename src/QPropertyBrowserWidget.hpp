@@ -5,8 +5,7 @@
 #include "qtpropertybrowser/qtvariantproperty.h"
 #include "qtpropertybrowser/qtpropertymanager.h"
 
-#include <QWidget>
-#include <QHash>
+#include <QtWidgets>
 
 namespace vizkit3d {
 

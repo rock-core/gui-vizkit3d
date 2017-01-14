@@ -2,10 +2,8 @@
 #define __VIZKIT_QVIZKITWIDGET__
 
 #include "Vizkit3DPlugin.hpp"
-
-#include <QtDesigner/QDesignerExportWidget>
-#include <QVector3D>
-#include <QTimer>
+#include <QtCore>
+#include <QtUiPlugin/QDesignerExportWidget>
 
 // disable tons of waringins in osg
 // this is only valid for the rest of this 
@@ -17,6 +15,9 @@
 #endif
 #include <osgViewer/CompositeViewer>
 #include <osgGA/CameraManipulator>
+#include <osgDB/ReadFile>
+#include <osgGA/NodeTrackerManipulator>
+
 
 namespace osgQt { class GraphicsWindowQt;}
 namespace vizkit3d

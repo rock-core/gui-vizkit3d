@@ -1,6 +1,4 @@
 #include "QtThreadedWidget.hpp"
-#include <QWidget>
-
 #include <boost/bind.hpp>
     
 QtThreadedWidgetBase::QtThreadedWidgetBase()

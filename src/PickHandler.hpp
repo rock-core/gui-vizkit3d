@@ -1,8 +1,7 @@
 #ifndef __VIZKIT_PICKHANDLER_HPP__
 #define __VIZKIT_PICKHANDLER_HPP__
 
-#include <QObject>
-#include <QVector3D>
+#include <QtCore>
 #include <osgViewer/Viewer>
 #include <iostream>
 

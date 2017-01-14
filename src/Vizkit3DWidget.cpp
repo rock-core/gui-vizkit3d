@@ -1,13 +1,4 @@
-#include <QVBoxLayout>
-#include <QSplitter>
-#include <QComboBox>
-#include <QGroupBox>
-#include <QPlastiqueStyle>
-#include <QProcessEnvironment>
-#include <QPluginLoader>
-#include <QFileInfo>
-#include <QDir>
-#include <QRegExp>
+#include <QtWidgets>
 #include <algorithm>
 
 #include "Vizkit3DBase.hpp"
@@ -21,17 +12,16 @@
 #include "EnableGLDebugOperation.hpp"
 #include <boost/lexical_cast.hpp>
 #include <vizkit3d/EnvPluginBase.hpp>
+#include <vizkit3d/DefaultManipulator.hpp>
 
 #include <osg/PositionAttitudeTransform>
-#include <osgDB/ReadFile>
 #include <osgQt/GraphicsWindowQt>
 #include <osgViewer/ViewerEventHandlers>
+#include <osgViewer/Renderer>
 
-#include <vizkit3d/DefaultManipulator.hpp>
 #include <osgGA/FirstPersonManipulator>
 #include <osgGA/FlightManipulator>
 #include <osgGA/OrbitManipulator>
-#include <osgGA/NodeTrackerManipulator>
 #include <osgGA/TerrainManipulator>
 #include <osgGA/TrackballManipulator>
 #include <osgGA/MultiTouchTrackballManipulator>

@@ -2,7 +2,7 @@
 #include "QVizkitWidgetLoader.hpp"
 #include <QtPlugin>
 
-Q_EXPORT_PLUGIN2(QVizkitWidgetLoader, QVizkitWidgetLoader)
+Q_EXPORT_PLUGIN2(QVizkitWidgetLoader, QVizkitWidgetLoader);
 
 QVizkitWidgetLoader::QVizkitWidgetLoader(QObject* parent): QObject(parent)
 {

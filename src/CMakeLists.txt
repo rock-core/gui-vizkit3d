@@ -1,7 +1,13 @@
-rock_find_qt4(QtOpenGL)
 include(RockRuby)
 
-QT4_ADD_RESOURCES(PROPERTY_BROWSER_RESOURCES qtpropertybrowser/qtpropertybrowser.qrc)
+# find qt5
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5OpenGl REQUIRED)
+
+# Instruct CMake to run moc automatically when needed.
+set(CMAKE_AUTOMOC ON)
+# Add resources from the property browser
+qt5_add_resources(PROPERTY_BROWSER_RESOURCES qtpropertybrowser/qtpropertybrowser.qrc)
 
 rock_library(vizkit3d
     SOURCES
@@ -16,22 +22,20 @@ rock_library(vizkit3d
         CoordinateFrame.cpp
         DefaultManipulator.cpp
         EnableGLDebugOperation.cpp
+	Vizkit3DPlugin.cpp 
+	PickHandler.cpp
+	Vizkit3DWidget.cpp
+	QVizkitMainWindow.cpp
+	qtpropertybrowser/qteditorfactory.cpp
+	qtpropertybrowser/qtvariantproperty.cpp
+	qtpropertybrowser/qtpropertymanager.cpp
+	qtpropertybrowser/qtbuttonpropertybrowser.cpp
+	qtpropertybrowser/qtpropertybrowser.cpp
+	qtpropertybrowser/qtpropertybrowserutils.cpp
+	qtpropertybrowser/qttreepropertybrowser.cpp
+	qtpropertybrowser/qtgroupboxpropertybrowser.cpp
+	QPropertyBrowserWidget.cpp
         ${PROPERTY_BROWSER_RESOURCES} 
-    MOC
-        Vizkit3DPlugin.cpp 
-        PickHandler.cpp
-        Vizkit3DWidget.cpp
-        QVizkitMainWindow.cpp
-        qtpropertybrowser/qteditorfactory.cpp
-        qtpropertybrowser/qtvariantproperty.cpp
-        qtpropertybrowser/qtpropertymanager.cpp
-        qtpropertybrowser/qtbuttonpropertybrowser.cpp
-        qtpropertybrowser/qtpropertybrowser.cpp
-        qtpropertybrowser/qtpropertybrowserutils.cpp
-        qtpropertybrowser/qttreepropertybrowser.cpp
-        qtpropertybrowser/qtgroupboxpropertybrowser.cpp
-        QPropertyBrowserWidget.cpp
-        ${MOC_EXTRA}
     HEADERS
         TransformerGraph.hpp
         GridNode.hpp
@@ -50,18 +54,21 @@ rock_library(vizkit3d
         EnvPluginBase.hpp
         DefaultManipulator.hpp
         ${HEADERS_EXTRA}
-    LIBS ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY}
+	LIBS ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY}
     DEPS_CMAKE OpenGL
-    DEPS_PKGCONFIG openscenegraph openscenegraph-osgQt ${DEPS_EXTRA})
+    DEPS_PKGCONFIG openscenegraph-osgQt openscenegraph ${DEPS_EXTRA})
 
-rock_library(vizkitwidgetloader
-    MOC QVizkitWidgetLoader.cpp
-    DEPS vizkit3d
-    NOINSTALL) # installs in a non-standard location
+# setup qt
+qt5_use_modules(vizkit3d Widgets OpenGL)
+
+#rock_library(vizkitwidgetloader
+#    MOC_QT5 QVizkitWidgetLoader.cpp
+#    DEPS vizkit3d
+#    NOINSTALL) # installs in a non-standard location
 #rock_library(vizkitmainwindowloader
 #    MOC QVizkitMainWindowLoader.cpp
 #    DEPS vizkit3d
 #    NOINSTALL) # installs in a non-standard location
-install(TARGETS vizkitwidgetloader #vizkitmainwindowloader
-    LIBRARY DESTINATION lib/qt/designer
-    ARCHIVE DESTINATION lib/qt/designer)
+#install(TARGETS vizkitwidgetloader #vizkitmainwindowloader
+#    LIBRARY DESTINATION lib/qt/designer
+#    ARCHIVE DESTINATION lib/qt/designer)

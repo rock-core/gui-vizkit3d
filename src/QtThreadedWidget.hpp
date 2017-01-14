@@ -1,8 +1,7 @@
 #ifndef __ENVIEW_QTTHREADEDWIDGET__
 #define __ENVIEW_QTTHREADEDWIDGET__
 
-#include <QApplication>
-
+#include <QtWidgets>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>

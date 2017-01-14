@@ -4,9 +4,7 @@
 #include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/Referenced>
-#include <QVector3D>
-#include <QColor>
-#include <QGenericMatrix>
+#include <QtCore>
 #include <string>
 
 namespace vizkit3d

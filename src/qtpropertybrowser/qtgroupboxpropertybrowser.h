@@ -42,9 +42,7 @@
 #define QTGROUPBOXPROPERTYBROWSER_H
 
 #include "qtpropertybrowser.h"
-#include <QtGui/QGridLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QGroupBox>
+#include <QtWidgets>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE

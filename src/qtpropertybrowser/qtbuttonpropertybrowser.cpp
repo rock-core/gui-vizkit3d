@@ -39,10 +39,6 @@
 
 
 #include "qtbuttonpropertybrowser.h"
-#include <QtCore/QSet>
-#include <QtCore/QTimer>
-#include <QtCore/QMap>
-#include <QtGui/QStyle>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE

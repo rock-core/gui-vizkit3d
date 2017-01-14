@@ -1,13 +1,5 @@
 #include "ModelVisualization.hpp"
 #include <vizkit3d/OsgVisitors.hpp>
-#include <osg/Geode>
-#include <osg/Switch>
-#include <osg/ShapeDrawable>
-#include <osg/PositionAttitudeTransform>
-#include <osgDB/ReadFile>
-
-#include <osg/MatrixTransform>
-
 
 using namespace osg;
 namespace vizkit3d

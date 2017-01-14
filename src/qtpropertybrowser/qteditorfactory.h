@@ -43,24 +43,7 @@
 
 #include "qtpropertymanager.h"
 #include "qtpropertybrowserutils.h"
-#include <QtGui/QSpinBox>
-#include <QtGui/QScrollBar>
-#include <QtGui/QLabel>
-#include <QtGui/QComboBox>
-#include <QtGui/QAbstractItemView>
-#include <QtGui/QLineEdit>
-#include <QtGui/QDateTimeEdit>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QMenu>
-#include <QtGui/QKeyEvent>
-#include <QtGui/QApplication>
-#include <QtGui/QToolButton>
-#include <QtGui/QColorDialog>
-#include <QtGui/QFontDialog>
-#include <QtGui/QSpacerItem>
-#include <QtGui/QStyleOption>
-#include <QtGui/QPainter>
-#include <QtCore/QMap>
+#include <QtWidgets>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
