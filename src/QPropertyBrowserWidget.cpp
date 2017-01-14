@@ -30,6 +30,8 @@ void QPropertyBrowserWidget::addGlobalProperties(QObject* obj, const QStringList
     
     for(int i = 1 ; i < metaObj->propertyCount(); i++)
     {
+	if(!metaObj->property(i).isDesignable())
+	    continue;
         if(property_list.contains(QString::fromLatin1(metaObj->property(i).name())))
         {
             QtVariantProperty* property = variantManager->addProperty(metaObj->property(i).type(), metaObj->property(i).name());
@@ -71,7 +73,7 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
     for(int i = 1 ; i < metaObj->propertyCount(); i++)
     {
         QMetaProperty prop = metaObj->property(i);
-        if(!prop.isValid())
+        if(!prop.isValid() || !prop.isDesignable())
             continue;
         QVariant var = obj->property(prop.name());
         if(!var.isValid())
