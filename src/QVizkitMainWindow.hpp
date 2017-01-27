@@ -1,7 +1,11 @@
 #ifndef QVIZKITMAINWINDOW_H
 #define QVIZKITMAINWINDOW_H
-#include "Vizkit3DPlugin.hpp"
-#include "Vizkit3DWidget.hpp"
+
+#ifndef Q_MOC_RUN
+    #include "Vizkit3DPlugin.hpp"
+    #include "Vizkit3DWidget.hpp"
+#endif
+
 
 #include <QMainWindow>
 #include <QtDesigner/QDesignerExportWidget>

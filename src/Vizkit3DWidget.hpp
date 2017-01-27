@@ -9,10 +9,12 @@
 #include <QTimer>
 #include <QQuaternion>
 
-#include <osgGA/CameraManipulator>
-#include <osgManipulator/Dragger>
-#include <osgViz/OsgViz.hpp>
-#include <boost/signals2/connection.hpp>
+#ifndef Q_MOC_RUN
+    #include <osgGA/CameraManipulator>
+    #include <osgManipulator/Dragger>
+    #include <osgViz/OsgViz.hpp>
+    #include <boost/signals2/connection.hpp>
+#endif
 
 namespace osgviz { class ManipulationClickHandler;}
 
