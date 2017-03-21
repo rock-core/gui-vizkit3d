@@ -773,6 +773,13 @@ void Vizkit3DWidget::addPluginIntern(QObject* plugin,QObject *parent)
         connect(viz_plugin, SIGNAL(pluginActivityChanged(bool)), this, SLOT(pluginActivityChanged(bool)));
         connect(viz_plugin, SIGNAL(childrenChanged()), this, SLOT(pluginChildrenChanged()));
         connect(viz_plugin, SIGNAL(destroyed(QObject*)), this, SLOT(removePluginIntern(QObject*)));
+        
+        const std::vector<QDockWidget*> dockWidgets = viz_plugin->getDockWidgets();
+        for(QDockWidget* dockWidget : dockWidgets)
+        {
+            dockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
+            addDockWidget(Qt::BottomDockWidgetArea, dockWidget);
+        }
     }
 
     // add sub plugins if object has some
@@ -801,6 +808,12 @@ void Vizkit3DWidget::removePluginIntern(QObject* plugin)
             propertyBrowserWidget->removeProperties(viz_plugin);
         disconnect(viz_plugin, SIGNAL(pluginActivityChanged(bool)), this, SLOT(pluginActivityChanged(bool)));
         disconnect(viz_plugin, SIGNAL(childrenChanged()), this, SLOT(pluginChildrenChanged()));
+        
+        const std::vector<QDockWidget*> dockWidgets = viz_plugin->getDockWidgets();
+        for(QDockWidget* dockWidget : dockWidgets)
+        {
+            removeDockWidget(dockWidget);
+        }
     }
 }
 
