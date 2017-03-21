@@ -1,5 +1,3 @@
-#include <QVBoxLayout>
-#include <QSplitter>
 #include <QComboBox>
 #include <QGroupBox>
 #include <QPlastiqueStyle>
@@ -204,8 +202,8 @@ void Vizkit3DConfig::setCameraManipulator(QStringList const& manipulator)
     return getWidget()->setCameraManipulator(id);
 }
 
-Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool auto_update)
-    : QWidget(parent)
+Vizkit3DWidget::Vizkit3DWidget(QWidget* parent,const QString &world_name,bool auto_update)
+    : QMainWindow(parent)
     , env_plugin(NULL), clickHandler(new osgviz::ManipulationClickHandler),
     movedHandler(*this), movingHandler(*this), selectedHandler(*this)
 {
@@ -216,16 +214,6 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
     //currently only this is supported
     current_manipulator = TERRAIN_MANIPULATOR;
 
-    //create layout
-    //objects will be owned by the parent widget (this)
-    QVBoxLayout* layout = new QVBoxLayout;
-    layout->setObjectName("main_layout");
-    layout->setContentsMargins(2,2,2,2);
-    QSplitter* splitter = new QSplitter(Qt::Horizontal);
-    splitter->setObjectName("splitter");
-
-    layout->addWidget(splitter);
-    this->setLayout(layout);
 
     last_manipulator = vizkit3d::DEFAULT_MANIPULATOR;
     
@@ -266,14 +254,22 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
     QWidget* widget = graphicsWindowQt->getGLWidget();
     widget->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
     widget->setObjectName(QString("View Widget"));
-    splitter->addWidget(widget);
+    
+    setCentralWidget(widget);
+    
 
     // create propertyBrowserWidget
     QPropertyBrowserWidget *propertyBrowserWidget = new QPropertyBrowserWidget( parent );
     propertyBrowserWidget->setObjectName("PropertyBrowser");
     propertyBrowserWidget->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
     propertyBrowserWidget->resize(200,600);
-    splitter->addWidget(propertyBrowserWidget);
+    
+    QDockWidget* propertyDocker = new QDockWidget("Properties");
+    //prop browser should be closed
+    propertyDocker->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    propertyDocker->setWidget(propertyBrowserWidget);
+    addDockWidget(Qt::RightDockWidgetArea, propertyDocker);
+    
 
     // add config object to the property browser
     Vizkit3DConfig *config =  new Vizkit3DConfig(this);
@@ -644,12 +640,14 @@ void Vizkit3DWidget::setCameraUp(double x, double y, double z)
 
 void Vizkit3DWidget::collapsePropertyBrowser()
 {
-    QSplitter *splitter = findChild<QSplitter*>("splitter");
-    if(!splitter)
-        return;
-    QList<int> sizes;
-    sizes.push_front(0);
-    splitter->setSizes(sizes);
+    //FIXME not implemented
+    throw std::runtime_error("not implemented");
+//     QSplitter *splitter = findChild<QSplitter*>("splitter");
+//     if(!splitter)
+//         return;
+//     QList<int> sizes;
+//     sizes.push_front(0);
+//     splitter->setSizes(sizes);
 }
 
 

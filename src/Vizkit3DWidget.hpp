@@ -7,6 +7,7 @@
 #include <QtDesigner/QDesignerExportWidget>
 #include <QVector3D>
 #include <QTimer>
+#include <QMainWindow>
 #include <QQuaternion>
 
 #ifndef Q_MOC_RUN
@@ -186,7 +187,7 @@ namespace vizkit3d
             QStringList getAvailableCameraManipulators() const;
     };
 
-    class QDESIGNER_WIDGET_EXPORT Vizkit3DWidget : public QWidget
+    class QDESIGNER_WIDGET_EXPORT Vizkit3DWidget : public QMainWindow
     {
         Q_OBJECT
         public:
