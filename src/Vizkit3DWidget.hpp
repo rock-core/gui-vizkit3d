@@ -2,7 +2,6 @@
 #define __VIZKIT_QVIZKITWIDGET__
 
 #include "Vizkit3DPlugin.hpp"
-#include <osgViewer/CompositeViewer>
 
 #include <QtDesigner/QDesignerExportWidget>
 #include <QVector3D>
@@ -17,8 +16,20 @@
     #include <boost/signals2/connection.hpp>
 #endif
 
-namespace osgviz { class ManipulationClickHandler;}
 
+// disable tons of waringins in osg
+// this is only valid for the rest of this 
+// file
+#if defined(__clang__)
+    #pragma clang system_header
+#elif defined(__GNUC__) || defined(__GNUG__)
+    #pragma GCC system_header
+#endif
+#include <osgViewer/CompositeViewer>
+#include <osgGA/CameraManipulator>
+
+
+namespace osgviz { class ManipulationClickHandler;}
 namespace osgQt { class GraphicsWindowQt;}
 namespace vizkit3d
 {
