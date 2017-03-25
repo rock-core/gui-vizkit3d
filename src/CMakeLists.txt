@@ -2,7 +2,7 @@ include(RockRuby)
 
 # find qt5
 find_package(Qt5Widgets REQUIRED)
-find_package(Qt5OpenGl REQUIRED)
+find_package(Qt5OpenGL REQUIRED)
 
 # Instruct CMake to run moc automatically when needed.
 set(CMAKE_AUTOMOC ON)
