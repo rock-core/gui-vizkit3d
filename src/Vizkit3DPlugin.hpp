@@ -458,6 +458,8 @@ class VizkitPluginFactory : public QObject
 #define VizkitQtPlugin(pluginName)\
     class QtPlugin##pluginName : public vizkit3d::VizkitPluginFactory {\
         public:\
+	Q_OBJECT\
+	Q_PLUGIN_METADATA(IID "QtPlugin##pluginName")\
         virtual QStringList* getAvailablePlugins() const\
         {\
             QStringList* result = new QStringList; \
@@ -470,8 +472,7 @@ class VizkitPluginFactory : public QObject
                 return new pluginName;\
             else return 0;\
         };\
-    };\
-    Q_EXPORT_PLUGIN2(QtPlugin##pluginName, QtPlugin##pluginName)
+    };
 
 /** @deprecated adapter item for legacy visualizations. Do not derive from this
  * class for new designs. Use VizPlugin directly instead.
