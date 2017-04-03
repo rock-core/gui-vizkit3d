@@ -247,8 +247,7 @@ Vizkit3DWidget::Vizkit3DWidget(QWidget* parent,const QString &world_name,bool au
 
     // create root scene node
     root = createSceneGraph(world_name);
-
-    osgviz->setScene(root);
+    window->addChild(root);
 
     // create osg widget
     QWidget* widget = graphicsWindowQt->getGLWidget();
