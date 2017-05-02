@@ -280,6 +280,7 @@ Vizkit3DWidget::Vizkit3DWidget(QWidget* parent,const QString &world_name,bool au
     //camera->setViewport( new ::osg::Viewport(0, 0, traits->width, traits->height) );
     //camera->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(traits->width)/static_cast<double>(traits->height), 1.0f, 10000.0f );
     camera->setCullMask(~INVISIBLE_NODE_MASK);
+    camera->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
 
     //connect signals and slots
     connect(this, SIGNAL(addPlugins(QObject*,QObject*)), this, SLOT(addPluginIntern(QObject*,QObject*)));
