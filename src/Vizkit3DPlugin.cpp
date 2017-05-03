@@ -24,6 +24,7 @@ public:
     {
         plugin.click((float)cursor.x(), (float)cursor.y());
         plugin.pick((float)world.x(), (float)world.y(), (float)world.z());
+        return true;
     }
 
 };
