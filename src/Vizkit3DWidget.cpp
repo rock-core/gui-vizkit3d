@@ -258,7 +258,7 @@ Vizkit3DWidget::Vizkit3DWidget(QWidget* parent,const QString &world_name,bool au
     
 
     // create propertyBrowserWidget
-    QPropertyBrowserWidget *propertyBrowserWidget = new QPropertyBrowserWidget( parent );
+    propertyBrowserWidget = new QPropertyBrowserWidget( parent );
     propertyBrowserWidget->setObjectName("PropertyBrowser");
     propertyBrowserWidget->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
     propertyBrowserWidget->resize(200,600);
@@ -819,7 +819,7 @@ void Vizkit3DWidget::removePluginIntern(QObject* plugin)
 
 QWidget* Vizkit3DWidget::getPropertyWidget() const
 {
-    return findChild<QPropertyBrowserWidget*>("PropertyBrowser");
+    return propertyBrowserWidget;
 }
 
 void Vizkit3DWidget::setPluginDataFrame(const QString& frame, QObject* plugin)

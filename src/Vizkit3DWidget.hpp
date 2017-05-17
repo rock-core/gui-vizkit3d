@@ -33,6 +33,7 @@ namespace osgviz { class ManipulationClickHandler;}
 namespace osgQt { class GraphicsWindowQt;}
 namespace vizkit3d
 {
+    class QPropertyBrowserWidget;
     class EnvPluginBase;
     class Vizkit3DWidget;
 
@@ -518,6 +519,8 @@ namespace vizkit3d
             /**Connection between selectedHandler and it's signal.
              * Used to temporarly block the slot*/
             boost::signals2::connection selectedObjectConnection;
+            
+            QPropertyBrowserWidget* propertyBrowserWidget;
             
     };
 }
