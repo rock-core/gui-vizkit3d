@@ -242,6 +242,7 @@ namespace vizkit3d
             void setCameraManipulator(osg::ref_ptr<osgGA::CameraManipulator> manipulator, bool resetToDefaultHome = false);
 
         public slots:
+            void update();
             void addPlugin(QObject* plugin, QObject* parent = NULL);
             void removePlugin(QObject* plugin);
 
@@ -410,9 +411,6 @@ namespace vizkit3d
             /** This signal is emitted when the user selects a frame in the
              *  3d view.*/
             void frameSelected(const QString frame);
-
-        protected:
-            virtual void paintEvent( QPaintEvent* event );
 
         private slots:
             void setPluginDataFrameIntern(const QString &frame, QObject *plugin);
