@@ -396,9 +396,9 @@ osgQt::GraphicsWindowQt* Vizkit3DWidget::createGraphicsWindow( int x, int y, int
     return new osgQt::GraphicsWindowQt(traits.get());
 }
 
-void Vizkit3DWidget::paintEvent( QPaintEvent* event )
+void Vizkit3DWidget::update()
 {
-    //frame();
+    QWidget::update();
     osgviz->update();
 }
 
