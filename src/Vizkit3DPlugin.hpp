@@ -166,7 +166,6 @@ class VizPluginBase : public QObject
         /**
          * Emits signal 'clicked(float, float)' if the plugin has a Vizkit3DWidget as an ancestor.
          */
-        virtual void click(float x,float y);
         virtual void click(float x,float y, int buttonMask, int modifierMask);
         
         /**Emits signal picked() */
