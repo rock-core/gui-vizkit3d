@@ -167,9 +167,10 @@ class VizPluginBase : public QObject
          * Emits signal 'clicked(float, float)' if the plugin has a Vizkit3DWidget as an ancestor.
          */
         virtual void click(float x,float y);
+        virtual void click(float x,float y, int buttonMask, int modifierMask);
         
         /**Emits signal picked() */
-        virtual void pick(float x, float y, float z);
+        virtual void pick(float x, float y, float z, int buttonMask, int modifierMask);
 
         /**
         * @return an instance of the ruby adapter collection.
@@ -247,11 +248,16 @@ class VizPluginBase : public QObject
         * That is the container widget of the OSG viewer and the property browser.
         */
         void clicked(float x, float y);
+        void clicked(float x, float y, int buttonMask, int modifierMask);
 
        /**
         * Signals when this plugin has been clicked. x,y,z are in world coordinates.
         */
         void picked(float x, float y,float z);
+        /** @param buttonMask Mouse button that has been pressed
+         *  @param modifierMask Modifier key(s) that have been pressed
+         */
+        void picked(float x, float y,float z, int buttonMask, int modifierMask);
 
     protected:
         /** override this function to update the visualisation.

@@ -22,11 +22,10 @@ public:
                        Clickable* object, const int modifierMask,
                        osgviz::WindowInterface* window = NULL)
     {
-        plugin.click((float)cursor.x(), (float)cursor.y());
-        plugin.pick((float)world.x(), (float)world.y(), (float)world.z());
+        plugin.click((float)cursor.x(), (float)cursor.y(), buttonMask, modifierMask);
+        plugin.pick((float)world.x(), (float)world.y(), (float)world.z(), buttonMask, modifierMask);
         return true;
     }
-
 };
 
 /** this adapter is used to forward the update call to the plugin
@@ -86,7 +85,7 @@ osg::ref_ptr<osg::Group> VizPluginBase::getRootNode() const
     return rootNode;
 }
 
-void VizPluginBase::click(float x,float y)
+void VizPluginBase::click(float x,float y, int buttonMask, int modifierMask)
 {
     QWidget *osg_widget = dynamic_cast<QWidget*>(parent()); // widget displaying the osg scene.
     
@@ -105,6 +104,7 @@ void VizPluginBase::click(float x,float y)
             QPoint container_coords = osg_widget->mapTo(container, QPoint(x,y));
             //std::cout << "grandparent coords: (" << container_coords.x() << "," << container_coords.y() << ")" << std::endl;
             emit clicked(container_coords.x(), container_coords.y());
+            emit clicked(container_coords.x(), container_coords.y(), buttonMask, modifierMask);
             break;
         }
         else
@@ -115,9 +115,10 @@ void VizPluginBase::click(float x,float y)
     }
 }
 
-void VizPluginBase::pick(float x, float y, float z)
+void VizPluginBase::pick(float x, float y, float z, int buttonMask, int modifierMask)
 {
     emit picked(x, y, z);
+    emit picked(x, y, z, buttonMask, modifierMask);
 }
 
 
