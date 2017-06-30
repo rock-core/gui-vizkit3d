@@ -519,6 +519,7 @@ namespace vizkit3d
             boost::signals2::connection selectedObjectConnection;
             
             QPropertyBrowserWidget* propertyBrowserWidget;
+            QDockWidget* propertyDocker;
             
     };
 }
