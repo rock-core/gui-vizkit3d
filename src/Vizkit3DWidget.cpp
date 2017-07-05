@@ -263,7 +263,7 @@ Vizkit3DWidget::Vizkit3DWidget(QWidget* parent,const QString &world_name,bool au
     propertyBrowserWidget->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
     propertyBrowserWidget->resize(200,600);
     
-    QDockWidget* propertyDocker = new QDockWidget("Properties");
+    propertyDocker = new QDockWidget("Properties");
     //prop browser should be closed
     propertyDocker->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     propertyDocker->setWidget(propertyBrowserWidget);
@@ -640,14 +640,8 @@ void Vizkit3DWidget::setCameraUp(double x, double y, double z)
 
 void Vizkit3DWidget::collapsePropertyBrowser()
 {
-    //FIXME not implemented
-    throw std::runtime_error("not implemented");
-//     QSplitter *splitter = findChild<QSplitter*>("splitter");
-//     if(!splitter)
-//         return;
-//     QList<int> sizes;
-//     sizes.push_front(0);
-//     splitter->setSizes(sizes);
+    removeDockWidget(propertyDocker);
+    propertyBrowserWidget->close();
 }
 
 
