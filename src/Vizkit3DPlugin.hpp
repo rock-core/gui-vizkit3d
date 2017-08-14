@@ -17,6 +17,8 @@ namespace osgviz
 
 namespace vizkit3d
 {
+class ClickHandler;
+
 /** 
  * Interface class for all ruby adapters of the visualization plugins
  * Ruby adapters are usefull to get incoming data via ruby.
@@ -119,9 +121,11 @@ class VizPluginBase : public QObject
     Q_PROPERTY(QString vizkit3d_plugin_name READ getPluginName)
     Q_PROPERTY(bool enabled READ isPluginEnabled WRITE setPluginEnabled)
     Q_PROPERTY(bool KeepOldData READ isKeepOldDataEnabled WRITE setKeepOldData)
+    Q_PROPERTY(bool evaluatesClicks READ getEvaluatesClicks WRITE setEvaluatesClicks)
     Q_PROPERTY(int MaxOldData READ getMaxOldData WRITE setMaxOldData)
     Q_PROPERTY(QStringList frame READ getVisualizationFrames WRITE setVisualizationFrameFromList)
     Q_PROPERTY(double scale READ getScale WRITE setScale)
+
 
     public:
         VizPluginBase(QObject *parent=NULL);
@@ -226,6 +230,17 @@ class VizPluginBase : public QObject
         */
         void setScale(double scale);
 
+        /**
+         * @return whether click events should be evaluated by this plugin or not
+         */
+        bool getEvaluatesClicks() const;
+
+        /**
+         * enable or disable click evaluation by this plugin
+         * @param value
+         */
+        void setEvaluatesClicks (const bool &value);
+
     signals:
        /**
         * must be emitted if a property of an inherited plugin changes
@@ -308,6 +323,7 @@ class VizPluginBase : public QObject
         bool dirty;
         bool plugin_enabled;
         bool keep_old_data;
+        std::shared_ptr<ClickHandler> click_handler;
         unsigned int max_old_data;
         QString current_frame;
 };

@@ -8,26 +8,41 @@
 #include "Vizkit3DPlugin.hpp"
 #include "Vizkit3DWidget.hpp"
 
-using namespace vizkit3d;
-
-
-class ClickHandler : public osgviz::Clickable
-{
-    VizPluginBase& plugin;
-public:
-    ClickHandler(VizPluginBase& plugin) : plugin(plugin){};
-    
-    virtual bool clicked(const int &buttonMask, const osg::Vec2d &cursor,
-                       const osg::Vec3d &world, const osg::Vec3d &local,
-                       Clickable* object, const int modifierMask,
-                       osgviz::WindowInterface* window = NULL)
+namespace vizkit3d{
+    class ClickHandler : public osgviz::Clickable
     {
-        plugin.click((float)cursor.x(), (float)cursor.y(), buttonMask, modifierMask);
-        plugin.pick((float)world.x(), (float)world.y(), (float)world.z(), buttonMask, modifierMask);
-        return true;
-    }
-};
+        VizPluginBase& plugin;
+    public:
+        ClickHandler(VizPluginBase& plugin) : plugin(plugin), enabled(true){};
 
+        virtual bool clicked(const int &buttonMask, const osg::Vec2d &cursor,
+                           const osg::Vec3d &world, const osg::Vec3d &local,
+                           Clickable* object, const int modifierMask,
+                           osgviz::WindowInterface* window = NULL)
+        {
+            if (enabled){
+                plugin.click((float)cursor.x(), (float)cursor.y(), buttonMask, modifierMask);
+                plugin.pick((float)world.x(), (float)world.y(), (float)world.z(), buttonMask, modifierMask);
+                return true;
+            }
+            return false;
+        }
+
+        bool isEnabled(){
+            return enabled;
+        }
+    
+        void enable(bool val = true){
+            enabled = val;
+        }
+
+    private:
+        bool enabled;
+
+    };
+}
+
+using namespace vizkit3d;
 /** this adapter is used to forward the update call to the plugin
  */
 class VizPluginBase::CallbackAdapter : public osg::NodeCallback
@@ -47,8 +62,8 @@ VizPluginBase::VizPluginBase(QObject *parent)
     keep_old_data(false),max_old_data(100)
 {
     rootNode = new osgviz::Object();
-    std::shared_ptr<ClickHandler> handler(new ClickHandler(*this));
-    rootNode->addClickableCallback(handler);
+    click_handler = std::shared_ptr<ClickHandler>(new ClickHandler(*this));
+    rootNode->addClickableCallback(click_handler);
     nodeCallback = new CallbackAdapter(this);
     rootNode->setUpdateCallback(nodeCallback);
     vizNode = new osg::PositionAttitudeTransform();
@@ -300,3 +315,12 @@ void VizPluginBase::setVisualizationFrame(const QString &frame)
     current_frame = frame;
     emit propertyChanged("frame");
 }
+
+bool VizPluginBase::getEvaluatesClicks() const{
+    return click_handler->isEnabled();
+}
+
+void VizPluginBase::setEvaluatesClicks (const bool &value){
+    click_handler->enable(value);
+}
+
