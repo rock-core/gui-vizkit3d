@@ -1,5 +1,5 @@
-#include "../src/GridNode.hpp"
 #include "GridVisualization.hpp"
+#include "../src/GridNode.hpp"
 
 namespace vizkit3d
 {

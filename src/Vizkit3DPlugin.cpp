@@ -1,10 +1,12 @@
-#include <osg/Group>
-#include <typeinfo>
-#include <cxxabi.h>
 
+#include <QtCore>
 #include "Vizkit3DPlugin.hpp"
 #include "Vizkit3DWidget.hpp"
 #include "PickHandler.hpp"
+
+#include <osg/Group>
+#include <typeinfo>
+#include <cxxabi.h>
 
 using namespace vizkit3d;
 

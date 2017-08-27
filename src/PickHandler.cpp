@@ -1,3 +1,6 @@
+
+#include "PickHandler.hpp"
+
 #include <osg/Timer>
 #include <osg/io_utils>
 #include <osg/observer_ptr>
@@ -10,8 +13,6 @@
 #include <osgGA/StateSetManipulator>
 #include <osgGA/KeySwitchMatrixManipulator>
 #include <osgGA/NodeTrackerManipulator>
-
-#include "PickHandler.hpp"
 
 using namespace vizkit3d;
 

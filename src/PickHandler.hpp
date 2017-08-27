@@ -1,11 +1,10 @@
 #ifndef __VIZKIT_PICKHANDLER_HPP__
 #define __VIZKIT_PICKHANDLER_HPP__
 
-#include <QtCore>
-#include <osgViewer/Viewer>
 #include <iostream>
-
+#include <QtCore>
 #include "Vizkit3DPlugin.hpp"
+#include <osgViewer/Viewer>
 
 namespace vizkit3d
 {
