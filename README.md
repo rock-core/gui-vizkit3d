@@ -7,4 +7,4 @@ Nonetheless, vizkit3d uses only widely accepted libraries (Qt and OSG) and depen
 on the Rock framework in no way.
 
 Vizkit3D functionality can also be accessed from Ruby by using
-[https://github.com/rock-core/gui-vizkit](the vizkit library)
+[the vizkit library](https://github.com/rock-core/gui-vizkit]).
