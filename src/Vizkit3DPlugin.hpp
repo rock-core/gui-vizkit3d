@@ -9,6 +9,8 @@
 #include <osg/PositionAttitudeTransform>
 
 #include <boost/thread/mutex.hpp>
+#include <vector>
+#include <functional>
 
 namespace osgviz 
 {
@@ -151,6 +153,7 @@ class VizPluginBase : public QObject
          * @return a vector of QDockWidgets provided by this class.
          */
         std::vector<QDockWidget*> getDockWidgets();
+	void addPickHandler(std::function<void (float, float, float)> f);
 
     public slots:
        /**
@@ -304,6 +307,8 @@ class VizPluginBase : public QObject
         VizPluginRubyAdapterCollection adapterCollection;
 
     private:
+	std::vector<std::function<void(float, float, float)>> pickCallbacks;
+      
         class CallbackAdapter;
         osg::ref_ptr<osg::NodeCallback> nodeCallback;
         void updateCallback(osg::Node* node);

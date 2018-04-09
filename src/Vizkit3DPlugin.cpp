@@ -134,6 +134,16 @@ void VizPluginBase::pick(float x, float y, float z, int buttonMask, int modifier
 {
     emit picked(x, y, z);
     emit picked(x, y, z, buttonMask, modifierMask);
+  
+    for(std::function<void(float, float, float)> f : pickCallbacks)
+    {
+	f(x, y, z);
+    }    
+}
+
+void VizPluginBase::addPickHandler(std::function<void(float, float, float)> f)
+{
+  pickCallbacks.push_back(f);
 }
 
 
