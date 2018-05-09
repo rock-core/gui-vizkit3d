@@ -12,6 +12,6 @@
     <depend package="qt4-opengl" />
     <depend package="boost" />
     <depend package="base/cmake" />
-    <depend package="gui/osgviz/osgviz" />
+    <depend package="gui/osgviz" />
     <!--    <depend package="qt-designer" /> !-->
 </package>
