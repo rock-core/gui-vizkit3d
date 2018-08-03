@@ -117,7 +117,7 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
     QHash<QString, QtProperty*>* groupMap = new QHash<QString, QtProperty*>();
     for(QList<QtVariantProperty*>::const_iterator it = properties.begin(); it != properties.end(); it++)
     {
-        std::cout << "adding to map: " << (*it)->propertyName().toStdString() << " -> " << obj << std::endl;
+        //std::cout << "adding to map: " << (*it)->propertyName().toStdString() << " -> " << obj << std::endl;
         QHash<QtProperty*, QObject*>::const_iterator i = propertyToObject.find(*it);
         if (i != propertyToObject.end()) {
             std::cerr << "property already present!" << std::endl;
@@ -149,7 +149,7 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
 }
 
 void QPropertyBrowserWidget::propObjDestroyed(QObject *delObj) {
-    std::cout << "Object destroyed: " << delObj << std::endl;
+    //std::cout << "Object destroyed: " << delObj << std::endl;
     removeProperties(delObj);
 }
 
@@ -172,7 +172,7 @@ void QPropertyBrowserWidget::removeProperties(QObject* obj)
         }
         this->removeProperty(objectToGroup[obj]);
         if(objectToGroup[obj]->subProperties().size() == 0) {
-            std::cout << "No more properties in group: " << obj << std::endl;
+            //std::cout << "No more properties in group: " << obj << std::endl;
             delete objectToGroup[obj];
         }
         objectToGroup.remove(obj);
@@ -196,7 +196,7 @@ void QPropertyBrowserWidget::propertyChangedInGUI(QtProperty* property, const QV
     if (i == propertyToObject.end())
         return;
     
-    std::cout << "accessing from map: " << property->propertyName().toStdString() << " -> " << i.value() << std::endl;
+    //std::cout << "accessing from map: " << property->propertyName().toStdString() << " -> " << i.value() << std::endl;
     
     QtVariantProperty* prop = dynamic_cast<QtVariantProperty*>(property);
     if(prop && prop->propertyType() == QtVariantPropertyManager::enumTypeId())
