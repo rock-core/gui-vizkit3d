@@ -24,6 +24,7 @@ protected slots:
     void propertyChangedInGUI(QtProperty *property, const QVariant &val);
     void propertyChangedInObject(QString property_name);
     void propertyChangedInObject();
+    void propObjDestroyed(QObject*);
     
 private:
     QHash<QtProperty*, QObject*> propertyToObject;
