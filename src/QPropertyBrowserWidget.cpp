@@ -140,12 +140,12 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
     }
     
     // connect plugin signal, to notice if a property has changed
-    if (!this->connect(obj, SIGNAL(propertyChanged(QString)), this, SLOT(propertyChangedInObject(QString))))
+    if (!this->connect(obj, SIGNAL(propertyChanged(QString)), SLOT(propertyChangedInObject(QString))))
     {
         std::cerr << "The QObject has no SIGNAL 'propertyChanged(QString)', the property browser widget won't get updated "
                   << "if properties in the QObject will change." << std::endl;
     }
-    this->connect(obj, SIGNAL(destroyed(QObject*)), this, SLOT(propObjDestroyed(QObject*)));
+    this->connect(obj, SIGNAL(destroyed(QObject*)), SLOT(propObjDestroyed(QObject*)));
 }
 
 void QPropertyBrowserWidget::propObjDestroyed(QObject *delObj) {
@@ -159,7 +159,7 @@ void QPropertyBrowserWidget::propObjDestroyed(QObject *delObj) {
 void QPropertyBrowserWidget::removeProperties(QObject* obj)
 {
     // disconnect signal
-    this->disconnect(obj, SIGNAL(propertyChanged(QString)), this, SLOT(propertyChangedInObject(QString)));
+    disconnect(obj, 0, this, 0);
     
     // remove properties
     if(objectToGroup[obj])
