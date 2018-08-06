@@ -405,7 +405,7 @@ namespace vizkit3d
             /** The set of known plugins, as a mapping from the plugin to the osg::Node
              * to which it should be attached.
              */
-            typedef std::map<VizPluginBase*, osg::ref_ptr<osg::Group> > PluginMap;
+            typedef std::map<QPointer<VizPluginBase>, osg::ref_ptr<osg::Group> > PluginMap;
             PluginMap plugins;
 
             QTimer _timer;

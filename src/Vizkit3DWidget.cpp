@@ -481,7 +481,7 @@ void Vizkit3DWidget::registerDataHandler(VizPluginBase* viz)
 {
     osg::Group* initial_parent = TransformerGraph::getFrameGroup(*getRootNode());
     assert(initial_parent);
-    plugins.insert(make_pair(viz, initial_parent));
+    plugins.insert(make_pair(QPointer<VizPluginBase>(viz), initial_parent));
 }
 
 void Vizkit3DWidget::deregisterDataHandler(VizPluginBase* viz)
@@ -742,8 +742,11 @@ void Vizkit3DWidget::addPluginIntern(QObject* plugin,QObject *parent)
 
     vizkit3d::VizPluginBase* viz_plugin = dynamic_cast<vizkit3d::VizPluginBase*>(plugin);
     bool has_plugin = plugins.find(viz_plugin) != plugins.end();
-    if (viz_plugin && !has_plugin)
-    {
+    
+    if (has_plugin) {
+        std::cerr << viz_plugin->getPluginName().toStdString() <<": plugin already present!" << std::endl;
+        //removePlugin(plugin);
+    } else if (viz_plugin) {
         viz_plugin->setParent(this);
         viz_plugin->setVisualizationFrame(getRootNode()->getName().c_str());
 
@@ -880,9 +883,19 @@ void Vizkit3DWidget::setTransformation(const QString &source_frame,const QString
     if(count != getVisualizationFrames().size())
     {
         emit propertyChanged("frame");
+        // first: VizPluginBase*
+        // second: osg::ref_ptr<osg::Group>
+        
         PluginMap::iterator it = plugins.begin();
-        for(;it != plugins.end();++it)
-            it->first->setVisualizationFrame(it->first->getVisualizationFrame());
+        for(;it != plugins.end();++it) {
+            std::cout << __FUNCTION__ << " update call for plugin at address " << it->first << std::endl;
+            if (it->first != 0) {
+                std::cout << __FUNCTION__ << " update call for plugin named " << it->first->getPluginName().toStdString() << std::endl;
+                it->first->setVisualizationFrame(it->first->getVisualizationFrame());
+            } else {
+                std::cout << __FUNCTION__ << " ptr to plugin is 0 " << std::endl;
+            }
+        }
     }
 
     if(!root_frame.isEmpty())
