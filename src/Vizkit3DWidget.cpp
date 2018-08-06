@@ -744,8 +744,7 @@ void Vizkit3DWidget::addPluginIntern(QObject* plugin,QObject *parent)
     bool has_plugin = plugins.find(viz_plugin) != plugins.end();
     
     if (has_plugin) {
-        std::cerr << viz_plugin->getPluginName().toStdString() <<": plugin already present!" << std::endl;
-        //removePlugin(plugin);
+        //std::cerr << viz_plugin->getPluginName().toStdString() <<": plugin already present!" << std::endl;
     } else if (viz_plugin) {
         viz_plugin->setParent(this);
         viz_plugin->setVisualizationFrame(getRootNode()->getName().c_str());
@@ -777,7 +776,7 @@ void Vizkit3DWidget::pluginChildrenChanged()
  */
 void Vizkit3DWidget::removePluginIntern(QObject* plugin)
 {
-    std::cout << __FUNCTION__ << " removing " << plugin << " (thread " << QThread::currentThreadId() << ")" << std::endl;
+    //std::cout << __FUNCTION__ << " removing " << plugin << " (thread " << QThread::currentThreadId() << ")" << std::endl;
     vizkit3d::VizPluginBase* viz_plugin = dynamic_cast<vizkit3d::VizPluginBase*>(plugin);
     if (viz_plugin)
     {
@@ -888,12 +887,12 @@ void Vizkit3DWidget::setTransformation(const QString &source_frame,const QString
         
         PluginMap::iterator it = plugins.begin();
         for(;it != plugins.end();++it) {
-            std::cout << __FUNCTION__ << " update call for plugin at address " << it->first << " (thread " << QThread::currentThreadId() << ")" <<  std::endl;
+            //std::cout << __FUNCTION__ << " update call for plugin at address " << it->first << " (thread " << QThread::currentThreadId() << ")" <<  std::endl;
             if ((it->second).weak_ptr.data()) {
-                std::cout << __FUNCTION__ << " update call for plugin named " << (it->second).weak_ptr.data()->getPluginName().toStdString() << " (thread " << QThread::currentThreadId() << ")" <<  std::endl;
+                //std::cout << __FUNCTION__ << " update call for plugin named " << (it->second).weak_ptr.data()->getPluginName().toStdString() << " (thread " << QThread::currentThreadId() << ")" <<  std::endl;
                 (it->second).weak_ptr.data()->setVisualizationFrame((it->second).weak_ptr.data()->getVisualizationFrame());
             } else {
-                std::cout << __FUNCTION__ << " ptr to plugin is 0 " << " (thread " << QThread::currentThreadId() << ")" <<  std::endl;
+                //std::cout << __FUNCTION__ << " ptr to plugin is 0 " << " (thread " << QThread::currentThreadId() << ")" <<  std::endl;
             }
         }
     }
