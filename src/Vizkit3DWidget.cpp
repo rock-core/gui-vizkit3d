@@ -745,7 +745,9 @@ void Vizkit3DWidget::addPluginIntern(QObject* plugin,QObject *parent)
     
     if (has_plugin) {
         //std::cerr << viz_plugin->getPluginName().toStdString() <<": plugin already present!" << std::endl;
-    } else if (viz_plugin) {
+        removePlugin(plugin);
+    } 
+    if (viz_plugin) {
         viz_plugin->setParent(this);
         viz_plugin->setVisualizationFrame(getRootNode()->getName().c_str());
 
