@@ -241,8 +241,11 @@ void QPropertyBrowserWidget::propertyChangedInObject(QString property_name)
 
             if (value.type() == QVariant::StringList)
                 dynamic_cast<QtVariantProperty*>(property)->setAttribute("enumNames", value);
-            else
+            else {
+                variantManager->blockSignals(true);
                 variantManager->setValue(property, value);
+                variantManager->blockSignals(false);
+            }
         }
     }
 }
@@ -266,7 +269,9 @@ void QPropertyBrowserWidget::propertyChangedInObject()
             QtProperty* property = groupMap->value(property_name);
             if(property)
             {
+                variantManager->blockSignals(true);
                 variantManager->setValue(property, metaObj->property(i).read(obj));
+                variantManager->blockSignals(false);
             }
         }
     }
