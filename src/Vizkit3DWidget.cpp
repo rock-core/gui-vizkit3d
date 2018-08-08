@@ -481,7 +481,7 @@ void Vizkit3DWidget::registerDataHandler(VizPluginBase* viz)
 {
     osg::Group* initial_parent = TransformerGraph::getFrameGroup(*getRootNode());
     assert(initial_parent);
-    plugins.insert(make_pair(viz, initial_parent));
+    plugins.insert(make_pair(viz, VizPluginInfo(viz, initial_parent)));
 }
 
 void Vizkit3DWidget::deregisterDataHandler(VizPluginBase* viz)
@@ -504,14 +504,14 @@ void Vizkit3DWidget::enableDataHandler(VizPluginBase *viz)
 
     PluginMap::iterator it = plugins.find(viz);
     if (it != plugins.end())
-        it->second->addChild(viz->getRootNode());
+        (it->second).osg_group_ptr->addChild(viz->getRootNode());
 }
 
 void Vizkit3DWidget::disableDataHandler(VizPluginBase *viz)
 {
     PluginMap::iterator it = plugins.find(viz);
     if (it != plugins.end())
-        it->second->removeChild( viz->getRootNode() );
+        (it->second).osg_group_ptr->removeChild( viz->getRootNode() );
 }
 
 void Vizkit3DWidget::setPluginEnabled(QObject* plugin, bool enabled)
@@ -532,7 +532,7 @@ void Vizkit3DWidget::setPluginEnabled(QObject* plugin, bool enabled)
 
     // Check the current state
     osg::Node::ParentList const& list = viz_plugin->getRootNode()->getParents();
-    bool is_enabled = std::find(list.begin(), list.end(), plugin_it->second) != list.end();
+    bool is_enabled = std::find(list.begin(), list.end(), (plugin_it->second).osg_group_ptr) != list.end();
 
     if (enabled && !is_enabled)
         enableDataHandler(viz_plugin);
@@ -547,23 +547,23 @@ void Vizkit3DWidget::pluginActivityChanged(bool enabled)
 
 void Vizkit3DWidget::setEnvironmentPlugin(QObject* plugin)
 {
-    EnvPluginBase* env_plugin = dynamic_cast<EnvPluginBase*>(plugin);
-    if (!env_plugin)
+    EnvPluginBase* env_plugin_new = dynamic_cast<EnvPluginBase*>(plugin);
+    if (!env_plugin_new)
         throw std::invalid_argument("plugin given to setEnvironmentPlugin is not from a subclass of EnvPluginBase");
 
-    PluginMap::iterator it = plugins.find(env_plugin);
+    PluginMap::iterator it = plugins.find(env_plugin_new);
     if (it == plugins.end())
     {
-        addPlugin(env_plugin);
-        it = plugins.find(env_plugin);
+        addPlugin(env_plugin_new);
+        it = plugins.find(env_plugin_new);
     }
 
     clearEnvironmentPlugin();
 
-    it->second->removeChild(env_plugin->getRootNode());
-    env_plugin->getRefNode()->addChild(root);
-    this->env_plugin = env_plugin;
-    setEnvironmentPluginEnabled(env_plugin->isPluginEnabled());
+    (it->second).osg_group_ptr->removeChild(env_plugin_new->getRootNode());
+    env_plugin_new->getRefNode()->addChild(root);
+    this->env_plugin = env_plugin_new;
+    setEnvironmentPluginEnabled(env_plugin_new->isPluginEnabled());
 }
 
 void Vizkit3DWidget::setEnvironmentPluginEnabled(bool enabled)
@@ -596,7 +596,7 @@ void Vizkit3DWidget::clearEnvironmentPlugin()
     env_plugin->getRefNode()->removeChild(root);
     PluginMap::iterator it = plugins.find(env_plugin);
     if (it != plugins.end())
-        it->second->addChild(env_plugin->getRootNode());
+        (it->second).osg_group_ptr->addChild(env_plugin->getRootNode());
 }
 
 void Vizkit3DWidget::setCameraLookAt(double x, double y, double z)
@@ -742,8 +742,12 @@ void Vizkit3DWidget::addPluginIntern(QObject* plugin,QObject *parent)
 
     vizkit3d::VizPluginBase* viz_plugin = dynamic_cast<vizkit3d::VizPluginBase*>(plugin);
     bool has_plugin = plugins.find(viz_plugin) != plugins.end();
-    if (viz_plugin && !has_plugin)
-    {
+    
+    if (has_plugin) {
+        //std::cerr << viz_plugin->getPluginName().toStdString() <<": plugin already present!" << std::endl;
+        removePlugin(plugin);
+    } 
+    if (viz_plugin) {
         viz_plugin->setParent(this);
         viz_plugin->setVisualizationFrame(getRootNode()->getName().c_str());
 
@@ -774,6 +778,7 @@ void Vizkit3DWidget::pluginChildrenChanged()
  */
 void Vizkit3DWidget::removePluginIntern(QObject* plugin)
 {
+    //std::cout << __FUNCTION__ << " removing " << plugin << " (thread " << QThread::currentThreadId() << ")" << std::endl;
     vizkit3d::VizPluginBase* viz_plugin = dynamic_cast<vizkit3d::VizPluginBase*>(plugin);
     if (viz_plugin)
     {
@@ -822,14 +827,13 @@ void Vizkit3DWidget::setPluginDataFrameIntern(const QString& frame, QObject* plu
     PluginMap::iterator it = plugins.find(viz);
     if (it != plugins.end())
     {
+        (it->second).osg_group_ptr = node;
+        
         if(viz != env_plugin && viz->isPluginEnabled())
         {
             disableDataHandler(viz);
-            it->second = node;
             enableDataHandler(viz);
         }
-        else
-            it->second = node;
     }
 }
 
@@ -880,9 +884,19 @@ void Vizkit3DWidget::setTransformation(const QString &source_frame,const QString
     if(count != getVisualizationFrames().size())
     {
         emit propertyChanged("frame");
+        // first: VizPluginBase*
+        // second: osg::ref_ptr<osg::Group>
+        
         PluginMap::iterator it = plugins.begin();
-        for(;it != plugins.end();++it)
-            it->first->setVisualizationFrame(it->first->getVisualizationFrame());
+        for(;it != plugins.end();++it) {
+            //std::cout << __FUNCTION__ << " update call for plugin at address " << it->first << " (thread " << QThread::currentThreadId() << ")" <<  std::endl;
+            if ((it->second).weak_ptr.data()) {
+                //std::cout << __FUNCTION__ << " update call for plugin named " << (it->second).weak_ptr.data()->getPluginName().toStdString() << " (thread " << QThread::currentThreadId() << ")" <<  std::endl;
+                (it->second).weak_ptr.data()->setVisualizationFrame((it->second).weak_ptr.data()->getVisualizationFrame());
+            } else {
+                //std::cout << __FUNCTION__ << " ptr to plugin is 0 " << " (thread " << QThread::currentThreadId() << ")" <<  std::endl;
+            }
+        }
     }
 
     if(!root_frame.isEmpty())
@@ -1015,7 +1029,7 @@ QObject* Vizkit3DWidget::loadLib(QString file_path)
 QStringList* Vizkit3DWidget::getAvailablePlugins()
 {
     // qt ruby is crashing if not a pointer is returned
-    QStringList *plugins = new QStringList;
+    QStringList *plugins_str_list = new QStringList;
 
     QStringList name_filters;
     name_filters << "lib*-viz.so" << "lib*-viz.dylib" << "lib*-viz.dll";
@@ -1043,7 +1057,7 @@ QStringList* Vizkit3DWidget::getAvailablePlugins()
                 QStringList* lib_plugins  = factory->getAvailablePlugins();
                 QStringList::iterator iter3 = lib_plugins->begin();
                 for(;iter3 != lib_plugins->end();++iter3)
-                    *plugins << QString(*iter3 + "@" + file_info.absoluteFilePath());
+                    *plugins_str_list << QString(*iter3 + "@" + file_info.absoluteFilePath());
             }
             catch(std::runtime_error e)
             {
@@ -1051,7 +1065,7 @@ QStringList* Vizkit3DWidget::getAvailablePlugins()
             }
         }
     }
-    return plugins;
+    return plugins_str_list;
 }
 
 QObject* Vizkit3DWidget::loadPlugin(QString lib_name,QString plugin_name)

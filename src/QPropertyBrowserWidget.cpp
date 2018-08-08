@@ -117,6 +117,12 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
     QHash<QString, QtProperty*>* groupMap = new QHash<QString, QtProperty*>();
     for(QList<QtVariantProperty*>::const_iterator it = properties.begin(); it != properties.end(); it++)
     {
+        //std::cout << "adding to map: " << (*it)->propertyName().toStdString() << " -> " << obj << std::endl;
+        QHash<QtProperty*, QObject*>::const_iterator i = propertyToObject.find(*it);
+        if (i != propertyToObject.end()) {
+            std::cerr << "property already present!" << std::endl;
+            continue;
+        }
         group->addSubProperty(*it);
         propertyToObject[*it] = obj;
         (*groupMap)[(*it)->propertyName()] = *it;
@@ -134,11 +140,17 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
     }
     
     // connect plugin signal, to notice if a property has changed
-    if (!this->connect(obj, SIGNAL(propertyChanged(QString)), this, SLOT(propertyChangedInObject(QString))))
+    if (!this->connect(obj, SIGNAL(propertyChanged(QString)), SLOT(propertyChangedInObject(QString))))
     {
         std::cerr << "The QObject has no SIGNAL 'propertyChanged(QString)', the property browser widget won't get updated "
                   << "if properties in the QObject will change." << std::endl;
     }
+    this->connect(obj, SIGNAL(destroyed(QObject*)), SLOT(propObjDestroyed(QObject*)));
+}
+
+void QPropertyBrowserWidget::propObjDestroyed(QObject *delObj) {
+    //std::cout << "Object destroyed: " << delObj << std::endl;
+    removeProperties(delObj);
 }
 
 /**
@@ -147,7 +159,7 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
 void QPropertyBrowserWidget::removeProperties(QObject* obj)
 {
     // disconnect signal
-    this->disconnect(obj, SIGNAL(propertyChanged(QString)), this, SLOT(propertyChangedInObject(QString)));
+    disconnect(obj, 0, this, 0);
     
     // remove properties
     if(objectToGroup[obj])
@@ -155,9 +167,14 @@ void QPropertyBrowserWidget::removeProperties(QObject* obj)
         QList<QtProperty*> properties = objectToGroup[obj]->subProperties();
         for(QList<QtProperty*>::iterator it = properties.begin(); it != properties.end(); it++)
         {
-            propertyToObject.remove(*it); 
+            propertyToObject.remove(*it);
+            objectToGroup[obj]->removeSubProperty(*it);
         }
         this->removeProperty(objectToGroup[obj]);
+        if(objectToGroup[obj]->subProperties().size() == 0) {
+            //std::cout << "No more properties in group: " << obj << std::endl;
+            delete objectToGroup[obj];
+        }
         objectToGroup.remove(obj);
     }
     // delete property group hash map
@@ -174,19 +191,24 @@ void QPropertyBrowserWidget::removeProperties(QObject* obj)
  */
 void QPropertyBrowserWidget::propertyChangedInGUI(QtProperty* property, const QVariant& val)
 {
-    if (propertyToObject[property] != 0)
+    QHash<QtProperty*, QObject*>::const_iterator i = propertyToObject.find(property);
+    
+    if (i == propertyToObject.end())
+        return;
+    
+    //std::cout << "accessing from map: " << property->propertyName().toStdString() << " -> " << i.value() << std::endl;
+    
+    QtVariantProperty* prop = dynamic_cast<QtVariantProperty*>(property);
+    if(prop && prop->propertyType() == QtVariantPropertyManager::enumTypeId())
     {
-
-        QtVariantProperty* prop = dynamic_cast<QtVariantProperty*>(property);
-        if(prop && prop->propertyType() == QtVariantPropertyManager::enumTypeId())
-        {
-            // emulate string list by using enums
-            QStringList list;
-            list << prop->attributeValue("enumNames").toStringList().at(val.toInt());
-            propertyToObject[property]->setProperty(property->propertyName().toStdString().c_str(), QVariant(list));
-        }
-        else
-            propertyToObject[property]->setProperty(property->propertyName().toStdString().c_str(), val);
+        // emulate string list by using enums
+        QStringList list;
+        list << prop->attributeValue("enumNames").toStringList().at(val.toInt());
+        i.value()->setProperty(property->propertyName().toStdString().c_str(), QVariant(list));
+    }
+    else
+    {
+        i.value()->setProperty(property->propertyName().toStdString().c_str(), val);
     }
 }
 
@@ -219,8 +241,11 @@ void QPropertyBrowserWidget::propertyChangedInObject(QString property_name)
 
             if (value.type() == QVariant::StringList)
                 dynamic_cast<QtVariantProperty*>(property)->setAttribute("enumNames", value);
-            else
+            else {
+                variantManager->blockSignals(true);
                 variantManager->setValue(property, value);
+                variantManager->blockSignals(false);
+            }
         }
     }
 }
@@ -244,7 +269,9 @@ void QPropertyBrowserWidget::propertyChangedInObject()
             QtProperty* property = groupMap->value(property_name);
             if(property)
             {
+                variantManager->blockSignals(true);
                 variantManager->setValue(property, metaObj->property(i).read(obj));
+                variantManager->blockSignals(false);
             }
         }
     }
