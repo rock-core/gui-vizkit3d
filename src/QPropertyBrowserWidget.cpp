@@ -138,6 +138,12 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
     {
         // otherwise add it to the existing parent group
         parent_group->addSubProperty(group);
+        
+        QList<QtBrowserItem *> newGrpItems = this->items(group);
+        QList<QtBrowserItem *>::iterator itemsIt;
+        for(itemsIt=newGrpItems.begin();itemsIt!=newGrpItems.end(); itemsIt++) {
+            this->setExpanded(*itemsIt, false);
+        }
     }
       
     // connect plugin signal, to notice if a property has changed
