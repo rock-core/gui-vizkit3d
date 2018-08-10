@@ -66,6 +66,9 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
     if(parent)
         parent_group = objectToGroup[parent];
     
+    // set default plugin name, used if plugin name property is missing 
+    QString groupName = obj->objectName();
+    
     // genarate group entry and all variant properties
     QList<QtVariantProperty*> properties;
     for(int i = 1 ; i < metaObj->propertyCount(); i++)
@@ -73,46 +76,39 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
         QMetaProperty prop = metaObj->property(i);
         if(!prop.isValid())
             continue;
+        
         QVariant var = obj->property(prop.name());
         if(!var.isValid())
             continue;
+        
         if(strcmp(prop.name(),"vizkit3d_plugin_name") == 0)
         {
-            group = groupManager->addProperty(var.toString());
-            if(parent_group)
-                parent_group->addSubProperty(group);
-        }
-        else
+            groupName = var.toString();
+            continue;
+        }        
+        
+        // emulate string list by using enum factory
+        if(prop.type() == QVariant::StringList)
         {
-            // emulate string list by using enum factory
-            if(prop.type() == QVariant::StringList)
-            {
-                QtVariantProperty* property = variantManager->addProperty(QtVariantPropertyManager::enumTypeId(),prop.name());
-                property->setAttribute("enumNames", var);
-                properties.push_back(property);
-            }
-            else
-            {
-                QtVariantProperty* property = variantManager->addProperty(prop.type(), prop.name());
-                if(property == 0)
-                {
-                    std::cerr << "QVariant type " << metaObj->property(i).type() << " with name " << metaObj->property(i).name() 
-                        << " is not supported by the QtPropertyBrowser." << std::endl;
-                    continue;
-                }
-                property->setValue(var);
-                properties.push_back(property);
-            }
+            QtVariantProperty* property = variantManager->addProperty(QtVariantPropertyManager::enumTypeId(),prop.name());
+            property->setAttribute("enumNames", var);
+            properties.push_back(property);
+            continue;
         }
+        
+        QtVariantProperty* property = variantManager->addProperty(prop.type(), prop.name());
+        if(property == 0)
+        {
+            std::cerr << "QVariant type " << metaObj->property(i).type() << " with name " << metaObj->property(i).name() 
+                << " is not supported by the QtPropertyBrowser." << std::endl;
+            continue;
+        }
+        property->setValue(var);
+        properties.push_back(property);
     }
-    // add default plugin name if plugin name property is missing 
-    if(group == 0)
-    {
-        group = groupManager->addProperty(obj->objectName());
-        if(parent_group)
-            parent_group->addSubProperty(group);
-    }
-    
+  
+    group = groupManager->addProperty(groupName);
+  
     // add variant properties to the group
     QHash<QString, QtProperty*>* groupMap = new QHash<QString, QtProperty*>();
     for(QList<QtVariantProperty*>::const_iterator it = properties.begin(); it != properties.end(); it++)
@@ -132,13 +128,18 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
     objectToGroup[obj] = group;
     objectToProperties[obj] = groupMap;
 
-    // do not add property if it is already added to a parent_group
     if(!parent_group)
     {
+        // add property to top level if there is no parent group
         QtBrowserItem *item = this->addProperty(group);
         setExpanded(item,false);
+    } 
+    else 
+    {
+        // otherwise add it to the existing parent group
+        parent_group->addSubProperty(group);
     }
-    
+      
     // connect plugin signal, to notice if a property has changed
     if (!this->connect(obj, SIGNAL(propertyChanged(QString)), SLOT(propertyChangedInObject(QString))))
     {
