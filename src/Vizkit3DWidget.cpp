@@ -153,7 +153,6 @@ namespace
     };
 }
 
-
 QStringList Vizkit3DConfig::getAvailableCameraManipulators() const
 {
     QStringList names;
@@ -377,7 +376,12 @@ QWidget* Vizkit3DWidget::addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node
 
     view->setSceneData(scene);
     view->addEventHandler( new osgViewer::StatsHandler );
-    setCameraManipulator(TERRAIN_MANIPULATOR);
+    QString manipulator_name = getenv("ROCK_DEFAULT_MANIPULATOR");
+    if(manipulator_name.isEmpty())
+        manipulator_name = "Terrain";
+    CAMERA_MANIPULATORS manipulator_id = 
+        Vizkit3DConfig::manipulatorNameToID(manipulator_name);
+    setCameraManipulator(manipulator_id);
 
     // pickhandler is for selecting objects in the opengl view
     PickHandler* pickHandler = new PickHandler();
