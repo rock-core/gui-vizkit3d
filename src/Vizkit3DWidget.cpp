@@ -36,6 +36,8 @@
 #include <osgGA/TrackballManipulator>
 #include <osgGA/MultiTouchTrackballManipulator>
 
+#include <vizkit3d/WindowCaptureCallback.hpp>
+
 using namespace vizkit3d;
 using namespace std;
 
@@ -151,7 +153,6 @@ namespace
     };
 }
 
-
 QStringList Vizkit3DConfig::getAvailableCameraManipulators() const
 {
     QStringList names;
@@ -203,7 +204,7 @@ void Vizkit3DConfig::setCameraManipulator(QStringList const& manipulator)
     return getWidget()->setCameraManipulator(id);
 }
 
-Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool auto_update)
+Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,int width,int height,const QString &world_name,bool auto_update)
     : QWidget(parent)
     , env_plugin(NULL)
 {
@@ -233,7 +234,7 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name,bool a
     root = createSceneGraph(world_name);
 
     // create osg widget
-    QWidget* widget = addViewWidget(createGraphicsWindow(0,0,800,600), root);
+    QWidget* widget = addViewWidget(createGraphicsWindow(0,0,width,height), root);
     widget->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
     widget->setObjectName(QString("View Widget"));
     splitter->addWidget(widget);
@@ -283,12 +284,12 @@ QString Vizkit3DWidget::getVisualizationFrame() const
     return current_frame;
 }
 
-struct CaptureOperation : public osgViewer::ScreenCaptureHandler::CaptureOperation
+struct ImageGrabOperation : public vizkit3d::CaptureOperation
 {
     uint64_t frame_id;
     QImage image;
 
-    CaptureOperation()
+    ImageGrabOperation()
         : frame_id(0) {}
 
     void operator()(const osg::Image& image, const unsigned int)
@@ -300,46 +301,62 @@ struct CaptureOperation : public osgViewer::ScreenCaptureHandler::CaptureOperati
             qtFormat = QImage::Format_RGB888;
         else if (image.getPixelFormat() == GL_BGRA)
             qtFormat = QImage::Format_ARGB32;
-        else if (image.getPixelFormat() == GL_RGB)
-            qtFormat = QImage::Format_RGB888;
-        else if (image.getPixelFormat() == GL_RGBA)
-            qtFormat = QImage::Format_ARGB32;
         else
             throw std::runtime_error("cannot interpret osg-provided image format " +
                     boost::lexical_cast<std::string>(image.getPixelFormat()));
 
-        this->image = QImage(image.data(), image.s(), image.t(), qtFormat);
+        QImage img(image.data(), image.s(), image.t(), qtFormat);
+        this->image = img.mirrored(false, true);
     }
-
 };
 
-void Vizkit3DWidget::enableGrabbing()
+void Vizkit3DWidget::enableGrabbing(GrabbingMode mode)
 {
-    if (captureHandler)
+    if (captureCallback)
         return;
 
-    CaptureOperation* op = new CaptureOperation;
+    WindowCaptureCallback* callback = new WindowCaptureCallback(-1,
+            mode, WindowCaptureCallback::END_FRAME, GL_BACK, GL_BGR);
+    ImageGrabOperation* op = new ImageGrabOperation;
+    callback->setCaptureOperation(op);
+
+    captureCallback  = callback;
     captureOperation = op;
-    captureHandler   = new osgViewer::ScreenCaptureHandler(op, 1);
+
+    // If in multi-pbo mode, we have to grab a few frames "for starter" to make
+    // sure that grab() will always return a valid image
+    int count = 0;
+    if (mode == DOUBLE_PBO)
+        count = 1;
+    else if (mode == TRIPLE_PBO)
+        count = 2;
+    if (count > 0)
+    {
+        getView(0)->getCamera()->setFinalDrawCallback(captureCallback);
+        for (int i = 0; i < count; ++i)
+            frame();
+        getView(0)->getCamera()->setFinalDrawCallback(0);
+    }
 }
 
 void Vizkit3DWidget::disableGrabbing()
 {
     captureOperation = NULL;
-    captureHandler = NULL;
+    captureCallback = NULL;
 }
 
 QImage Vizkit3DWidget::grab()
 {
-    if (!captureHandler)
+    if (!captureCallback)
     {
         qWarning("you must call enableGrabbing() before grab()");
         return QImage();
     }
 
-    dynamic_cast<osgViewer::ScreenCaptureHandler&>(*captureHandler).captureNextFrame(*this);
+    getView(0)->getCamera()->setFinalDrawCallback(captureCallback);
     frame();
-    return static_cast<CaptureOperation&>(*captureOperation).image;
+    getView(0)->getCamera()->setFinalDrawCallback(0);
+    return static_cast<ImageGrabOperation&>(*captureOperation).image;
 };
 
 QWidget* Vizkit3DWidget::addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node* scene )
@@ -359,7 +376,12 @@ QWidget* Vizkit3DWidget::addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node
 
     view->setSceneData(scene);
     view->addEventHandler( new osgViewer::StatsHandler );
-    setCameraManipulator(TERRAIN_MANIPULATOR);
+    QString manipulator_name = getenv("ROCK_DEFAULT_MANIPULATOR");
+    if(manipulator_name.isEmpty())
+        manipulator_name = "Terrain";
+    CAMERA_MANIPULATORS manipulator_id = 
+        Vizkit3DConfig::manipulatorNameToID(manipulator_name);
+    setCameraManipulator(manipulator_id);
 
     // pickhandler is for selecting objects in the opengl view
     PickHandler* pickHandler = new PickHandler();
@@ -920,6 +942,19 @@ void Vizkit3DWidget::getTransformation(const QString &source_frame,const QString
 QString Vizkit3DWidget::getWorldName()const
 {
     return QString(TransformerGraph::getWorldName(*getRootNode()).c_str());
+}
+
+void Vizkit3DWidget::displayTransformGraph() const
+{
+    TransformerGraph::GraphDescription description = TransformerGraph::getGraphDescription(*getRootNode());
+    std::cerr << description.size() << " edges in transform graph" << std::endl;
+    std::cerr << "Root frame: " << getRootVisualizationFrame().toStdString() << std::endl;
+    for (list<TransformerGraph::EdgeDescription>::const_iterator it = description.begin();
+            it != description.end(); ++it)
+    {
+        std::cout << "  " << it->first << " -> " << it->second << std::endl;
+    }
+
 }
 
 bool Vizkit3DWidget::isTransformer() const
