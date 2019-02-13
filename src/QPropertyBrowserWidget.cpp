@@ -174,24 +174,25 @@ void QPropertyBrowserWidget::removeProperties(QObject* obj)
  */
 void QPropertyBrowserWidget::propertyChangedInGUI(QtProperty* property, const QVariant& val)
 {
-    if (propertyToObject[property] != 0)
-    {
+    QHash<QtProperty*, QObject*>::const_iterator i = propertyToObject.find(property);
+    if (i == propertyToObject.end())
+        return;
 
-        QtVariantProperty* prop = dynamic_cast<QtVariantProperty*>(property);
-        if(prop && prop->propertyType() == QtVariantPropertyManager::enumTypeId())
+    QtVariantProperty* prop = dynamic_cast<QtVariantProperty*>(property);
+    if(prop && prop->propertyType() == QtVariantPropertyManager::enumTypeId())
+    {
+        // emulate string list by using enums
+        QStringList list;
+        const QStringList names = prop->attributeValue("enumNames").toStringList();
+        if(names.size() > 0)
         {
-            // emulate string list by using enums
-            QStringList list;
-            const QStringList names = prop->attributeValue("enumNames").toStringList();
-            if(names.size() > 0)
-            {
-              list << names.at(val.toInt());
-            }
-            propertyToObject[property]->setProperty(property->propertyName().toStdString().c_str(), QVariant(list));
+          list << names.at(val.toInt());
         }
-        else
-            propertyToObject[property]->setProperty(property->propertyName().toStdString().c_str(), val);
+        i.value()->setProperty(property->propertyName().toStdString().c_str(), QVariant(list));
     }
+    else
+        i.value()->setProperty(property->propertyName().toStdString().c_str(), val);
+  
 }
 
 /**
