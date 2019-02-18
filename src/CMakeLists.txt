@@ -19,7 +19,6 @@ rock_library(vizkit3d
         ${PROPERTY_BROWSER_RESOURCES} 
     MOC
         Vizkit3DPlugin.cpp 
-        PickHandler.cpp
         Vizkit3DWidget.cpp
         QVizkitMainWindow.cpp
         qtpropertybrowser/qteditorfactory.cpp
@@ -44,7 +43,6 @@ rock_library(vizkit3d
         Vizkit3DPlugin.hpp
         Vizkit3DWidget.hpp
         QVizkitMainWindow.hpp
-        PickHandler.hpp
         ColorConversionHelper.hpp
         CoordinateFrame.hpp
         EnvPluginBase.hpp
@@ -52,7 +50,8 @@ rock_library(vizkit3d
         ${HEADERS_EXTRA}
     LIBS ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY}
     DEPS_CMAKE OpenGL
-    DEPS_PKGCONFIG openscenegraph openscenegraph-osgQt ${DEPS_EXTRA})
+    DEPS_PKGCONFIG openscenegraph openscenegraph-osgQt osgViz
+                   PrimitivesFactory ManipulationClickHandler ${DEPS_EXTRA})
 
 rock_library(vizkitwidgetloader
     MOC QVizkitWidgetLoader.cpp

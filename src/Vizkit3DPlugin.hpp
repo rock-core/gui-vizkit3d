@@ -9,9 +9,18 @@
 #include <osg/PositionAttitudeTransform>
 
 #include <boost/thread/mutex.hpp>
+#include <vector>
+#include <functional>
+
+namespace osgviz 
+{
+    class Object;
+}
 
 namespace vizkit3d
 {
+class ClickHandler;
+
 /** 
  * Interface class for all ruby adapters of the visualization plugins
  * Ruby adapters are usefull to get incoming data via ruby.
@@ -109,15 +118,16 @@ class Vizkit3DWidget;
  */
 class VizPluginBase : public QObject
 {
-    friend class PickHandler;
 
     Q_OBJECT
     Q_PROPERTY(QString vizkit3d_plugin_name READ getPluginName)
     Q_PROPERTY(bool enabled READ isPluginEnabled WRITE setPluginEnabled)
     Q_PROPERTY(bool KeepOldData READ isKeepOldDataEnabled WRITE setKeepOldData)
+    Q_PROPERTY(bool evaluatesClicks READ getEvaluatesClicks WRITE setEvaluatesClicks)
     Q_PROPERTY(int MaxOldData READ getMaxOldData WRITE setMaxOldData)
     Q_PROPERTY(QStringList frame READ getVisualizationFrames WRITE setVisualizationFrameFromList)
     Q_PROPERTY(double scale READ getScale WRITE setScale)
+
 
     public:
         VizPluginBase(QObject *parent=NULL);
@@ -128,21 +138,22 @@ class VizPluginBase : public QObject
          * May be NULL if the plugin is e.g. built as a child of another plugin
          */
         Vizkit3DWidget* getWidget() const;
+    
+        /** @return true if the plugins internal state has been updated */
+        virtual bool isDirty() const;
+        /** mark the internal state as modified */
+        void setDirty();
 
-	/** @return true if the plugins internal state has been updated */
-	virtual bool isDirty() const;
-	/** mark the internal state as modified */
-	void setDirty();
-
-	/** @return a pointer to the internal Group that is used to maintain the
-         * plugin's nodes */
-	osg::ref_ptr<osg::Group> getVizNode() const;
-	osg::ref_ptr<osg::Group> getRootNode() const;
+        /** @return a pointer to the internal Group that is used to maintain the
+                * plugin's nodes */
+        osg::ref_ptr<osg::Group> getVizNode() const;
+        osg::ref_ptr<osg::Group> getRootNode() const;
 
         /**
          * @return a vector of QDockWidgets provided by this class.
          */
         std::vector<QDockWidget*> getDockWidgets();
+	void addPickHandler(std::function<void (float, float, float)> f);
 
     public slots:
        /**
@@ -155,14 +166,17 @@ class VizPluginBase : public QObject
         */
         virtual void setPluginEnabled(bool enabled);
 
-	/** @return the name of the plugin */
-	virtual const QString getPluginName() const;
+        /** @return the name of the plugin */
+        virtual const QString getPluginName() const;
         virtual void setPluginName(const QString &name);
 
         /**
          * Emits signal 'clicked(float, float)' if the plugin has a Vizkit3DWidget as an ancestor.
          */
-        virtual void click(float x,float y);
+        virtual void click(float x,float y, int buttonMask, int modifierMask);
+        
+        /**Emits signal picked() */
+        virtual void pick(float x, float y, float z, int buttonMask, int modifierMask);
 
         /**
         * @return an instance of the ruby adapter collection.
@@ -176,11 +190,11 @@ class VizPluginBase : public QObject
         void setKeepOldData(bool value);
         bool isKeepOldDataEnabled();
 
-	/**
-	 * Clears the visualization of the plugin
-	 * */
-	virtual void clearVisualization();
-	
+        /**
+            * Clears the visualization of the plugin
+            * */
+        virtual void clearVisualization();
+
         /**
         * deletes all copies of the osg graph which were genereted by keepCurrentViz
         */
@@ -189,7 +203,7 @@ class VizPluginBase : public QObject
         int getMaxOldData()const {return max_old_data;};
         void setMaxOldData(int value);
 
-	void setPose(const QVector3D &position, const QQuaternion &orientation);
+        void setPose(const QVector3D &position, const QQuaternion &orientation);
 
         /** Returns the list of available visualization frames
          *
@@ -219,6 +233,17 @@ class VizPluginBase : public QObject
         */
         void setScale(double scale);
 
+        /**
+         * @return whether click events should be evaluated by this plugin or not
+         */
+        bool getEvaluatesClicks() const;
+
+        /**
+         * enable or disable click evaluation by this plugin
+         * @param value
+         */
+        void setEvaluatesClicks (const bool &value);
+
     signals:
        /**
         * must be emitted if a property of an inherited plugin changes
@@ -240,22 +265,27 @@ class VizPluginBase : public QObject
         * That is the container widget of the OSG viewer and the property browser.
         */
         void clicked(float x, float y);
+        void clicked(float x, float y, int buttonMask, int modifierMask);
 
        /**
         * Signals when this plugin has been clicked. x,y,z are in world coordinates.
         */
         void picked(float x, float y,float z);
+        /** @param buttonMask Mouse button that has been pressed
+         *  @param modifierMask Modifier key(s) that have been pressed
+         */
+        void picked(float x, float y,float z, int buttonMask, int modifierMask);
 
     protected:
-	/** override this function to update the visualisation.
-	 * @param node contains a point to the node which can be modified.
-	 */
-	virtual void updateMainNode(osg::Node* node) = 0;
+        /** override this function to update the visualisation.
+            * @param node contains a point to the node which can be modified.
+            */
+        virtual void updateMainNode(osg::Node* node) = 0;
 
-	/** override this method to provide your own main node.
-	 * @return node derived from osg::Group
-	 */ 
-	virtual osg::ref_ptr<osg::Node> createMainNode();
+        /** override this method to provide your own main node.
+            * @return node derived from osg::Group
+            */ 
+        virtual osg::ref_ptr<osg::Node> createMainNode();
 
         /** override this method to provide your own QDockWidgets.
          * The QDockWidgets will automatically attached to the main window.
@@ -267,22 +297,24 @@ class VizPluginBase : public QObject
          */ 
         virtual osg::ref_ptr<osg::Node> cloneCurrentViz();
 
-	/** lock this mutex outside updateMainNode if you update the internal
-	 * state of the visualization.
-	 */ 
-	boost::mutex updateMutex;
+        /** lock this mutex outside updateMainNode if you update the internal
+            * state of the visualization.
+            */ 
+        boost::mutex updateMutex;
 
         std::vector<QDockWidget*> dockWidgets;
         QString vizkit3d_plugin_name;
         VizPluginRubyAdapterCollection adapterCollection;
 
     private:
-	class CallbackAdapter;
-	osg::ref_ptr<osg::NodeCallback> nodeCallback;
-	void updateCallback(osg::Node* node);
+	std::vector<std::function<void(float, float, float)>> pickCallbacks;
+      
+        class CallbackAdapter;
+        osg::ref_ptr<osg::NodeCallback> nodeCallback;
+        void updateCallback(osg::Node* node);
 
         osg::ref_ptr<osg::Node> mainNode;               //node which is used by the child class
-        osg::ref_ptr<osg::Group> rootNode;              //node which is the osg root node of the pluign 
+        osg::ref_ptr<osgviz::Object> rootNode;              //node which is the osg root node of the pluign 
         osg::ref_ptr<osg::PositionAttitudeTransform> vizNode; //node which describes the transformation between rootNode and mainNode
         osg::ref_ptr<osg::Group> oldNodes;              //node which is the root node for all old visualization graphs of the plugin  
 
@@ -292,10 +324,11 @@ class VizPluginBase : public QObject
         //orientation of the viznode
         QQuaternion orientation;
 
-	bool isAttached;
-	bool dirty;
+        bool isAttached;
+        bool dirty;
         bool plugin_enabled;
         bool keep_old_data;
+        std::shared_ptr<ClickHandler> click_handler;
         unsigned int max_old_data;
         QString current_frame;
 };
@@ -328,11 +361,11 @@ class VizPluginAddType
     virtual ~VizPluginAddType() {}
 
     protected:
-	/** overide this method and set your internal state such that the next
-	 * call to updateMainNode will reflect that update.
-	 * @param data data to be updated
-	 */
-	virtual void updateDataIntern(const T &data) = 0;
+    /** overide this method and set your internal state such that the next
+        * call to updateMainNode will reflect that update.
+        * @param data data to be updated
+        */
+    virtual void updateDataIntern(const T &data) = 0;
 };
 
 /** 
@@ -350,21 +383,21 @@ class Vizkit3DPlugin : public VizPluginBase,
 
         virtual ~Vizkit3DPlugin() {}
 
-	/** updates the data to be visualised and marks the visualisation dirty
-	 * @param data const ref to data that is visualised
-	 */
+    /** updates the data to be visualised and marks the visualisation dirty
+        * @param data const ref to data that is visualised
+        */
         template<typename Type>
-	void updateData(const Type &data) {
-	    boost::mutex::scoped_lock lockit(this->updateMutex);
-	    this->setDirty();
-	    VizPluginAddType<Type> *type = dynamic_cast<VizPluginAddType<Type>*>(this);
-	    if(type)
-		type->updateDataIntern(data);
-	    else
-	    {
-		throw std::runtime_error("Wrong type given to visualizer");
-	    }
-	};
+    void updateData(const Type &data) {
+        boost::mutex::scoped_lock lockit(this->updateMutex);
+        this->setDirty();
+        VizPluginAddType<Type> *type = dynamic_cast<VizPluginAddType<Type>*>(this);
+        if(type)
+            type->updateDataIntern(data);
+        else
+        {
+            throw std::runtime_error("Wrong type given to visualizer");
+        }
+    };
 };
 
 /** 
@@ -409,8 +442,8 @@ class VizkitPluginFactory : public QObject
                 void* ptr = data.value<void*>();\
                 dataType* pluginData = reinterpret_cast<dataType*>(ptr);\
                 vizPlugin->methodName(*pluginData);\
-		if (pass_ownership) \
-			delete pluginData; \
+            if (pass_ownership) \
+                delete pluginData; \
             }\
         public slots:\
             QString getDataType() \
@@ -477,32 +510,32 @@ template <class T>
 class VizPluginAdapter : public Vizkit3DPlugin<T>
 {
     protected:
-	virtual void operatorIntern( osg::Node* node, osg::NodeVisitor* nv ) = 0;
+    virtual void operatorIntern( osg::Node* node, osg::NodeVisitor* nv ) = 0;
 
         VizPluginAdapter()
-	    : groupNode(new osg::Group())
+        : groupNode(new osg::Group())
         {
         }
 
-	osg::ref_ptr<osg::Node> createMainNode()
-	{
-	    return groupNode;
-	}
+    osg::ref_ptr<osg::Node> createMainNode()
+    {
+        return groupNode;
+    }
 
-	void updateMainNode( osg::Node* node )
-	{
-	    // NULL for nodevisitor is ok here, since its not used anywhere
-	    operatorIntern( node, NULL );
-	}
+    void updateMainNode( osg::Node* node )
+    {
+        // NULL for nodevisitor is ok here, since its not used anywhere
+        operatorIntern( node, NULL );
+    }
 
-	void setMainNode( osg::Node* node )
-	{
-	    groupNode->addChild( node );
-	}
+    void setMainNode( osg::Node* node )
+    {
+        groupNode->addChild( node );
+    }
 
     protected:
-	osg::ref_ptr<osg::Group> groupNode;
-	osg::ref_ptr<osg::Node> ownNode;
+    osg::ref_ptr<osg::Group> groupNode;
+    osg::ref_ptr<osg::Node> ownNode;
 };
 
 }

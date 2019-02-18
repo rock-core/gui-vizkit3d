@@ -1,13 +1,48 @@
 #include <osg/Group>
 #include <typeinfo>
 #include <cxxabi.h>
+#include <memory>
+#include <osgViz/Object.h>
+#include <osgViz/interfaces/Clickable.h>
 
 #include "Vizkit3DPlugin.hpp"
 #include "Vizkit3DWidget.hpp"
-#include "PickHandler.hpp"
+
+namespace vizkit3d{
+    class ClickHandler : public osgviz::Clickable
+    {
+        VizPluginBase& plugin;
+    public:
+        ClickHandler(VizPluginBase& plugin) : plugin(plugin), enabled(true){};
+
+        virtual bool clicked(const int &buttonMask, const osg::Vec2d &cursor,
+                           const osg::Vec3d &world, const osg::Vec3d &local,
+                           Clickable* object, const int modifierMask,
+                           osgviz::WindowInterface* window = NULL)
+        {
+            if (enabled){
+                plugin.click((float)cursor.x(), (float)cursor.y(), buttonMask, modifierMask);
+                plugin.pick((float)world.x(), (float)world.y(), (float)world.z(), buttonMask, modifierMask);
+                return true;
+            }
+            return false;
+        }
+
+        bool isEnabled(){
+            return enabled;
+        }
+    
+        void enable(bool val = true){
+            enabled = val;
+        }
+
+    private:
+        bool enabled;
+
+    };
+}
 
 using namespace vizkit3d;
-
 /** this adapter is used to forward the update call to the plugin
  */
 class VizPluginBase::CallbackAdapter : public osg::NodeCallback
@@ -26,17 +61,15 @@ VizPluginBase::VizPluginBase(QObject *parent)
     : QObject(parent), oldNodes(NULL), isAttached(false), dirty( false ),  plugin_enabled(true),
     keep_old_data(false),max_old_data(100)
 {
-    rootNode = new osg::Group();
+    rootNode = new osgviz::Object();
+    click_handler = std::shared_ptr<ClickHandler>(new ClickHandler(*this));
+    rootNode->addClickableCallback(click_handler);
     nodeCallback = new CallbackAdapter(this);
     rootNode->setUpdateCallback(nodeCallback);
     vizNode = new osg::PositionAttitudeTransform();
     rootNode->addChild(vizNode);
     oldNodes = new osg::Group();
     rootNode->addChild(oldNodes);
-
-    // reference counter we do not have to delete the data
-    // add picker callback
-    vizNode->setUserData(new PickedUserData(this));
 }
 
 VizPluginBase::~VizPluginBase()
@@ -67,7 +100,7 @@ osg::ref_ptr<osg::Group> VizPluginBase::getRootNode() const
     return rootNode;
 }
 
-void VizPluginBase::click(float x,float y)
+void VizPluginBase::click(float x,float y, int buttonMask, int modifierMask)
 {
     QWidget *osg_widget = dynamic_cast<QWidget*>(parent()); // widget displaying the osg scene.
     
@@ -86,6 +119,7 @@ void VizPluginBase::click(float x,float y)
             QPoint container_coords = osg_widget->mapTo(container, QPoint(x,y));
             //std::cout << "grandparent coords: (" << container_coords.x() << "," << container_coords.y() << ")" << std::endl;
             emit clicked(container_coords.x(), container_coords.y());
+            emit clicked(container_coords.x(), container_coords.y(), buttonMask, modifierMask);
             break;
         }
         else
@@ -94,8 +128,24 @@ void VizPluginBase::click(float x,float y)
             container = container->parentWidget();
         }
     }
-
 }
+
+void VizPluginBase::pick(float x, float y, float z, int buttonMask, int modifierMask)
+{
+    emit picked(x, y, z);
+    emit picked(x, y, z, buttonMask, modifierMask);
+  
+    for(std::function<void(float, float, float)> f : pickCallbacks)
+    {
+	f(x, y, z);
+    }    
+}
+
+void VizPluginBase::addPickHandler(std::function<void(float, float, float)> f)
+{
+  pickCallbacks.push_back(f);
+}
+
 
 void VizPluginBase::setPose(const QVector3D &position, const QQuaternion &orientation)
 {
@@ -148,7 +198,7 @@ void VizPluginBase::updateCallback(osg::Node* node)
     {
         mainNode = createMainNode();
         vizNode->addChild(mainNode);
-	isAttached = true;
+        isAttached = true;
     }
 
     if(isDirty())
@@ -157,7 +207,7 @@ void VizPluginBase::updateCallback(osg::Node* node)
         vizNode->setPosition(osg::Vec3d(position.x(), position.y(), position.z()));
         vizNode->setAttitude(osg::Quat(orientation.x(), orientation.y(), orientation.z(), orientation.scalar()));
 
-	updateMainNode(mainNode);
+    updateMainNode(mainNode);
         if(keep_old_data)
         {
             oldNodes->addChild(cloneCurrentViz());
@@ -165,11 +215,11 @@ void VizPluginBase::updateCallback(osg::Node* node)
                 oldNodes->removeChild(0,oldNodes->getNumChildren() -max_old_data);
         }
         if(!isAttached)
-	{
-	    vizNode->addChild(mainNode);
-	    isAttached = true;
-	}
-	dirty = false;
+    {
+        vizNode->addChild(mainNode);
+        isAttached = true;
+    }
+    dirty = false;
     }
 }
 
@@ -262,7 +312,7 @@ void VizPluginBase::setVisualizationFrameFromList(const QStringList &frames)
     if (frames.empty())
         return;
     if (!getWidget())
-        return;
+        return; 
     getWidget()->setPluginDataFrameIntern(frames.front(),this);
     current_frame = frames.front();
 }
@@ -275,3 +325,12 @@ void VizPluginBase::setVisualizationFrame(const QString &frame)
     current_frame = frame;
     emit propertyChanged("frame");
 }
+
+bool VizPluginBase::getEvaluatesClicks() const{
+    return click_handler->isEnabled();
+}
+
+void VizPluginBase::setEvaluatesClicks (const bool &value){
+    click_handler->enable(value);
+}
+

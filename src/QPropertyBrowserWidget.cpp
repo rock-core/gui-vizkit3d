@@ -199,24 +199,24 @@ void QPropertyBrowserWidget::removeProperties(QObject* obj)
 void QPropertyBrowserWidget::propertyChangedInGUI(QtProperty* property, const QVariant& val)
 {
     QHash<QtProperty*, QObject*>::const_iterator i = propertyToObject.find(property);
-    
     if (i == propertyToObject.end())
         return;
-    
-    //std::cout << "accessing from map: " << property->propertyName().toStdString() << " -> " << i.value() << std::endl;
-    
+
     QtVariantProperty* prop = dynamic_cast<QtVariantProperty*>(property);
     if(prop && prop->propertyType() == QtVariantPropertyManager::enumTypeId())
     {
         // emulate string list by using enums
         QStringList list;
-        list << prop->attributeValue("enumNames").toStringList().at(val.toInt());
+        const QStringList names = prop->attributeValue("enumNames").toStringList();
+        if(names.size() > 0)
+        {
+          list << names.at(val.toInt());
+        }
         i.value()->setProperty(property->propertyName().toStdString().c_str(), QVariant(list));
     }
     else
-    {
         i.value()->setProperty(property->propertyName().toStdString().c_str(), val);
-    }
+  
 }
 
 /**

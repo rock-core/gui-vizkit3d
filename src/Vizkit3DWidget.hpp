@@ -6,6 +6,16 @@
 #include <QtDesigner/QDesignerExportWidget>
 #include <QVector3D>
 #include <QTimer>
+#include <QMainWindow>
+#include <QQuaternion>
+
+#ifndef Q_MOC_RUN
+    #include <osgGA/CameraManipulator>
+    #include <osgManipulator/Dragger>
+    #include <osgViz/OsgViz.hpp>
+    #include <boost/signals2/connection.hpp>
+#endif
+
 
 // disable tons of waringins in osg
 // this is only valid for the rest of this 
@@ -18,9 +28,12 @@
 #include <osgViewer/CompositeViewer>
 #include <osgGA/CameraManipulator>
 
+
+namespace osgviz { class ManipulationClickHandler;}
 namespace osgQt { class GraphicsWindowQt;}
 namespace vizkit3d
 {
+    class QPropertyBrowserWidget;
     class EnvPluginBase;
     class Vizkit3DWidget;
 
@@ -186,7 +199,7 @@ namespace vizkit3d
             QStringList getAvailableCameraManipulators() const;
     };
 
-    class QDESIGNER_WIDGET_EXPORT Vizkit3DWidget : public QWidget, public osgViewer::CompositeViewer
+    class QDESIGNER_WIDGET_EXPORT Vizkit3DWidget : public QMainWindow
     {
         Q_OBJECT
         public:
@@ -211,7 +224,7 @@ namespace vizkit3d
              *   to be reported in getCameraManipulatorName (and therefore in
              *   the property browser view)
              */
-            void setTrackedNode(osg::Node* node, QString tracked_object_name);
+            void setTrackedNode(osg::Node* node, const QString& tracked_object_name);
             /** @overload sets the camera to track this plugins's root position
              *
              * The tracked object name is <Plugin plugin_name>
@@ -229,6 +242,7 @@ namespace vizkit3d
             void setCameraManipulator(osg::ref_ptr<osgGA::CameraManipulator> manipulator, bool resetToDefaultHome = false);
 
         public slots:
+            void update();
             void addPlugin(QObject* plugin, QObject* parent = NULL);
             void removePlugin(QObject* plugin);
 
@@ -269,13 +283,20 @@ namespace vizkit3d
                     const QVector3D &position, const QQuaternion &orientation);
             void getTransformation(const QString &source_frame,const QString &target_frame, QVector3D &position, QQuaternion &orientation)const;
             QString getWorldName()const;
+            void setWorldName(const QString& name);
+            
+            /**Removes @p frame from the visualization */
+            void removeFrame(const QString& frame);
+            
+            /**Select @p frame. This is the same as if the user clicked the frame.
+             * @param suppressSignal If true the frameSelected signal will not be
+             *                       emitted.*/
+            void selectFrame(const QString& frame, const bool suppressSignal);
 
             void setCameraLookAt(double x, double y, double z);
             void setCameraEye(double x, double y, double z);
             void setCameraUp(double x, double y, double z);
             void getCameraView(QVector3D& eye, QVector3D& lookAt, QVector3D& up);
-
-            void setSmallFeatureCullingPixelSize(float val);
 
             QColor getBackgroundColor()const;
             void setBackgroundColor(QColor color);
@@ -308,10 +329,13 @@ namespace vizkit3d
              * You must call enableGrabbing() first. Will return an empty image
              * if you did not do so.
              */
-            QImage grab();
+            QImage grab(unsigned int viewIndex = 0);
 
             QString findPluginPath(QString plugin_name);
             QString findLibPath(QString lib_name);
+            
+            /**Creates the specified plugin but dos **not** add it to this widget */
+            QObject* createPlugin(QString lib_name,QString plugin_name);
             QObject* loadPlugin(QString lib_name,QString plugin_name);
             QStringList* getAvailablePlugins();
 
@@ -357,14 +381,36 @@ namespace vizkit3d
              * remove the plugin itself
              */
             void clearEnvironmentPlugin();
+            
+            /*Removes all plugins and all frames except the world frame.*/
+            void clear();
+            
+            /**If set to true rotation and translation manipulators will be shown
+             * when a frame is clicked. Default: false*/
+            void setEnabledManipulators(const bool value);
 
         signals:
             void addPlugins(QObject* plugin,QObject* parent);
             void removePlugins(QObject* plugin);
             void propertyChanged(QString propertyName);
-
-        protected:
-            virtual void paintEvent( QPaintEvent* event );
+            
+            /** This signal is emitted when the user wants to move a frame.
+             *  The actual moving of the frame has to be done by the handler
+             *  of this event.
+             * @p translation the translation relative to @p frame.
+             * @p rotation    the rotation relative to @p frame.*/
+            void frameMoved(const QString& frame, const QVector3D& translation,
+                            const QQuaternion& rotation);
+            
+            /** This signal is emitted while the user is dragging or rotating a
+             *  frame. This event is intendet to update gui elements. Do 
+             *  **not** update transformations while handling this event.*/
+            void frameMoving(const QString& frame, const QVector3D& translation,
+                            const QQuaternion& rotation);
+            
+            /** This signal is emitted when the user selects a frame in the
+             *  3d view.*/
+            void frameSelected(const QString frame);
 
         private slots:
             void setPluginDataFrameIntern(const QString &frame, QObject *plugin);
@@ -373,8 +419,12 @@ namespace vizkit3d
             void pluginActivityChanged(bool enabled);
             void pluginChildrenChanged();
             void addProperties(QObject* plugin,QObject *parent=NULL);
-
+            
         private:
+            
+            /**Register the click handler to the given frame */
+            void registerClickHandler(const std::string& frame);
+            
             // Helper method for setPluginEnabled
             void enableEnvironmentPlugin();
             // Helper method for setPluginEnabled
@@ -389,8 +439,12 @@ namespace vizkit3d
             void disableDataHandler(VizPluginBase *viz);
             osg::Group *createSceneGraph(const QString &world_name);
 
-            QWidget* addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node* scene );
             osgQt::GraphicsWindowQt* createGraphicsWindow( int x, int y, int w, int h, const std::string& name="", bool windowDecoration=false );
+
+            
+            osgviz::OsgViz* osgviz;
+            osgviz::Window* window;
+
 
         private:
             //holds the scene
@@ -436,6 +490,47 @@ namespace vizkit3d
 
             osg::ref_ptr<osg::Referenced> captureHandler;
             osg::ref_ptr<osg::Referenced> captureOperation;
+            osg::ref_ptr<osgQt::GraphicsWindowQt> graphicsWindowQt;
+            osg::ref_ptr<osg::GraphicsContext> graphicsWindowQtgc;
+            
+            std::shared_ptr<osgviz::ManipulationClickHandler> clickHandler;
+            
+            //TODO replace with lambda once c++11 is used
+            struct ObjectMovedHandler
+            {
+                ObjectMovedHandler(Vizkit3DWidget& widget) : widget(widget){}
+                /** @param obj The object that has been moved.
+                 *  @param motionMatrix Motion of the object relative to the 
+                 *                      current object position. */
+                void operator()(const osgviz::Object* obj,
+                                const osg::Matrix& motionMatrix);
+                Vizkit3DWidget& widget;//the widget that this handler belongs to
+            }movedHandler;
+            
+            struct ObjectMovingHandler
+            {
+                ObjectMovingHandler(Vizkit3DWidget& widget) : widget(widget){}
+                void operator()(const osgviz::Object* obj,
+                                const osg::Matrix& motionMatrix);
+                Vizkit3DWidget& widget;//the widget that this handler belongs to
+            }movingHandler;
+            
+            struct ObjectSelectedHandler
+            {
+                ObjectSelectedHandler(Vizkit3DWidget& widget) : widget(widget){}
+                void operator()(const osgviz::Object* obj);
+                /**Does address comparision */
+                bool operator==(const ObjectSelectedHandler& other) const;
+                Vizkit3DWidget& widget;//the widget that this handler belongs to
+            }selectedHandler;    
+            
+            /**Connection between selectedHandler and it's signal.
+             * Used to temporarly block the slot*/
+            boost::signals2::connection selectedObjectConnection;
+            
+            QPropertyBrowserWidget* propertyBrowserWidget;
+            QDockWidget* propertyDocker;
+            
     };
 }
 #endif
