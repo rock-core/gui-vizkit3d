@@ -846,13 +846,24 @@ void Vizkit3DWidget::setPluginDataFrameIntern(const QString& frame, QObject* plu
     if(!viz)
         throw std::runtime_error("setPluginDataFrame called with something that is not a vizkit3d plugin");
 
+    //remove plugin viz from old frame
+    osg::ref_ptr<osg::Group> vizgroup = viz->getRootNode();
+    //get old frame
+    QString oldframe = viz->getVisualizationFrame();
+    //remove from old frame
+    osg::Group* oldgroup = TransformerGraph::getFrameGroup(*getRootNode(),oldframe.toStdString());
+    oldgroup->removeChild(vizgroup);
+
+
     TransformerGraph::addFrame(*getRootNode(),frame.toStdString());
+    
     registerClickHandler(frame.toStdString());
     osg::Group* node = TransformerGraph::getFrameGroup(*getRootNode(),frame.toStdString());
     assert(node);
     PluginMap::iterator it = plugins.find(viz);
     if (it != plugins.end())
     {
+
         (it->second).osg_group_ptr = node;
         
         if(viz != env_plugin && viz->isPluginEnabled())
