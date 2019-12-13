@@ -1,7 +1,7 @@
-rock_find_qt4(QtOpenGL)
+rock_find_qt5(OpenGL Gui Widgets)
 include(RockRuby)
 
-QT4_ADD_RESOURCES(PROPERTY_BROWSER_RESOURCES qtpropertybrowser/qtpropertybrowser.qrc)
+QT5_ADD_RESOURCES(PROPERTY_BROWSER_RESOURCES qtpropertybrowser/qtpropertybrowser.qrc)
 
 rock_library(vizkit3d
     SOURCES

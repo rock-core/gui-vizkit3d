@@ -43,14 +43,14 @@
 
 #include "qtpropertybrowser.h"
 #include "qtpropertybrowserutils.h"
-#include <QtGui/QLineEdit>
-#include <QtCore/QMetaEnum>
-#include <QtCore/QMap>
-#include <QtGui/QIcon>
-#include <QtCore/QTimer>
-#include <QtCore/QLocale>
-#include <QtCore/QDateTime>
-#include <QtGui/QFontDatabase>
+#include <QLineEdit>
+#include <QMetaEnum>
+#include <QMap>
+#include <QIcon>
+#include <QTimer>
+#include <QLocale>
+#include <QDateTime>
+#include <QFontDatabase>
 
 #include <limits.h>
 

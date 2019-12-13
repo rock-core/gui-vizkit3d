@@ -41,10 +41,10 @@
 #ifndef QTPROPERTYBROWSER_H
 #define QTPROPERTYBROWSER_H
 
-#include <QtGui/QWidget>
-#include <QtCore/QSet>
-#include <QtGui/QLineEdit>
-#include <QtCore/QMap>
+#include <QWidget>
+#include <QSet>
+#include <QLineEdit>
+#include <QMap>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE

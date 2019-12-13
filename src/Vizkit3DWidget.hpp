@@ -3,7 +3,7 @@
 
 #include "Vizkit3DPlugin.hpp"
 
-#include <QtDesigner/QDesignerExportWidget>
+#include <QtUiPlugin/QDesignerExportWidget>
 #include <QVector3D>
 #include <QTimer>
 #include <QMainWindow>
@@ -461,11 +461,11 @@ namespace vizkit3d
              */
             struct VizPluginInfo {
                 osg::ref_ptr<osg::Group> osg_group_ptr;
-                QWeakPointer<VizPluginBase> weak_ptr;
+                VizPluginBase* weak_ptr;
                 
                 VizPluginInfo(VizPluginBase* plugin_ptr_, osg::ref_ptr<osg::Group> osg_group_ptr_)
                   : osg_group_ptr(osg_group_ptr_),
-                    weak_ptr(plugin_ptr_) 
+                    weak_ptr(plugin_ptr_)
                 {
                 }
             };

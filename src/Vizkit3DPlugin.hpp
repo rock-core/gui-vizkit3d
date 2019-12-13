@@ -12,6 +12,8 @@
 #include <vector>
 #include <functional>
 
+class QDockWidget;
+
 namespace osgviz 
 {
     class Object;
@@ -487,6 +489,8 @@ class VizkitPluginFactory : public QObject
  */
 #define VizkitQtPlugin(pluginName)\
     class QtPlugin##pluginName : public vizkit3d::VizkitPluginFactory {\
+        Q_OBJECT \
+	Q_PLUGIN_METADATA(IID "de.dfki.rock.QtPlugin"#pluginName) \
         public:\
         virtual QStringList* getAvailablePlugins() const\
         {\
@@ -500,8 +504,7 @@ class VizkitPluginFactory : public QObject
                 return new pluginName;\
             else return 0;\
         };\
-    };\
-    Q_EXPORT_PLUGIN2(QtPlugin##pluginName, QtPlugin##pluginName)
+    };
 
 /** @deprecated adapter item for legacy visualizations. Do not derive from this
  * class for new designs. Use VizPlugin directly instead.
@@ -539,4 +542,9 @@ class VizPluginAdapter : public Vizkit3DPlugin<T>
 };
 
 }
+
+#define VizkitPluginFactory_iid "de.dfki.rock.VizkitPluginFactory"
+
+Q_DECLARE_INTERFACE(vizkit3d::VizkitPluginFactory, VizkitPluginFactory_iid)
+
 #endif

@@ -12,8 +12,8 @@ namespace vizkit3d
         Q_PROPERTY(QString model_path READ getModelPath WRITE setModelPath)
 
         // invalidate parent properties
-        Q_PROPERTY(QVariant KeepOldData READ QVariant)
-        Q_PROPERTY(QVariant MaxOldData READ QVariant)
+        Q_PROPERTY(QVariant KeepOldData)
+        Q_PROPERTY(QVariant MaxOldData)
 
     public:
 	ModelVisualization(QObject* parent = NULL);

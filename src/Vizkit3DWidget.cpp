@@ -1,11 +1,11 @@
 #include <QComboBox>
 #include <QGroupBox>
-#include <QPlastiqueStyle>
 #include <QProcessEnvironment>
 #include <QPluginLoader>
 #include <QFileInfo>
 #include <QDir>
 #include <QRegExp>
+#include <QDockWidget>
 #include <algorithm>
 
 #include "Vizkit3DBase.hpp"
@@ -927,9 +927,9 @@ void Vizkit3DWidget::setTransformation(const QString &source_frame,const QString
         PluginMap::iterator it = plugins.begin();
         for(;it != plugins.end();++it) {
             //std::cout << __FUNCTION__ << " update call for plugin at address " << it->first << " (thread " << QThread::currentThreadId() << ")" <<  std::endl;
-            if ((it->second).weak_ptr.data()) {
-                //std::cout << __FUNCTION__ << " update call for plugin named " << (it->second).weak_ptr.data()->getPluginName().toStdString() << " (thread " << QThread::currentThreadId() << ")" <<  std::endl;
-                (it->second).weak_ptr.data()->setVisualizationFrame((it->second).weak_ptr.data()->getVisualizationFrame());
+            if ((it->second).weak_ptr) {
+                //std::cout << __FUNCTION__ << " update call for plugin named " << (it->second).weak_ptr->getPluginName().toStdString() << " (thread " << QThread::currentThreadId() << ")" <<  std::endl;
+                (it->second).weak_ptr->setVisualizationFrame((it->second).weak_ptr->getVisualizationFrame());
             } else {
                 //std::cout << __FUNCTION__ << " ptr to plugin is 0 " << " (thread " << QThread::currentThreadId() << ")" <<  std::endl;
             }

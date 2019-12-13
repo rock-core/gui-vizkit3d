@@ -42,10 +42,10 @@
 #define QTBUTTONPROPERTYBROWSER_H
 
 #include "qtpropertybrowser.h"
-#include <QtGui/QLabel>
-#include <QtGui/QGridLayout>
-#include <QtGui/QToolButton>
-#include <QtGui/QWidget>
+#include <QLabel>
+#include <QGridLayout>
+#include <QToolButton>
+#include <QWidget>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE

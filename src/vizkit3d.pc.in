@@ -6,6 +6,6 @@ includedir=${prefix}/include
 Name: @PROJECT_NAME@
 Description: @PROJECT_DESCRIPTION@
 Version: @PROJECT_VERSION@
-Requires: QtCore QtGui openscenegraph openscenegraph-osgManipulator openscenegraph-osgViewer @DEPS_PKGCONFIG@
+Requires: Qt5Core Qt5Gui Qt5Widgets openscenegraph openscenegraph-osgManipulator openscenegraph-osgViewer @DEPS_PKGCONFIG@
 Libs: -L${libdir} -l@PROJECT_NAME@
 Cflags: -I${includedir}
