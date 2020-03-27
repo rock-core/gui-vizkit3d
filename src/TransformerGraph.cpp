@@ -588,7 +588,9 @@ bool TransformerGraph::setTransformation(osg::Node &transformer,const std::strin
     osg::Switch *switch_node = getFrameSwitch(target);
     osg::Node *old_node = FindNode::find(*switch_node,"link");
     assert(old_node);
-
+    /** When the node structure is created, a plain Node is added as a 'link'
+     * child of switch. Replace it by a NodeLink if it has not been done yet
+     */
     vizkit::NodeLink* nodeLink = dynamic_cast<vizkit::NodeLink*>(old_node);
     if (!nodeLink){
         osg::Node *link = vizkit::NodeLink::create(source,target,osg::Vec4(255,0,0,255));
