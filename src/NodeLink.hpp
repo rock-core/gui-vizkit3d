@@ -9,9 +9,11 @@
 #include <QGenericMatrix>
 #include <string>
 
+#include <osgViz/windows/EventHandlers/NullClickObject.h>
+
 namespace vizkit
 {
-    class NodeLink
+    class NodeLink: public osgviz::NullClickObject //click events should not propagate through nodelinks
     {
         public:
             class NodeCallback : public osg::NodeCallback

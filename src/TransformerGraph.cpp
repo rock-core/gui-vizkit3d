@@ -522,6 +522,7 @@ void TransformerGraph::makeRoot(osg::Node& _transformer, std::string const& fram
     return ::makeRoot(_transformer, desiredRoot, std::set<osg::Node*>());
 }
 
+
 bool TransformerGraph::setTransformation(osg::Node &transformer,const std::string &_source_frame,const std::string &_target_frame,
         const osg::Quat &_quat, const osg::Vec3d &_trans)
 {
@@ -587,9 +588,17 @@ bool TransformerGraph::setTransformation(osg::Node &transformer,const std::strin
     osg::Switch *switch_node = getFrameSwitch(target);
     osg::Node *old_node = FindNode::find(*switch_node,"link");
     assert(old_node);
-    osg::Node *link = vizkit::NodeLink::create(source,target,osg::Vec4(255,0,0,255));
-    link->setName("link");
-    switch_node->replaceChild(old_node,link);
+    /** When the node structure is created, a plain Node is added as a 'link'
+     * child of switch. Replace it by a NodeLink if it has not been done yet
+     */
+    vizkit::NodeLink* nodeLink = dynamic_cast<vizkit::NodeLink*>(old_node);
+    if (!nodeLink){
+        osg::Node *link = vizkit::NodeLink::create(source,target,osg::Vec4(255,0,0,255));
+        link->setName("link");
+        switch_node->replaceChild(old_node,link);
+        nodeLink = dynamic_cast<vizkit::NodeLink*>(link);
+    }
+
     return true;
 }
 
