@@ -93,6 +93,6 @@ namespace vizkit
         NodeCallback *callback = new NodeCallback(node1,node2);
         geode->setUpdateCallback(callback);
         object->addChild(geode);
-        return (::osg::Node*)object;
+        return object;
     }
 }
