@@ -842,6 +842,10 @@ QString Vizkit3DWidget::getPluginDataFrame(QObject* plugin)const
 // should be called from the plugin 
 void Vizkit3DWidget::setPluginDataFrameIntern(const QString& frame, QObject* plugin)
 {
+    if (frame.isEmpty())
+    {
+        return;
+    }
     vizkit3d::VizPluginBase* viz= dynamic_cast<vizkit3d::VizPluginBase*>(plugin);
     if(!viz)
         throw std::runtime_error("setPluginDataFrame called with something that is not a vizkit3d plugin");
