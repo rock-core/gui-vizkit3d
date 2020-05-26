@@ -308,6 +308,11 @@ class VizPluginBase : public QObject
         QString vizkit3d_plugin_name;
         VizPluginRubyAdapterCollection adapterCollection;
 
+	/** Returns an invalid QVariant 
+	 * used to invalidate properties
+	 */ 
+	QVariant _invalidate()const;
+
     private:
 	std::vector<std::function<void(float, float, float)>> pickCallbacks;
       
@@ -489,8 +494,8 @@ class VizkitPluginFactory : public QObject
  */
 #define VizkitQtPlugin(pluginName)\
     class QtPlugin##pluginName : public vizkit3d::VizkitPluginFactory {\
-        Q_OBJECT \
-	Q_PLUGIN_METADATA(IID "de.dfki.rock.QtPlugin"#pluginName) \
+	Q_OBJECT \
+	Q_PLUGIN_METADATA(IID "rock.vizkit3d.QtPlugin"#pluginName) \
         public:\
         virtual QStringList* getAvailablePlugins() const\
         {\
@@ -543,7 +548,7 @@ class VizPluginAdapter : public Vizkit3DPlugin<T>
 
 }
 
-#define VizkitPluginFactory_iid "de.dfki.rock.VizkitPluginFactory"
+#define VizkitPluginFactory_iid "rock.vizkit3d.VizkitPluginFactory"
 
 Q_DECLARE_INTERFACE(vizkit3d::VizkitPluginFactory, VizkitPluginFactory_iid)
 

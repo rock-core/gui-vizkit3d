@@ -1,5 +1,5 @@
-#include "../src/TextureBox.hpp"
 #include "TextureBoxVisualization.hpp"
+#include "../src/TextureBox.hpp"
 
 namespace vizkit3d
 {
