@@ -495,7 +495,7 @@ class VizkitPluginFactory : public QObject
 #define VizkitQtPlugin(pluginName)\
     class QtPlugin##pluginName : public vizkit3d::VizkitPluginFactory {\
 	Q_OBJECT \
-	Q_PLUGIN_METADATA(IID "rock.vizkit3d.QtPlugin"#pluginName) \
+	Q_PLUGIN_METADATA(IID "rock.vizkit3d.VizkitPluginFactory") \
         public:\
         virtual QStringList* getAvailablePlugins() const\
         {\
