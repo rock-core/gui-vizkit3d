@@ -6,7 +6,7 @@
 namespace vizkit3d {
     class QtPluginVizkit : public vizkit3d::VizkitPluginFactory {
       Q_OBJECT
-      Q_PLUGIN_METADATA(IID "rock.vizkit3d.QtPluginVizkit")
+      Q_PLUGIN_METADATA(IID "rock.vizkit3d.VizkitPluginFactory")
     private:
     public:
 	
