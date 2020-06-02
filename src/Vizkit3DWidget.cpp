@@ -204,8 +204,9 @@ void Vizkit3DConfig::setCameraManipulator(QStringList const& manipulator)
 
 Vizkit3DWidget::Vizkit3DWidget(QWidget* parent,const QString &world_name,bool auto_update)
     : QMainWindow(parent)
-    , env_plugin(NULL), clickHandler(new osgviz::ManipulationClickHandler),
-    movedHandler(*this), movingHandler(*this), selectedHandler(*this)
+    , env_plugin(NULL), clickHandler(new osgviz::ManipulationClickHandler)
+    , movedHandler(*this), movingHandler(*this), selectedHandler(*this)
+    , timerRunning(auto_update)
 {
     setEnabledManipulators(false);
     clickHandler->objectMoved.connect(movedHandler);
@@ -288,10 +289,6 @@ Vizkit3DWidget::Vizkit3DWidget(QWidget* parent,const QString &world_name,bool au
     connect( &_timer, SIGNAL(timeout()), this, SLOT(update()) );
 
     current_frame = QString(root->getName().c_str());
-
-    //start timer responsible for updating osg viewer
-    if (auto_update)
-        _timer.start(10);
 }
 
 Vizkit3DWidget::~Vizkit3DWidget() {
@@ -399,7 +396,8 @@ osgQt::GraphicsWindowQt* Vizkit3DWidget::createGraphicsWindow( int x, int y, int
 void Vizkit3DWidget::update()
 {
     QWidget::update();
-    osgviz->update();
+    if(isVisible())
+        osgviz->update();
 }
 
 QSize Vizkit3DWidget::sizeHint() const
@@ -1377,6 +1375,24 @@ void Vizkit3DWidget::setWorldName(const QString& name)
 void Vizkit3DWidget::setEnabledManipulators(const bool value)
 {
     clickHandler->setEnabled(value);
+}
+
+void Vizkit3DWidget::showEvent(QShowEvent *ev)
+{
+    QMainWindow::showEvent(ev);
+    if(timerRunning)
+    {
+        _timer.start(10);
+    }
+}
+
+void Vizkit3DWidget::hideEvent(QHideEvent *ev)
+{
+    if(timerRunning)
+    {
+        _timer.stop();
+    }
+    QMainWindow::hideEvent(ev);
 }
 
 

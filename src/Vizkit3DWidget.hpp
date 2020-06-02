@@ -412,6 +412,10 @@ namespace vizkit3d
              *  3d view.*/
             void frameSelected(const QString frame);
 
+        protected:
+	    void hideEvent(QHideEvent *ev);
+	    void showEvent(QShowEvent *ev);
+
         private slots:
             void setPluginDataFrameIntern(const QString &frame, QObject *plugin);
             void addPluginIntern(QObject* plugin,QObject *parent=NULL);
@@ -473,6 +477,8 @@ namespace vizkit3d
             PluginMap plugins;
 
             QTimer _timer;
+	    /** Holds the timer state while the window is hidden */
+	    bool timerRunning;
 
             /** The current visualization frame as set by setVisualizationFrame */
             QString current_frame;
