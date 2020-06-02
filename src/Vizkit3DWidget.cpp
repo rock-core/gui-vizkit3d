@@ -226,8 +226,8 @@ void Vizkit3DConfig::setCameraManipulator(QStringList const& manipulator)
 Vizkit3DWidget::Vizkit3DWidget(QWidget* parent,const QString &world_name,bool auto_update)
     : QMainWindow(parent)
     , env_plugin(NULL), clickHandler(new osgviz::ManipulationClickHandler),
-    movedHandler(*this), movingHandler(*this), selectedHandler(*this)
-    , timerRunning(auto_update)
+      movedHandler(*this), movingHandler(*this), selectedHandler(*this),
+      timerRunning(auto_update)
 {
     setEnabledManipulators(false);
     clickHandler->objectMoved.connect(movedHandler);
