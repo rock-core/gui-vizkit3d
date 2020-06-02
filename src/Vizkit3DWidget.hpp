@@ -447,8 +447,9 @@ namespace vizkit3d
 
             
             osgviz::OsgViz* osgviz;
-            osgviz::Window* window;
-
+            osgViewer::CompositeViewer* window;
+            osg::ref_ptr<osgviz::SuperView> view;
+            osg::ref_ptr<osg::Group> window_root;
 
         private:
             //holds the scene

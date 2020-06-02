@@ -225,15 +225,21 @@ Vizkit3DWidget::Vizkit3DWidget(QWidget* parent,const QString &world_name,bool au
     osgviz = osgviz::OsgViz::getInstance();
 
 
-    osgviz::WindowConfig windowConfig;
-    windowConfig.width = 800;
-    windowConfig.height = 600;
-    windowConfig.title = "rock-display";
+    window = new osgViewer::CompositeViewer();
+    window_root = new osg::Group();
+    window_root->setName("Window root");
+    window_root->addChild(NULL);
+    window->setName("rock-display");
+    // if no view config is given, take the default configs
+    // set the view with its own scene
+    view = new osgviz::SuperView(osgviz::ViewConfig(), graphicsWindowQtgc.get(), NULL);
+    window->osgViewer::CompositeViewer::addView((osgViewer::View*) view.get());
 
+    // set also window scene to the view
+    // so all views in the window share the same window scene
+    view->addChild(window_root);
 
-    int osgvizWindowID = osgviz->createWindow(windowConfig,graphicsWindowQtgc);
-    window = osgviz->getWindowManager()->getWindowByID(osgvizWindowID);
-
+    window_root->addChild(osgviz->getRootNode());
 
     // set threading model
     window->setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
@@ -276,7 +282,7 @@ Vizkit3DWidget::Vizkit3DWidget(QWidget* parent,const QString &world_name,bool au
     addProperties(config,NULL);
 
     //setup camera
-    osg::Camera* camera = window->getView()->getCamera();
+    osg::Camera* camera = view->getCamera();
     camera->setClearColor(::osg::Vec4(0.2, 0.2, 0.6, 1.0) );
     //camera->setViewport( new ::osg::Viewport(0, 0, traits->width, traits->height) );
     //camera->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(traits->width)/static_cast<double>(traits->height), 1.0f, 10000.0f );
@@ -292,7 +298,6 @@ Vizkit3DWidget::Vizkit3DWidget(QWidget* parent,const QString &world_name,bool au
 }
 
 Vizkit3DWidget::~Vizkit3DWidget() {
-    osgviz->destroyWindow(0);
 }
 
 //qt ruby is crashing if we use none pointer here
@@ -396,8 +401,10 @@ osgQt::GraphicsWindowQt* Vizkit3DWidget::createGraphicsWindow( int x, int y, int
 void Vizkit3DWidget::update()
 {
     QWidget::update();
-    if(isVisible())
-        osgviz->update();
+    osgviz->update();
+    if(isVisible()) {
+        window->frame();
+    }
 }
 
 QSize Vizkit3DWidget::sizeHint() const
@@ -417,7 +424,6 @@ void Vizkit3DWidget::setTrackedNode(VizPluginBase* plugin)
 
 void Vizkit3DWidget::setTrackedNode(osg::Node* node,const QString& tracked_object_name)
 {
-    osgViewer::View *view = window->getView(0);
     assert(view);
 
     osgGA::NodeTrackerManipulator* manipulator = new osgGA::NodeTrackerManipulator;
@@ -649,7 +655,6 @@ void Vizkit3DWidget::getCameraView(QVector3D& lookAtPos, QVector3D& eyePos, QVec
 {
     osg::Vec3d eye, lookAt, up;
 
-    osgViewer::View *view = window->getView(0);
     assert(view);
     view->getCamera()->getViewMatrixAsLookAt(eye, lookAt, up);
 
@@ -666,7 +671,6 @@ void Vizkit3DWidget::getCameraView(QVector3D& lookAtPos, QVector3D& eyePos, QVec
 
 void Vizkit3DWidget::changeCameraView(const osg::Vec3* lookAtPos, const osg::Vec3* eyePos, const osg::Vec3* upVector)
 {
-    osgViewer::View *view = window->getView(0);
     assert(view);
 
     osgGA::CameraManipulator* manipulator = dynamic_cast<osgGA::CameraManipulator*>(view->getCameraManipulator());
@@ -702,7 +706,6 @@ void Vizkit3DWidget::changeCameraView(const osg::Vec3* lookAtPos, const osg::Vec
 
 QColor Vizkit3DWidget::getBackgroundColor()const
 {
-    const osgViewer::View *view = window->getView();
     assert(view);
     osg::Vec4 color = view->getCamera()->getClearColor();
     return QColor(color.r()*255,color.g()*255,color.b()*255,color.a()*255);
@@ -710,7 +713,6 @@ QColor Vizkit3DWidget::getBackgroundColor()const
 
 void Vizkit3DWidget::setBackgroundColor(QColor color)
 {
-    osgViewer::View *view = window->getView();
     assert(view);
     view->getCamera()->setClearColor(::osg::Vec4(color.red()/255.0,color.green()/255.0,color.blue()/255.0,1.0));
 }
@@ -1183,7 +1185,6 @@ CAMERA_MANIPULATORS Vizkit3DWidget::getCameraManipulator() const
 
 void Vizkit3DWidget::setCameraManipulator(osg::ref_ptr<osgGA::CameraManipulator> manipulator, bool resetToDefaultHome)
 {
-    osgViewer::View *view = window->getView(0);
     assert(view);
 
     osg::Vec3d
