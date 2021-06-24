@@ -44,7 +44,7 @@ rock_library(vizkit3d
 	Boost::thread
     DEPS_PKGCONFIG
     	osgViz
-	osgQt
+	openscenegraph-osgQt5
 	ManipulationClickHandler
 )
 
