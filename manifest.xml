@@ -8,10 +8,11 @@
 	DFKI/robotik@dfki.de
     </copyright>
     <depend package="osg" />
-    <depend package="qt4" />
-    <depend package="qt4-opengl" />
+    <depend package="qt5" />
+    <depend package="qt5-opengl" />
     <depend package="boost" />
     <depend package="base/cmake" />
     <depend package="gui/osgviz" />
+    <depend package="gui/qtpropertybrowser" />	
     <!--    <depend package="qt-designer" /> !-->
 </package>
