@@ -1,7 +1,8 @@
 #ifndef QVIZKITWIDGETLOADER_HPP
 #define QVIZKITWIDGETLOADER_HPP
 
-#include <QtDesigner/QDesignerCustomWidgetInterface>
+#include <QtUiPlugin/QDesignerCustomWidgetInterface>
+
 /**
  * This class is used to create an instance of QVizkitWidget in ruby.
  */

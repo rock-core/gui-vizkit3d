@@ -74,4 +74,4 @@ QString QVizkitMainWindowLoader::whatsThis() const
     return "";
 }
 
-Q_EXPORT_PLUGIN2(QVizkitMainWindowLoader, QVizkitMainWindowLoader)
+Q_PLUGIN_METADATA(IID "QVizkitMainWindowLoader")

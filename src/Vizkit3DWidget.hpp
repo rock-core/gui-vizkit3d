@@ -3,11 +3,12 @@
 
 #include "Vizkit3DPlugin.hpp"
 
-#include <QtDesigner/QDesignerExportWidget>
+#include <QtWidgets>
 #include <QVector3D>
 #include <QTimer>
 #include <QMainWindow>
 #include <QQuaternion>
+#include <QtUiPlugin/QDesignerExportWidget>
 
 #ifndef Q_MOC_RUN
     #include <osgGA/CameraManipulator>
@@ -463,7 +464,7 @@ namespace vizkit3d
                 osg::ref_ptr<osg::Group> osg_group_ptr;
                 QWeakPointer<VizPluginBase> weak_ptr;
                 
-                VizPluginInfo(VizPluginBase* plugin_ptr_, osg::ref_ptr<osg::Group> osg_group_ptr_)
+                VizPluginInfo(QSharedPointer<VizPluginBase> plugin_ptr_, osg::ref_ptr<osg::Group> osg_group_ptr_)
                   : osg_group_ptr(osg_group_ptr_),
                     weak_ptr(plugin_ptr_) 
                 {

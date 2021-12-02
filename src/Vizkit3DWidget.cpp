@@ -1,6 +1,6 @@
 #include <QComboBox>
 #include <QGroupBox>
-#include <QPlastiqueStyle>
+//#include <QtWidgets/QFusionStyle>
 #include <QProcessEnvironment>
 #include <QPluginLoader>
 #include <QFileInfo>
@@ -493,7 +493,7 @@ void Vizkit3DWidget::registerDataHandler(VizPluginBase* viz)
 {
     osg::Group* initial_parent = TransformerGraph::getFrameGroup(*getRootNode());
     assert(initial_parent);
-    plugins.insert(make_pair(viz, VizPluginInfo(viz, initial_parent)));
+    plugins.insert(make_pair(viz, VizPluginInfo(QSharedPointer<VizPluginBase>(viz), initial_parent)));
 }
 
 void Vizkit3DWidget::registerClickHandler(const string& frame)
@@ -1103,7 +1103,7 @@ QStringList* Vizkit3DWidget::getAvailablePlugins()
                 for(;iter3 != lib_plugins->end();++iter3)
                     *plugins_str_list << QString(*iter3 + "@" + file_info.absoluteFilePath());
             }
-            catch(std::runtime_error e)
+            catch(std::runtime_error& e)
             {
                 std::cerr << "WARN: cannot load vizkit plugin library " << e.what() << std::endl;
             }

@@ -2,7 +2,7 @@
 #define __VIZKIT3D_VIZPLUGIN_HPP__
 
 #include <QtCore>
-#include <QtGui>
+#include <QtWidgets>
 
 #include <osg/NodeCallback>
 #include <osg/Group>
