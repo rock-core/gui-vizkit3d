@@ -1,4 +1,4 @@
-rock_find_qt5(Core OpenGL Widgets REQUIRED)
+rock_find_qt5(Core OpenGL Widgets UiPlugin REQUIRED)
 find_package(QtPropertyBrowser REQUIRED)
 find_package(Boost COMPONENTS Thread REQUIRED)
 
@@ -40,6 +40,7 @@ rock_library(vizkit3d
 	Qt5::Core	
     	Qt5::Widgets
 	Qt5::OpenGL
+	Qt::UiPlugin
 	Boost::thread
     DEPS_PKGCONFIG
     	osgViz
