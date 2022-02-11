@@ -7,6 +7,7 @@
 #include <osg/NodeVisitor>
 #include <osg/Switch>
 #include <osgText/Text>
+#include <osgViz/Object.h>
 #include <stdexcept>
 #include <assert.h>
 #include <iostream>
@@ -37,7 +38,8 @@ osg::PositionAttitudeTransform *getTransform(osg::Node *node,bool raise=true)
 
 osg::PositionAttitudeTransform *createFrame(const std::string &name,bool root=false,float textSize=0.1)
 {
-    osg::PositionAttitudeTransform* node = new osg::PositionAttitudeTransform();
+//     osg::PositionAttitudeTransform* node = new osg::PositionAttitudeTransform();
+    osgviz::Object* node = new osgviz::Object();
     node->setName(name.c_str());
 
     // always add a group as first child which will used to hold custom nodes
@@ -381,6 +383,31 @@ osg::Node *TransformerGraph::getFrame(osg::Node &transformer,osg::Node *node)
     return FindFrame::find(transformer,node);
 }
 
+osgviz::Object *TransformerGraph::getFrameOsgVizObject(osg::Node &transformer,const std::string &frame)
+{
+    osg::Node *frameNode = TransformerGraph::getFrame(transformer, frame);
+    if(frameNode == NULL)
+    {
+        std::cerr << "Unknown frame: " << frame << std::endl;
+        return NULL;
+    }
+    
+    osg::PositionAttitudeTransform *transform = NULL;
+    try
+    {
+        transform = getTransform(frameNode);
+    }
+    catch(const std::runtime_error& ex)
+    {
+        std::cerr << ex.what() << std::endl;
+        return NULL;
+    }
+    
+    osgviz::Object *obj = dynamic_cast<osgviz::Object*>(transform);
+    if(obj == NULL)
+      std::cerr << "Frame is not an osgViz object" << std::endl;
+    return obj;    
+}
 
 osg::Group *TransformerGraph::getFrameGroup(osg::Node &transformer,const std::string &frame)
 {
@@ -495,6 +522,7 @@ void TransformerGraph::makeRoot(osg::Node& _transformer, std::string const& fram
     return ::makeRoot(_transformer, desiredRoot, std::set<osg::Node*>());
 }
 
+
 bool TransformerGraph::setTransformation(osg::Node &transformer,const std::string &_source_frame,const std::string &_target_frame,
         const osg::Quat &_quat, const osg::Vec3d &_trans)
 {
@@ -560,9 +588,17 @@ bool TransformerGraph::setTransformation(osg::Node &transformer,const std::strin
     osg::Switch *switch_node = getFrameSwitch(target);
     osg::Node *old_node = FindNode::find(*switch_node,"link");
     assert(old_node);
-    osg::Node *link = vizkit::NodeLink::create(source,target,osg::Vec4(255,0,0,255));
-    link->setName("link");
-    switch_node->replaceChild(old_node,link);
+    /** When the node structure is created, a plain Node is added as a 'link'
+     * child of switch. Replace it by a NodeLink if it has not been done yet
+     */
+    vizkit::NodeLink* nodeLink = dynamic_cast<vizkit::NodeLink*>(old_node);
+    if (!nodeLink){
+        osg::Node *link = vizkit::NodeLink::create(source,target,osg::Vec4(255,0,0,255));
+        link->setName("link");
+        switch_node->replaceChild(old_node,link);
+        nodeLink = dynamic_cast<vizkit::NodeLink*>(link);
+    }
+
     return true;
 }
 
@@ -616,4 +652,12 @@ void TransformerGraph::detachNode(osg::Node &transformer,osg::Node &node)
 {
     NodeRemover::remove(transformer,&node);
 }
+
+void TransformerGraph::setWorldName(osg::Node &transformer, const std::string &name)
+{
+    transformer.setName(name);
+    osgText::Text* text = getFrameText(&transformer);
+    text->setText(name);
+}
+
 
