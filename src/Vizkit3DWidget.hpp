@@ -156,7 +156,10 @@ namespace vizkit3d
             Q_PROPERTY( bool transformer READ isTransformer WRITE setTransformer)
             Q_ENUMS( CAMERA_MANIPULATORS )
             Q_PROPERTY( QStringList manipulator READ getAvailableCameraManipulators WRITE setCameraManipulator )
-            Q_PROPERTY( double transformerTextSize READ getTransformerTextSize WRITE setTransformerTextSize );
+            Q_ENUMS( osgText::Text::AxisAlignment )
+            Q_PROPERTY( QStringList textAxisAlignment READ getAvailableAxisAlignments WRITE setTextAxisAlignment )
+            Q_PROPERTY( double transformerTextSize READ getTransformerTextSize WRITE setTransformerTextSize )
+            Q_PROPERTY( QStringList transformerRootFrame READ getTransformerFrames WRITE setRootFrame )
 
         public:
             Vizkit3DConfig(Vizkit3DWidget *parent);
@@ -183,6 +186,9 @@ namespace vizkit3d
             float getTransformerTextSize() const;
             void setTransformerTextSize(float value);
 
+            QStringList getTransformerFrames() const;
+            void setRootFrame(const QStringList &frames) const;
+
             QColor getBackgroundColor()const;
             void setBackgroundColor(QColor color);
 
@@ -197,6 +203,11 @@ namespace vizkit3d
              * current one at the top
              */
             QStringList getAvailableCameraManipulators() const;
+
+            static QString axisAlignmentIDToName(osgText::Text::AxisAlignment id);
+            static osgText::Text::AxisAlignment axisAlignmentNameToID(QString const& name);
+            void setTextAxisAlignment(QStringList const& axisAlignment);
+            QStringList getAvailableAxisAlignments() const;
     };
 
     class QDESIGNER_WIDGET_EXPORT Vizkit3DWidget : public QMainWindow
@@ -308,6 +319,7 @@ namespace vizkit3d
             void setTransformer(bool value);
             float getTransformerTextSize() const;
             void setTransformerTextSize(float value);
+            void setTextAxisAlignment(osgText::TextBase::AxisAlignment alignment);
             bool isAxes() const;
             void setAxes(bool value);
 
