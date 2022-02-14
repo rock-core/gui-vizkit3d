@@ -1,5 +1,3 @@
-#include <QVBoxLayout>
-#include <QSplitter>
 #include <QComboBox>
 #include <QGroupBox>
 #include <QPlastiqueStyle>
@@ -10,21 +8,25 @@
 #include <QRegExp>
 #include <algorithm>
 
+#include "Vizkit3DBase.hpp"
 #include "Vizkit3DWidget.hpp"
 #include "Vizkit3DPlugin.hpp"
-#include "PickHandler.hpp"
 #include "QPropertyBrowserWidget.hpp"
 #include "AxesNode.hpp"
 #include "OsgVisitors.hpp"
 #include "TransformerGraph.hpp"
 #include "EnableGLDebugOperation.hpp"
+#include <osgViz/Object.h>
 #include <boost/lexical_cast.hpp>
+#include <vizkit3d/EnvPluginBase.hpp>
 
 #include <osg/PositionAttitudeTransform>
 #include <osgDB/ReadFile>
 #include <osgQt/GraphicsWindowQt>
 #include <osgViewer/ViewerEventHandlers>
 
+#include <osgViz/modules/ManipulationClickHandler/ManipulationClickHandler.h>
+#include <vizkit3d/DefaultManipulator.hpp>
 #include <osgGA/FirstPersonManipulator>
 #include <osgGA/FlightManipulator>
 #include <osgGA/OrbitManipulator>
@@ -86,6 +88,26 @@ void Vizkit3DConfig::setTransformer(bool value)
     return getWidget()->setTransformer(value);
 }
 
+bool Vizkit3DConfig::isEnvironmentPluginEnabled() const
+{
+    return getWidget()->isEnvironmentPluginEnabled();
+}
+
+void Vizkit3DConfig::setEnvironmentPluginEnabled(bool enabled)
+{
+    return getWidget()->setEnvironmentPluginEnabled(enabled);
+}
+
+float Vizkit3DConfig::getTransformerTextSize() const
+{
+    return getWidget()->getTransformerTextSize();
+}
+
+void Vizkit3DConfig::setTransformerTextSize(float value)
+{
+    return getWidget()->setTransformerTextSize(value);
+}
+
 QColor Vizkit3DConfig::getBackgroundColor() const
 {
     return getWidget()->getBackgroundColor();
@@ -115,6 +137,7 @@ namespace
         bool is_public;
     };
     ManipulatorDefinition KNOWN_MANIPULATORS[] = {
+        { "Default", DEFAULT_MANIPULATOR, true },
         { "First Person", FIRST_PERSON_MANIPULATOR, true },
         { "Flight", FLIGHT_MANIPULATOR, true },
         { "Multi Touch Trackball", MULTI_TOUCH_TRACKBALL_MANIPULATOR, true },
@@ -122,6 +145,7 @@ namespace
         { "Orbit", ORBIT_MANIPULATOR, true },
         { "Terrain", TERRAIN_MANIPULATOR, true },
         { "Trackball", TRACKBALL_MANIPULATOR, true },
+        { "None", NO_MANIPULATOR, true },
         { 0, FIRST_PERSON_MANIPULATOR } // only the empty string is used as guard
     };
 }
@@ -178,50 +202,90 @@ void Vizkit3DConfig::setCameraManipulator(QStringList const& manipulator)
     return getWidget()->setCameraManipulator(id);
 }
 
-Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name)
-    : QWidget(parent)
+Vizkit3DWidget::Vizkit3DWidget(QWidget* parent,const QString &world_name,bool auto_update)
+    : QMainWindow(parent)
+    , env_plugin(NULL), clickHandler(new osgviz::ManipulationClickHandler),
+    movedHandler(*this), movingHandler(*this), selectedHandler(*this)
 {
-    //create layout
-    //objects will be owned by the parent widget (this)
-    QVBoxLayout* layout = new QVBoxLayout;
-    layout->setObjectName("main_layout");
-    layout->setContentsMargins(2,2,2,2);
-    QSplitter* splitter = new QSplitter(Qt::Horizontal);
-    splitter->setObjectName("splitter");
+    setEnabledManipulators(false);
+    clickHandler->objectMoved.connect(movedHandler);
+    clickHandler->objectMoving.connect(movingHandler);
+    selectedObjectConnection = clickHandler->objectSelected.connect(selectedHandler);
+    //currently only this is supported
+    current_manipulator = TERRAIN_MANIPULATOR;
 
-    layout->addWidget(splitter);
-    this->setLayout(layout);
+
+    last_manipulator = vizkit3d::DEFAULT_MANIPULATOR;
+    
+    graphicsWindowQt = createGraphicsWindow(0,0,800,600);
+    graphicsWindowQtgc = dynamic_cast<osg::GraphicsContext*>(graphicsWindowQt.get());
+
+
+    osgviz = osgviz::OsgViz::getInstance();
+
+
+    osgviz::WindowConfig windowConfig;
+    windowConfig.width = 800;
+    windowConfig.height = 600;
+    windowConfig.title = "rock-display";
+
+
+    int osgvizWindowID = osgviz->createWindow(windowConfig,graphicsWindowQtgc);
+    window = osgviz->getWindowManager()->getWindowByID(osgvizWindowID);
+
 
     // set threading model
-    setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
+    window->setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
 
     if (getenv("VIZKIT_GL_DEBUG") && (std::string(getenv("VIZKIT_GL_DEBUG")) == "1"))
     {
         osg::setNotifyLevel(osg::DEBUG_INFO);
-        setRealizeOperation(new EnableGLDebugOperation());
+        window->setRealizeOperation(new EnableGLDebugOperation());
     }
     // disable the default setting of viewer.done() by pressing Escape.
-    setKeyEventSetsDone(0);
+    window->setKeyEventSetsDone(0);
 
     // create root scene node
     root = createSceneGraph(world_name);
+    osgviz->getRootNode()->addChild(root);
 
     // create osg widget
-    QWidget* widget = addViewWidget(createGraphicsWindow(0,0,800,600), root);
+    QWidget* widget = graphicsWindowQt->getGLWidget();
     widget->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
     widget->setObjectName(QString("View Widget"));
-    splitter->addWidget(widget);
+    
+    setCentralWidget(widget);
+    
 
     // create propertyBrowserWidget
-    QPropertyBrowserWidget *propertyBrowserWidget = new QPropertyBrowserWidget( parent );
+    propertyBrowserWidget = new QPropertyBrowserWidget( parent );
     propertyBrowserWidget->setObjectName("PropertyBrowser");
     propertyBrowserWidget->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
     propertyBrowserWidget->resize(200,600);
-    splitter->addWidget(propertyBrowserWidget);
+    
+    propertyDocker = new QDockWidget("Properties");
+    //prop browser should be closed
+    propertyDocker->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    propertyDocker->setWidget(propertyBrowserWidget);
+    addDockWidget(Qt::RightDockWidgetArea, propertyDocker);
+    
 
     // add config object to the property browser
     Vizkit3DConfig *config =  new Vizkit3DConfig(this);
     addProperties(config,NULL);
+
+    //setup camera
+    osg::Camera* camera = window->getView()->getCamera();
+    camera->setClearColor(::osg::Vec4(0.2, 0.2, 0.6, 1.0) );
+    //camera->setViewport( new ::osg::Viewport(0, 0, traits->width, traits->height) );
+    //camera->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(traits->width)/static_cast<double>(traits->height), 1.0f, 10000.0f );
+    camera->setCullMask(~INVISIBLE_NODE_MASK);
+    camera->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
+
+    osg::Vec3 lookAtPos(0,0,0);
+    osg::Vec3 eyePos(-4,-4,4);
+    osg::Vec3 upVector(0,0,1);
+    changeCameraView(&lookAtPos, &eyePos, &upVector);
 
     //connect signals and slots
     connect(this, SIGNAL(addPlugins(QObject*,QObject*)), this, SLOT(addPluginIntern(QObject*,QObject*)));
@@ -231,10 +295,13 @@ Vizkit3DWidget::Vizkit3DWidget( QWidget* parent,const QString &world_name)
     current_frame = QString(root->getName().c_str());
 
     //start timer responsible for updating osg viewer
-    _timer.start(10);
+    if (auto_update)
+        _timer.start(10);
 }
 
-Vizkit3DWidget::~Vizkit3DWidget() {}
+Vizkit3DWidget::~Vizkit3DWidget() {
+    osgviz->destroyWindow(0);
+}
 
 //qt ruby is crashing if we use none pointer here
 QStringList* Vizkit3DWidget::getVisualizationFramesRuby() const
@@ -256,66 +323,65 @@ QString Vizkit3DWidget::getVisualizationFrame() const
     return current_frame;
 }
 
+struct CaptureOperation : public osgViewer::ScreenCaptureHandler::CaptureOperation
+{
+    uint64_t frame_id;
+    QImage image;
+
+    CaptureOperation()
+        : frame_id(0) {}
+
+    void operator()(const osg::Image& image, const unsigned int)
+    {
+        frame_id++;
+
+        QImage::Format qtFormat;
+        if (image.getPixelFormat() == GL_BGR)
+            qtFormat = QImage::Format_RGB888;
+        else if (image.getPixelFormat() == GL_BGRA)
+            qtFormat = QImage::Format_ARGB32;
+        else if (image.getPixelFormat() == GL_RGB)
+            qtFormat = QImage::Format_RGB888;
+        else if (image.getPixelFormat() == GL_RGBA)
+            qtFormat = QImage::Format_ARGB32;
+        else
+            throw std::runtime_error("cannot interpret osg-provided image format " +
+                    boost::lexical_cast<std::string>(image.getPixelFormat()));
+
+        this->image = QImage(image.data(), image.s(), image.t(), qtFormat);
+    }
+
+};
+
 void Vizkit3DWidget::enableGrabbing()
 {
-    if (grabImage)
-        return; // already enabled
+    if (captureHandler)
+        return;
 
-    grabImage = new osg::Image;
-    getView(0)->getCamera()->attach(osg::Camera::COLOR_BUFFER, grabImage);
-    // We do it once here, as the image format is not set properly on first
-    // frame (we get RGBA on the first frame)
-    osg::Viewport* view = getView(0)->getCamera()->getViewport();
-    grabImage->readPixels(view->x(), view->y(), view->width(), view->height(), GL_BGRA, GL_UNSIGNED_BYTE);
+    CaptureOperation* op = new CaptureOperation;
+    captureOperation = op;
+    captureHandler   = new osgViewer::ScreenCaptureHandler(op, 1);
 }
 
 void Vizkit3DWidget::disableGrabbing()
 {
-    getView(0)->getCamera()->detach(osg::Camera::COLOR_BUFFER);
-    grabImage.release();
+    captureOperation = NULL;
+    captureHandler = NULL;
 }
 
-QImage Vizkit3DWidget::grab()
+QImage Vizkit3DWidget::grab(unsigned int viewIndex)
 {
-    if (!grabImage)
+    if (!captureHandler)
     {
         qWarning("you must call enableGrabbing() before grab()");
         return QImage();
     }
 
-    frame();
-
-    osg::Viewport* view = getView(0)->getCamera()->getViewport();
-    grabImage->readPixels(view->x(), view->y(), view->width(), view->height(), GL_BGRA, GL_UNSIGNED_BYTE);
-    grabImage->flipVertical();
-
-    return QImage(grabImage->data(), view->width(), view->height(), QImage::Format_ARGB32);
+    dynamic_cast<osgViewer::ScreenCaptureHandler&>(*captureHandler).captureNextFrame(*window);
+    osgviz->update();
+    return static_cast<CaptureOperation&>(*captureOperation).image;
 };
 
-QWidget* Vizkit3DWidget::addViewWidget( osgQt::GraphicsWindowQt* gw, ::osg::Node* scene )
-{
-    osgViewer::View* view = new osgViewer::View;
-    addView(view);
-
-    ::osg::Camera* camera = view->getCamera();
-    camera->setGraphicsContext( gw );
-
-    const ::osg::GraphicsContext::Traits* traits = gw->getTraits();
-
-    camera->setClearColor(::osg::Vec4(0.2, 0.2, 0.6, 1.0) );
-    camera->setViewport( new ::osg::Viewport(0, 0, traits->width, traits->height) );
-    camera->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(traits->width)/static_cast<double>(traits->height), 1.0f, 10000.0f );
-
-    view->setSceneData(scene);
-    view->addEventHandler( new osgViewer::StatsHandler );
-    setCameraManipulator(TERRAIN_MANIPULATOR);
-
-    // pickhandler is for selecting objects in the opengl view
-    PickHandler* pickHandler = new PickHandler();
-    view->addEventHandler(pickHandler);
-
-    return gw->getGLWidget();
-}
 
 osgQt::GraphicsWindowQt* Vizkit3DWidget::createGraphicsWindow( int x, int y, int w, int h, const std::string& name, bool windowDecoration)
 {
@@ -335,9 +401,10 @@ osgQt::GraphicsWindowQt* Vizkit3DWidget::createGraphicsWindow( int x, int y, int
     return new osgQt::GraphicsWindowQt(traits.get());
 }
 
-void Vizkit3DWidget::paintEvent( QPaintEvent* event )
+void Vizkit3DWidget::update()
 {
-    frame();
+    QWidget::update();
+    osgviz->update();
 }
 
 QSize Vizkit3DWidget::sizeHint() const
@@ -350,14 +417,14 @@ osg::Group* Vizkit3DWidget::getRootNode() const
     return root;
 }
 
-void Vizkit3DWidget::setTrackedNode( VizPluginBase* plugin )
+void Vizkit3DWidget::setTrackedNode(VizPluginBase* plugin)
 {
-    return setTrackedNode(plugin->getRootNode(), QString("<Plugin %1>").arg(plugin->getPluginName()));
+   return setTrackedNode(plugin->getRootNode(), QString("<Plugin %1>").arg(plugin->getPluginName()));
 }
 
-void Vizkit3DWidget::setTrackedNode( osg::Node* node, QString tracked_object_name )
+void Vizkit3DWidget::setTrackedNode(osg::Node* node,const QString& tracked_object_name)
 {
-    osgViewer::View *view = getView(0);
+    osgViewer::View *view = window->getView(0);
     assert(view);
 
     osgGA::NodeTrackerManipulator* manipulator = new osgGA::NodeTrackerManipulator;
@@ -431,14 +498,27 @@ void Vizkit3DWidget::registerDataHandler(VizPluginBase* viz)
 {
     osg::Group* initial_parent = TransformerGraph::getFrameGroup(*getRootNode());
     assert(initial_parent);
-    plugins.insert(make_pair(viz, initial_parent));
+    plugins.insert(make_pair(viz, VizPluginInfo(viz, initial_parent)));
 }
 
+void Vizkit3DWidget::registerClickHandler(const string& frame)
+{
+  osgviz::Object* obj = TransformerGraph::getFrameOsgVizObject(*getRootNode(), frame);
+  if(obj == NULL)
+      throw std::runtime_error("Cannot register click handler");
+
+  if(!obj->hasClickableCallback(clickHandler))
+    obj->addClickableCallback(clickHandler);
+}
+  
 void Vizkit3DWidget::deregisterDataHandler(VizPluginBase* viz)
 {
     PluginMap::iterator it = plugins.find(viz);
     if (it == plugins.end())
         throw std::runtime_error("trying to deregister a plugin that is not registered on this widget");
+
+    if (viz == env_plugin)
+        clearEnvironmentPlugin();
 
     disableDataHandler(viz);
     plugins.erase(it);
@@ -446,16 +526,19 @@ void Vizkit3DWidget::deregisterDataHandler(VizPluginBase* viz)
 
 void Vizkit3DWidget::enableDataHandler(VizPluginBase *viz)
 {
+    if (viz == env_plugin)
+        throw std::invalid_argument("attempted to enable the environment plugin");
+
     PluginMap::iterator it = plugins.find(viz);
     if (it != plugins.end())
-        it->second->addChild(viz->getRootNode());
+        (it->second).osg_group_ptr->addChild(viz->getRootNode());
 }
 
 void Vizkit3DWidget::disableDataHandler(VizPluginBase *viz)
 {
     PluginMap::iterator it = plugins.find(viz);
     if (it != plugins.end())
-        it->second->removeChild( viz->getRootNode() );
+        (it->second).osg_group_ptr->removeChild( viz->getRootNode() );
 }
 
 void Vizkit3DWidget::setPluginEnabled(QObject* plugin, bool enabled)
@@ -464,13 +547,19 @@ void Vizkit3DWidget::setPluginEnabled(QObject* plugin, bool enabled)
     if (!viz_plugin)
         return;
 
+    if (viz_plugin == env_plugin)
+    {
+        setEnvironmentPluginEnabled(enabled);
+        return;
+    }
+
     PluginMap::const_iterator plugin_it = plugins.find(viz_plugin);
     if (plugin_it == plugins.end())
         return;
 
     // Check the current state
     osg::Node::ParentList const& list = viz_plugin->getRootNode()->getParents();
-    bool is_enabled = std::find(list.begin(), list.end(), plugin_it->second) != list.end();
+    bool is_enabled = std::find(list.begin(), list.end(), (plugin_it->second).osg_group_ptr) != list.end();
 
     if (enabled && !is_enabled)
         enableDataHandler(viz_plugin);
@@ -481,6 +570,59 @@ void Vizkit3DWidget::setPluginEnabled(QObject* plugin, bool enabled)
 void Vizkit3DWidget::pluginActivityChanged(bool enabled)
 {
     return setPluginEnabled(QObject::sender(), enabled);
+}
+
+void Vizkit3DWidget::setEnvironmentPlugin(QObject* plugin)
+{
+    EnvPluginBase* env_plugin_new = dynamic_cast<EnvPluginBase*>(plugin);
+    if (!env_plugin_new)
+        throw std::invalid_argument("plugin given to setEnvironmentPlugin is not from a subclass of EnvPluginBase");
+
+    PluginMap::iterator it = plugins.find(env_plugin_new);
+    if (it == plugins.end())
+    {
+        addPlugin(env_plugin_new);
+        it = plugins.find(env_plugin_new);
+    }
+
+    clearEnvironmentPlugin();
+
+    (it->second).osg_group_ptr->removeChild(env_plugin_new->getRootNode());
+    env_plugin_new->getRefNode()->addChild(root);
+    this->env_plugin = env_plugin_new;
+    setEnvironmentPluginEnabled(env_plugin_new->isPluginEnabled());
+}
+
+void Vizkit3DWidget::setEnvironmentPluginEnabled(bool enabled)
+{
+    if (!env_plugin)
+        return;
+
+    if (enabled)
+        osgviz->setScene(env_plugin->getRootNode());
+    else
+        osgviz->setScene(root);
+    emit propertyChanged("environment");
+}
+
+bool Vizkit3DWidget::isEnvironmentPluginEnabled() const
+{
+    if (!env_plugin)
+        return false;
+    return osgviz->getChild() != root;
+}
+
+void Vizkit3DWidget::clearEnvironmentPlugin()
+{
+    if (!env_plugin)
+        return;
+
+    setEnvironmentPluginEnabled(false);
+
+    env_plugin->getRefNode()->removeChild(root);
+    PluginMap::iterator it = plugins.find(env_plugin);
+    if (it != plugins.end())
+        (it->second).osg_group_ptr->addChild(env_plugin->getRootNode());
 }
 
 void Vizkit3DWidget::setCameraLookAt(double x, double y, double z)
@@ -503,27 +645,18 @@ void Vizkit3DWidget::setCameraUp(double x, double y, double z)
 
 void Vizkit3DWidget::collapsePropertyBrowser()
 {
-    QSplitter *splitter = findChild<QSplitter*>("splitter");
-    if(!splitter)
-        return;
-    QList<int> sizes;
-    sizes.push_front(0);
-    splitter->setSizes(sizes);
+    removeDockWidget(propertyDocker);
+    propertyBrowserWidget->close();
 }
 
 
-void Vizkit3DWidget::setSmallFeatureCullingPixelSize(float val)
-{
-    osgViewer::View *view = getView(0);
-    assert(view);
-    view->getCamera()->setSmallFeatureCullingPixelSize(val);
-}
+
 
 void Vizkit3DWidget::getCameraView(QVector3D& lookAtPos, QVector3D& eyePos, QVector3D& upVector)
 {
     osg::Vec3d eye, lookAt, up;
 
-    osgViewer::View *view = getView(0);
+    osgViewer::View *view = window->getView(0);
     assert(view);
     view->getCamera()->getViewMatrixAsLookAt(eye, lookAt, up);
 
@@ -540,28 +673,43 @@ void Vizkit3DWidget::getCameraView(QVector3D& lookAtPos, QVector3D& eyePos, QVec
 
 void Vizkit3DWidget::changeCameraView(const osg::Vec3* lookAtPos, const osg::Vec3* eyePos, const osg::Vec3* upVector)
 {
-    osgViewer::View *view = getView(0);
+    osgViewer::View *view = window->getView(0);
     assert(view);
 
     osgGA::CameraManipulator* manipulator = dynamic_cast<osgGA::CameraManipulator*>(view->getCameraManipulator());
-    osg::Vec3d eye, center, up;
-    manipulator->getHomePosition(eye, center, up);
+    if (!manipulator)
+    {
+        osg::Vec3d eye, center, up;
+        view->getCamera()->getViewMatrixAsLookAt(eye, center, up);
+        if (lookAtPos)
+            center = *lookAtPos;
+        if (eyePos)
+            eye = *eyePos;
+        if (upVector)
+            up = *upVector;
+        view->getCamera()->setViewMatrixAsLookAt(eye, center, up);
+    }
+    else
+    {
+        osg::Vec3d eye, center, up;
+        manipulator->getHomePosition(eye, center, up);
 
-    if (lookAtPos)
-        center = *lookAtPos;
-    if (eyePos)
-        eye = *eyePos;
-    if (upVector)
-        up = *upVector;
+        if (lookAtPos)
+            center = *lookAtPos;
+        if (eyePos)
+            eye = *eyePos;
+        if (upVector)
+            up = *upVector;
 
-    //set new values
-    manipulator->setHomePosition(eye, center, up);
-    view->home();
+        //set new values
+        manipulator->setHomePosition(eye, center, up);
+        view->home();
+    }
 }
 
 QColor Vizkit3DWidget::getBackgroundColor()const
 {
-    const osgViewer::View *view = getView(0);
+    const osgViewer::View *view = window->getView();
     assert(view);
     osg::Vec4 color = view->getCamera()->getClearColor();
     return QColor(color.r()*255,color.g()*255,color.b()*255,color.a()*255);
@@ -569,7 +717,7 @@ QColor Vizkit3DWidget::getBackgroundColor()const
 
 void Vizkit3DWidget::setBackgroundColor(QColor color)
 {
-    osgViewer::View *view = getView(0);
+    osgViewer::View *view = window->getView();
     assert(view);
     view->getCamera()->setClearColor(::osg::Vec4(color.red()/255.0,color.green()/255.0,color.blue()/255.0,1.0));
 }
@@ -611,8 +759,12 @@ void Vizkit3DWidget::addPluginIntern(QObject* plugin,QObject *parent)
 
     vizkit3d::VizPluginBase* viz_plugin = dynamic_cast<vizkit3d::VizPluginBase*>(plugin);
     bool has_plugin = plugins.find(viz_plugin) != plugins.end();
-    if (viz_plugin && !has_plugin)
-    {
+    
+    if (has_plugin) {
+        //std::cerr << viz_plugin->getPluginName().toStdString() <<": plugin already present!" << std::endl;
+        removePlugin(plugin);
+    } 
+    if (viz_plugin) {
         viz_plugin->setParent(this);
         viz_plugin->setVisualizationFrame(getRootNode()->getName().c_str());
 
@@ -624,6 +776,13 @@ void Vizkit3DWidget::addPluginIntern(QObject* plugin,QObject *parent)
         connect(viz_plugin, SIGNAL(pluginActivityChanged(bool)), this, SLOT(pluginActivityChanged(bool)));
         connect(viz_plugin, SIGNAL(childrenChanged()), this, SLOT(pluginChildrenChanged()));
         connect(viz_plugin, SIGNAL(destroyed(QObject*)), this, SLOT(removePluginIntern(QObject*)));
+        
+        const std::vector<QDockWidget*> dockWidgets = viz_plugin->getDockWidgets();
+        for(QDockWidget* dockWidget : dockWidgets)
+        {
+            dockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
+            addDockWidget(Qt::BottomDockWidgetArea, dockWidget);
+        }
     }
 
     // add sub plugins if object has some
@@ -643,6 +802,7 @@ void Vizkit3DWidget::pluginChildrenChanged()
  */
 void Vizkit3DWidget::removePluginIntern(QObject* plugin)
 {
+    //std::cout << __FUNCTION__ << " removing " << plugin << " (thread " << QThread::currentThreadId() << ")" << std::endl;
     vizkit3d::VizPluginBase* viz_plugin = dynamic_cast<vizkit3d::VizPluginBase*>(plugin);
     if (viz_plugin)
     {
@@ -652,12 +812,18 @@ void Vizkit3DWidget::removePluginIntern(QObject* plugin)
             propertyBrowserWidget->removeProperties(viz_plugin);
         disconnect(viz_plugin, SIGNAL(pluginActivityChanged(bool)), this, SLOT(pluginActivityChanged(bool)));
         disconnect(viz_plugin, SIGNAL(childrenChanged()), this, SLOT(pluginChildrenChanged()));
+        
+        const std::vector<QDockWidget*> dockWidgets = viz_plugin->getDockWidgets();
+        for(QDockWidget* dockWidget : dockWidgets)
+        {
+            removeDockWidget(dockWidget);
+        }
     }
 }
 
 QWidget* Vizkit3DWidget::getPropertyWidget() const
 {
-    return findChild<QPropertyBrowserWidget*>("PropertyBrowser");
+    return propertyBrowserWidget;
 }
 
 void Vizkit3DWidget::setPluginDataFrame(const QString& frame, QObject* plugin)
@@ -684,21 +850,28 @@ void Vizkit3DWidget::setPluginDataFrameIntern(const QString& frame, QObject* plu
     vizkit3d::VizPluginBase* viz= dynamic_cast<vizkit3d::VizPluginBase*>(plugin);
     if(!viz)
         throw std::runtime_error("setPluginDataFrame called with something that is not a vizkit3d plugin");
-
+    //remove plugin viz from old frame
+    osg::ref_ptr<osg::Group> vizgroup = viz->getRootNode();
+    //get old frame
+    QString oldframe = viz->getVisualizationFrame();
+    //remove from old frame
+    osg::Group* oldgroup = TransformerGraph::getFrameGroup(*getRootNode(),oldframe.toStdString());
+    oldgroup->removeChild(vizgroup);
+    //add to new frame
     TransformerGraph::addFrame(*getRootNode(),frame.toStdString());
+    registerClickHandler(frame.toStdString());
     osg::Group* node = TransformerGraph::getFrameGroup(*getRootNode(),frame.toStdString());
     assert(node);
     PluginMap::iterator it = plugins.find(viz);
     if (it != plugins.end())
     {
-        if(viz->isPluginEnabled())
+        (it->second).osg_group_ptr = node;
+        
+        if(viz != env_plugin && viz->isPluginEnabled())
         {
             disableDataHandler(viz);
-            it->second = node;
             enableDataHandler(viz);
         }
-        else
-            it->second = node;
     }
 }
 
@@ -719,8 +892,6 @@ void Vizkit3DWidget::setVisualizationFrame(const QString& frame)
         return;
     }
 
-    osgViewer::View *view = getView(0);
-    assert(view);
     // the following is not working if the directly track the transformation 
     // therefore use a child
     osg::Node *node = TransformerGraph::getFrameGroup(*getRootNode(),frame.toStdString());
@@ -746,16 +917,39 @@ void Vizkit3DWidget::setTransformation(const QString &source_frame,const QString
                                          osg::Quat(quat.x(),quat.y(),quat.z(),quat.scalar()),
                                          osg::Vec3d(position.x(),position.y(),position.z()));
 
+    //if a new frame was added
     if(count != getVisualizationFrames().size())
     {
+        //there is no way to determine which frame was new
+        //checking for duplicate handlers will be done elsewhere
+        registerClickHandler(source_frame.toStdString());
+        registerClickHandler(target_frame.toStdString());
+        
         emit propertyChanged("frame");
+        // first: VizPluginBase*
+        // second: osg::ref_ptr<osg::Group>
+        
         PluginMap::iterator it = plugins.begin();
-        for(;it != plugins.end();++it)
-            it->first->setVisualizationFrame(it->first->getVisualizationFrame());
+        for(;it != plugins.end();++it) {
+            //std::cout << __FUNCTION__ << " update call for plugin at address " << it->first << " (thread " << QThread::currentThreadId() << ")" <<  std::endl;
+            if ((it->second).weak_ptr.data()) {
+                //std::cout << __FUNCTION__ << " update call for plugin named " << (it->second).weak_ptr.data()->getPluginName().toStdString() << " (thread " << QThread::currentThreadId() << ")" <<  std::endl;
+                (it->second).weak_ptr.data()->setVisualizationFrame((it->second).weak_ptr.data()->getVisualizationFrame());
+            } else {
+                //std::cout << __FUNCTION__ << " ptr to plugin is 0 " << " (thread " << QThread::currentThreadId() << ")" <<  std::endl;
+            }
+        }
     }
 
-    if (!root_frame.isEmpty());
+    if(!root_frame.isEmpty())
         TransformerGraph::makeRoot(*getRootNode(), root_frame.toStdString());
+}
+
+void Vizkit3DWidget::removeFrame(const QString& frame)
+{
+    const bool worked = TransformerGraph::removeFrame(*getRootNode(), frame.toStdString());
+    if(!worked)
+      std::cerr << "WARN: Unable to remove frame " << frame.toStdString() << std::endl;
 }
 
 void Vizkit3DWidget::setRootFrame(QString frame)
@@ -786,6 +980,17 @@ void Vizkit3DWidget::setTransformer(bool value)
 {
     TransformerGraph::showFrameAnnotation(*getRootNode(),value);
     emit propertyChanged("transformer");
+}
+
+float Vizkit3DWidget::getTransformerTextSize() const
+{
+    return TransformerGraph::getTextSize(*getRootNode());
+}
+
+void Vizkit3DWidget::setTransformerTextSize(float size)
+{
+    TransformerGraph::setTextSize(*getRootNode(),size);
+    emit propertyChanged("transformerTextSize");
 }
 
 void Vizkit3DWidget::setAxesLabels(bool value)
@@ -873,7 +1078,7 @@ QObject* Vizkit3DWidget::loadLib(QString file_path)
 QStringList* Vizkit3DWidget::getAvailablePlugins()
 {
     // qt ruby is crashing if not a pointer is returned
-    QStringList *plugins = new QStringList;
+    QStringList *plugins_str_list = new QStringList;
 
     QStringList name_filters;
     name_filters << "lib*-viz.so" << "lib*-viz.dylib" << "lib*-viz.dll";
@@ -901,7 +1106,7 @@ QStringList* Vizkit3DWidget::getAvailablePlugins()
                 QStringList* lib_plugins  = factory->getAvailablePlugins();
                 QStringList::iterator iter3 = lib_plugins->begin();
                 for(;iter3 != lib_plugins->end();++iter3)
-                    *plugins << QString(*iter3 + "@" + file_info.absoluteFilePath());
+                    *plugins_str_list << QString(*iter3 + "@" + file_info.absoluteFilePath());
             }
             catch(std::runtime_error e)
             {
@@ -909,28 +1114,28 @@ QStringList* Vizkit3DWidget::getAvailablePlugins()
             }
         }
     }
-    return plugins;
+    return plugins_str_list;
 }
 
-QObject* Vizkit3DWidget::loadPlugin(QString lib_name,QString plugin_name)
+QObject* Vizkit3DWidget::createPlugin(QString lib_name, QString plugin_name)
 {
     //check if the plugin name is encoded into the lib_name
     QStringList plugin_strings = lib_name.split("@");
     if(plugin_strings.size() == 2)
     {
-        lib_name = plugin_strings.at(0);
-        plugin_name = plugin_strings.at(1);
+        plugin_name = plugin_strings.at(0);
+        lib_name = plugin_strings.at(1);
     }
 
     //if no lib_name is given try to find it from plugin_name
     if(lib_name.isEmpty() && !plugin_name.isEmpty())
         lib_name = findPluginPath(plugin_name);
-
+    
     //check if the lib name is a path
     QFileInfo file_info(lib_name);
     QString path;
     if(file_info.isFile())
-        path = file_info.absolutePath();
+        path = file_info.absoluteFilePath();
     else
         path = findLibPath(lib_name);
 
@@ -959,6 +1164,13 @@ QObject* Vizkit3DWidget::loadPlugin(QString lib_name,QString plugin_name)
                       lib->getAvailablePlugins()->join(", ").toStdString() << std::endl;
         return NULL;
     }
+    return plugin;
+}
+
+
+QObject* Vizkit3DWidget::loadPlugin(QString lib_name, QString plugin_name)
+{
+    QObject* plugin = createPlugin(lib_name, plugin_name);
     addPlugin(plugin);
     return plugin;
 }
@@ -978,7 +1190,7 @@ CAMERA_MANIPULATORS Vizkit3DWidget::getCameraManipulator() const
 
 void Vizkit3DWidget::setCameraManipulator(osg::ref_ptr<osgGA::CameraManipulator> manipulator, bool resetToDefaultHome)
 {
-    osgViewer::View *view = getView(0);
+    osgViewer::View *view = window->getView(0);
     assert(view);
 
     osg::Vec3d
@@ -990,7 +1202,9 @@ void Vizkit3DWidget::setCameraManipulator(osg::ref_ptr<osgGA::CameraManipulator>
     if (!resetToDefaultHome && current)
         current->getHomePosition(eye, center, up);
 
-    manipulator->setHomePosition(eye, center, up);
+    if (manipulator)
+        manipulator->setHomePosition(eye, center, up);
+
     view->setCameraManipulator(manipulator);
     view->home();
 }
@@ -1005,6 +1219,9 @@ void Vizkit3DWidget::setCameraManipulator(CAMERA_MANIPULATORS manipulatorType, b
     osg::ref_ptr<osgGA::CameraManipulator> newManipulator;
     switch(manipulatorType)
     {
+        case DEFAULT_MANIPULATOR:
+            newManipulator = new vizkit3d::DefaultManipulator;
+            break;
         case FIRST_PERSON_MANIPULATOR:
             newManipulator = new osgGA::FirstPersonManipulator;
             break;
@@ -1025,6 +1242,9 @@ void Vizkit3DWidget::setCameraManipulator(CAMERA_MANIPULATORS manipulatorType, b
             break;
         case NODE_TRACKER_MANIPULATOR:
             throw std::invalid_argument("cannot set the manipulaor to NODE_TRACKER_MANIPULATOR using setCameraManipulator, use setTrackedNode instead");
+        case NO_MANIPULATOR:
+            // NULL
+            break;
         default:
             throw std::invalid_argument("invalid camera manipulator type provided");
     };
@@ -1039,4 +1259,131 @@ void Vizkit3DWidget::setCameraManipulator(CAMERA_MANIPULATORS manipulatorType, b
         emit propertyChanged("frame");
     }
 }
+
+void Vizkit3DWidget::ObjectMovedHandler::operator()(const osgviz::Object* obj,
+                                                        const osg::Matrix& motion)
+{
+    const std::string frame = obj->getName();
+    if(TransformerGraph::hasFrame(*widget.getRootNode(), frame))
+    {
+        const osg::Vec3d trans = motion.getTrans();
+        const osg::Quat rot = motion.getRotate();
+        const QVector3D qTrans(trans.x(), trans.y(), trans.z());
+        const QQuaternion qRot(rot.w(), rot.x(), rot.y(), rot.z());
+        emit widget.frameMoved(QString::fromStdString(frame), qTrans, qRot);
+    }
+    else
+    {
+        std::cerr << "Dragged object is not a frame: " << frame << std::endl;
+    }
+}
+
+void Vizkit3DWidget::ObjectMovingHandler::operator()(const osgviz::Object* obj,
+                                                        const osg::Matrix& motion)
+{
+    const std::string frame = obj->getName();
+    if(TransformerGraph::hasFrame(*widget.getRootNode(), frame))
+    {
+        const osg::Vec3d trans = motion.getTrans();
+        const osg::Quat rot = motion.getRotate();
+        const QVector3D qTrans(trans.x(), trans.y(), trans.z());
+        const QQuaternion qRot(rot.w(), rot.x(), rot.y(), rot.z());
+        emit widget.frameMoving(QString::fromStdString(frame), qTrans, qRot);
+    }
+    else
+    {
+        std::cerr << "Dragged object is not a frame: " << frame << std::endl;
+    }
+}
+
+void Vizkit3DWidget::ObjectSelectedHandler::operator()(const osgviz::Object* obj)
+{    
+    const std::string frame = obj->getName();
+    if(TransformerGraph::hasFrame(*widget.getRootNode(), frame))
+    {
+        emit widget.frameSelected(QString::fromStdString(frame));
+    }
+    else
+    {
+        std::cerr << "Selected object that is not a frame: " << frame << std::endl;
+    }   
+}
+
+bool Vizkit3DWidget::ObjectSelectedHandler::operator==(const Vizkit3DWidget::ObjectSelectedHandler& other) const
+{
+    //to disconnect slots we need to be able to identify them, therefore they
+    //need to be comparable
+    return this == &other;
+}
+
+
+void Vizkit3DWidget::selectFrame(const QString& frame, const bool suppressSignal)
+{
+    if(TransformerGraph::hasFrame(*getRootNode(), frame.toStdString()))
+    {
+        osgviz::Object* obj = TransformerGraph::getFrameOsgVizObject(*getRootNode(),
+                                                                     frame.toStdString());
+        if(obj != NULL)
+        {
+            if(suppressSignal)
+            {
+                boost::signals2::shared_connection_block block(selectedObjectConnection);
+                clickHandler->selectObject(obj);
+            }
+            else
+            {
+                clickHandler->selectObject(obj);
+            }
+        }
+        else
+          std::cerr << "Cannot select frame: " << frame.toStdString() << std::endl;
+    }
+    else
+    {
+        std::cerr << frame.toStdString() << " doesn't exist!" << std::endl;
+    }     
+}
+
+void Vizkit3DWidget::clear()
+{
+    //remove plugins, is while loop because removing invalidates iterators
+    while(plugins.size() > 0)
+    {
+        removePlugin(plugins.begin()->first);
+    }
+    
+    //remove frames
+    const std::vector<std::string> frames = TransformerGraph::getFrameNames(*getRootNode());
+    for(unsigned i = 0; i < frames.size(); ++i)
+    {
+        //removeFrame internally skips the world frame
+        TransformerGraph::removeFrame(*getRootNode(), frames[i]);
+    }
+}
+
+void Vizkit3DWidget::setWorldName(const QString& name)
+{
+    const QString oldWorldName = getWorldName();
+    TransformerGraph::setWorldName(*getRootNode(), name.toStdString());
+    PluginMap::iterator it = plugins.begin();
+    
+    //find all plugins that use the old world name as visualization frame
+    //and update them. Otherwise the old world name might be re-added when
+    //setting transformations
+    for(;it != plugins.end();++it)
+    {
+      if(it->first->getVisualizationFrame() == oldWorldName)
+      {
+        it->first->setVisualizationFrame(name);
+      }
+    }
+}
+
+void Vizkit3DWidget::setEnabledManipulators(const bool value)
+{
+    clickHandler->setEnabled(value);
+}
+
+
+
 

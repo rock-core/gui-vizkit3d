@@ -8,6 +8,11 @@
 #include <vector>
 #include <string>
 
+namespace osgviz 
+{
+  class Object;
+}
+
 namespace vizkit3d
 {
     /**
@@ -33,6 +38,18 @@ namespace vizkit3d
          * Returns the name of the wold (root) frame.
          */
         static std::string getWorldName(const osg::Node &transformer);
+        
+        static void setWorldName(osg::Node &transformer, const std::string &name);
+
+        /**
+         * Sets the size of the frame annotations
+         */
+        static void setTextSize(osg::Node &transformer, float size);
+
+        /**
+         * Returns the size of the frame annotations
+         */
+        static float getTextSize(osg::Node &transformer);
 
         /**
          * Adds a new coordinate frame to the graph. Use setTranformation to
@@ -75,6 +92,17 @@ namespace vizkit3d
          * @param node The node
          */
         static osg::Group *getFrameGroup(osg::Node &transformer,const std::string &frame="");
+        
+        /**
+         * Returns the osgviz object for the given frame. Use this node if you
+         * want to attach event handlers etc.
+         * If no name is given it will return the top level osg viz object.
+         * 
+         * Returns NULL and prints error message to stderr in case of error.
+         * 
+         * @param transformer the osg node of the transformer graph
+         * @param frame Name of the frame*/
+        static osgviz::Object *getFrameOsgVizObject(osg::Node &transformer,const std::string &frame="");
 
         /**
          * Returns the name of the osg frame node for the given custom node. Returns an empty string if the given node

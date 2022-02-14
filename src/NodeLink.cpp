@@ -1,6 +1,8 @@
 #include "NodeLink.hpp"
 
+
 #include <osg/Point>
+#include <osgViz/Object.h>
 #include <assert.h>
 #include <iostream>
 #include <stdexcept>
@@ -44,7 +46,8 @@ namespace vizkit
         assert(osg_vertex);
         (*osg_vertex)[0] = pos1;
         (*osg_vertex)[1] = pos2;
-
+        //re-set vertex array to apply changes
+        geometry->setVertexArray(osg_vertex);
         geometry->dirtyBound();
         traverse(node, nv);
     }
@@ -52,7 +55,7 @@ namespace vizkit
     ::osg::Node* NodeLink::create(::osg::Node *node1, ::osg::Node *node2, const ::osg::Vec4 &color)
     {
         assert(node1 && node2);
-
+        NodeLink* object = new NodeLink();
         ::osg::Geode* geode = new ::osg::Geode();
         geode->setName(node2->getName());
         ::osg::Geometry* geometry = new ::osg::Geometry();
@@ -89,6 +92,7 @@ namespace vizkit
 
         NodeCallback *callback = new NodeCallback(node1,node2);
         geode->setUpdateCallback(callback);
-        return (::osg::Node*)geode;
+        object->addChild(geode);
+        return object;
     }
 }
