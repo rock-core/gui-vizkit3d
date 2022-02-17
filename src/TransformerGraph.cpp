@@ -535,6 +535,14 @@ static void makeRoot(osg::Node& _transformer,
 {
     PositionAttitudeTransform* transformer = getTransform(&_transformer);
 
+    // Visit all child transforms and mark as outdated
+    // According to createFrame and addTRansform, the children are sorted like:
+    //   [user data group, axes, text, link (line between frames), switch for annotation, transform_to_root_frame_1, transform_to_root_frame_2, ...]
+    for(size_t i = 5; i<transformer->getNumChildren(); i++){
+        SetOpacity::setOpacity(*transformer->getChild(6), 0.25);
+    }
+
+
     osg::Vec3d trans = osg::Vec3d(0, 0, 0);
     osg::Quat  rot   = osg::Quat(0, 0, 0, 1);
 
@@ -555,6 +563,9 @@ static void makeRoot(osg::Node& _transformer,
         lastNode = currentNode;
         currentNode = parent;
     }
+
+    // Set unset opacity of all connected children of new root such they are fully visible
+    SetOpacity::setOpacity(*(desiredRoot->asNode()), 1);
 }
 
 void TransformerGraph::makeRoot(osg::Node& _transformer, std::string const& frame)

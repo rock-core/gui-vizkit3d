@@ -21,5 +21,21 @@ namespace vizkit3d
             ::osg::ref_ptr< ::osg::Node> node;
             std::string name;
     };
+
+
+    class SetOpacity : public ::osg::NodeVisitor
+    {
+        public:
+            static void setOpacity(::osg::Node &node, double opacity);
+
+            SetOpacity();
+            SetOpacity(double opacity);
+
+            void apply(osg::Node &node );
+            void apply(::osg::Geode &geode);
+        private:
+            ::osg::ref_ptr< ::osg::Node> node;
+            double opacity;
+    };
 }
 #endif

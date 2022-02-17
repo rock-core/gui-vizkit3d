@@ -10,6 +10,6 @@ rock_testsuite(testCore suite.cpp testTransformerGraph.cpp
 
 rock_executable(vizkit3d-bin NOINSTALL
     SOURCES vizkit3d.cpp
-    DEPS vizkit3d
+    DEPS vizkit3d vizkit3d-viz
     LIBS ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY}
     )
