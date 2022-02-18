@@ -171,9 +171,10 @@ namespace
     };
     AxisAlignmentDefinition KNOWN_AXIS_ALIGNMENTS[] = {
         { "Default", osgText::Text::AxisAlignment::USER_DEFINED_ROTATION, true },
-        { "Screen", osgText::Text::AxisAlignment::SCREEN, true },
-        { "Screen", osgText::Text::AxisAlignment::XY_PLANE, true },
-        { "Screen", osgText::Text::AxisAlignment::YZ_PLANE, true },
+        { "SCREEN", osgText::Text::AxisAlignment::SCREEN, true },
+        { "XY_PLANE", osgText::Text::AxisAlignment::XY_PLANE, true },
+        { "XZ_PLANE", osgText::Text::AxisAlignment::XZ_PLANE, true },
+        { "YZ_PLANE", osgText::Text::AxisAlignment::YZ_PLANE, true },
         { 0, osgText::Text::AxisAlignment::USER_DEFINED_ROTATION } // only the empty string is used as guard
     };
 }
@@ -1066,7 +1067,6 @@ void Vizkit3DWidget::setTransformerTextSize(float size)
 void Vizkit3DWidget::setTextAxisAlignment(osgText::Text::AxisAlignment alignment)
 {
     TransformerGraph::setTextAxisAlignment(*getRootNode(), alignment);
-    emit propertyChanged("textAxisAlignment");
 }
 
 void Vizkit3DWidget::setAxesLabels(bool value)

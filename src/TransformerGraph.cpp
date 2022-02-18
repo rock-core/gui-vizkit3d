@@ -283,7 +283,7 @@ class TextAxisAlignmentSetter: public ::osg::NodeVisitor
             node.accept(setter);
         }
 
-        TextAxisAlignmentSetter(float size)
+        TextAxisAlignmentSetter(osgText::Text::AxisAlignment alignment)
             : ::osg::NodeVisitor(::osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN)
             , alignment(alignment) {}
 
@@ -293,7 +293,7 @@ class TextAxisAlignmentSetter: public ::osg::NodeVisitor
             // traversing the hole graph.
             // The assumption here is that all custom nodes are always added
             // to a group child node of the transformation nodes.
-            osg::PositionAttitudeTransform *trans = getTransform(&node,false);
+            osg::PositionAttitudeTransform *trans = getTransform(&node, false);
             if(!trans)
                 return;
 
