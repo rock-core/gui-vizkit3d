@@ -55,11 +55,6 @@ osg::PositionAttitudeTransform *createFrame(const std::string &name,bool root=fa
     text->setText(name);
     text->setCharacterSize(textSize);
 
-    bool screenCoords = false;
-    if(screenCoords){
-        text->setAxisAlignment(osgText::Text::SCREEN);
-    }
-
     if(root)
         text->setPosition(osg::Vec3d(textSize/2,-textSize*1.5,0));
     else
