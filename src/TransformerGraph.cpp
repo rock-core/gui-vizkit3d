@@ -560,7 +560,7 @@ static void makeRoot(osg::Node& _transformer,
     }
 
     // Set unset opacity of all connected children of new root such they are fully visible
-    SetOpacity::setOpacity(*(desiredRoot->asNode()), 1);
+    SetOpacity::setOpacity(*desiredRoot, 1);
 }
 
 void TransformerGraph::makeRoot(osg::Node& _transformer, std::string const& frame)
