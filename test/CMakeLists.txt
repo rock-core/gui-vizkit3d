@@ -1,4 +1,4 @@
-rock_find_qt4()
+rock_find_qt5()
 
 rock_testsuite(testGUI suite.cpp testWidget.cpp
     DEPS vizkit3d
