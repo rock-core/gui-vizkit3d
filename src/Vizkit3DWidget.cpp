@@ -1,11 +1,11 @@
 #include <QComboBox>
 #include <QGroupBox>
-//#include <QtWidgets/QFusionStyle>
 #include <QProcessEnvironment>
 #include <QPluginLoader>
 #include <QFileInfo>
 #include <QDir>
 #include <QRegExp>
+#include <QDockWidget>
 #include <algorithm>
 
 #include "Vizkit3DBase.hpp"
@@ -282,11 +282,6 @@ Vizkit3DWidget::Vizkit3DWidget(QWidget* parent,const QString &world_name,bool au
     camera->setCullMask(~INVISIBLE_NODE_MASK);
     camera->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
 
-    osg::Vec3 lookAtPos(0,0,0);
-    osg::Vec3 eyePos(-4,-4,4);
-    osg::Vec3 upVector(0,0,1);
-    changeCameraView(&lookAtPos, &eyePos, &upVector);
-
     //connect signals and slots
     connect(this, SIGNAL(addPlugins(QObject*,QObject*)), this, SLOT(addPluginIntern(QObject*,QObject*)));
     connect(this, SIGNAL(removePlugins(QObject*)), this, SLOT(removePluginIntern(QObject*)));
@@ -498,7 +493,7 @@ void Vizkit3DWidget::registerDataHandler(VizPluginBase* viz)
 {
     osg::Group* initial_parent = TransformerGraph::getFrameGroup(*getRootNode());
     assert(initial_parent);
-    plugins.insert(make_pair(viz, VizPluginInfo(QSharedPointer<VizPluginBase>(viz), initial_parent)));
+    plugins.insert(make_pair(viz, VizPluginInfo(viz, initial_parent)));
 }
 
 void Vizkit3DWidget::registerClickHandler(const string& frame)
@@ -932,9 +927,9 @@ void Vizkit3DWidget::setTransformation(const QString &source_frame,const QString
         PluginMap::iterator it = plugins.begin();
         for(;it != plugins.end();++it) {
             //std::cout << __FUNCTION__ << " update call for plugin at address " << it->first << " (thread " << QThread::currentThreadId() << ")" <<  std::endl;
-            if ((it->second).weak_ptr.data()) {
-                //std::cout << __FUNCTION__ << " update call for plugin named " << (it->second).weak_ptr.data()->getPluginName().toStdString() << " (thread " << QThread::currentThreadId() << ")" <<  std::endl;
-                (it->second).weak_ptr.data()->setVisualizationFrame((it->second).weak_ptr.data()->getVisualizationFrame());
+            if ((it->second).weak_ptr) {
+                //std::cout << __FUNCTION__ << " update call for plugin named " << (it->second).weak_ptr->getPluginName().toStdString() << " (thread " << QThread::currentThreadId() << ")" <<  std::endl;
+                (it->second).weak_ptr->setVisualizationFrame((it->second).weak_ptr->getVisualizationFrame());
             } else {
                 //std::cout << __FUNCTION__ << " ptr to plugin is 0 " << " (thread " << QThread::currentThreadId() << ")" <<  std::endl;
             }
@@ -1108,7 +1103,7 @@ QStringList* Vizkit3DWidget::getAvailablePlugins()
                 for(;iter3 != lib_plugins->end();++iter3)
                     *plugins_str_list << QString(*iter3 + "@" + file_info.absoluteFilePath());
             }
-            catch(std::runtime_error& e)
+            catch(std::runtime_error e)
             {
                 std::cerr << "WARN: cannot load vizkit plugin library " << e.what() << std::endl;
             }

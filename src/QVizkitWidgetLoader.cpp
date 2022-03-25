@@ -2,8 +2,6 @@
 #include "QVizkitWidgetLoader.hpp"
 #include <QtPlugin>
 
-Q_PLUGIN_METADATA(IID "QVizkitWidgetLoader")
-
 QVizkitWidgetLoader::QVizkitWidgetLoader(QObject* parent): QObject(parent)
 {
     initialized = false;

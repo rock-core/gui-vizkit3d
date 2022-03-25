@@ -8,7 +8,7 @@
 
 
 #include <QMainWindow>
-#include <QtWidgets>
+#include <QtUiPlugin/QDesignerExportWidget>
 
 namespace vizkit3d {
 
