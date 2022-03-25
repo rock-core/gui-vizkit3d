@@ -35,7 +35,7 @@ rock_library(vizkit3d
 		CoordinateFrame.hpp
 		EnvPluginBase.hpp
 		DefaultManipulator.hpp
-	DEPS
+	LIBS
 		QtPropertyBrowser
 		Qt5::Core
 		Qt5::Widgets
