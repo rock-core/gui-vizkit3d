@@ -1,6 +1,6 @@
 rock_find_qt5(Core OpenGL Widgets UiPlugin REQUIRED)
 find_package(QtPropertyBrowser REQUIRED)
-find_package(Boost COMPONENTS Thread REQUIRED)
+find_package(Boost COMPONENTS Thread System REQUIRED)
 
 rock_library(vizkit3d
     SOURCES

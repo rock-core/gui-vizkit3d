@@ -3,5 +3,4 @@
 cmake_minimum_required(VERSION 2.8.11)
 find_package(Rock)
 rock_init(vizkit3d 2.0)
-rock_find_cmake(Boost REQUIRED COMPONENTS thread system)
 rock_standard_layout()
