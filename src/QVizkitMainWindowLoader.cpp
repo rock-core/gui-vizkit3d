@@ -73,5 +73,3 @@ QString QVizkitMainWindowLoader::whatsThis() const
 {
     return "";
 }
-
-Q_PLUGIN_METADATA(IID "QVizkitMainWindowLoader")

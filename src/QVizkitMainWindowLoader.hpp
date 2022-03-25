@@ -11,6 +11,7 @@ class QVizkitMainWindowLoader : public QObject, public QDesignerCustomWidgetInte
 {
      Q_OBJECT
      Q_INTERFACES(QDesignerCustomWidgetInterface)
+     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QDesignerCustomWidgetInterface")
 
  public:
      QVizkitMainWindowLoader(QObject *parent = 0);

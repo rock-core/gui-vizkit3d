@@ -317,6 +317,11 @@ void VizPluginBase::setVisualizationFrameFromList(const QStringList &frames)
     current_frame = frames.front();
 }
 
+QVariant VizPluginBase::_invalidate()const
+{
+    return QVariant();
+}
+
 void VizPluginBase::setVisualizationFrame(const QString &frame)
 {
     if (!getWidget())

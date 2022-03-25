@@ -2,7 +2,7 @@
 #define __VIZKIT3D_VIZPLUGIN_HPP__
 
 #include <QtCore>
-#include <QtWidgets>
+#include <QtGui>
 
 #include <osg/NodeCallback>
 #include <osg/Group>
@@ -11,6 +11,8 @@
 #include <boost/thread/mutex.hpp>
 #include <vector>
 #include <functional>
+
+class QDockWidget;
 
 namespace osgviz 
 {
@@ -306,6 +308,11 @@ class VizPluginBase : public QObject
         QString vizkit3d_plugin_name;
         VizPluginRubyAdapterCollection adapterCollection;
 
+	/** Returns an invalid QVariant 
+	 * used to invalidate properties
+	 */ 
+	QVariant _invalidate()const;
+
     private:
 	std::vector<std::function<void(float, float, float)>> pickCallbacks;
       
@@ -487,6 +494,8 @@ class VizkitPluginFactory : public QObject
  */
 #define VizkitQtPlugin(pluginName)\
     class QtPlugin##pluginName : public vizkit3d::VizkitPluginFactory {\
+	Q_OBJECT \
+	Q_PLUGIN_METADATA(IID "rock.vizkit3d.VizkitPluginFactory") \
         public:\
         virtual QStringList* getAvailablePlugins() const\
         {\
@@ -500,8 +509,7 @@ class VizkitPluginFactory : public QObject
                 return new pluginName;\
             else return 0;\
         };\
-    };\
-    Q_EXPORT_PLUGIN2(QtPlugin##pluginName, QtPlugin##pluginName)
+    };
 
 /** @deprecated adapter item for legacy visualizations. Do not derive from this
  * class for new designs. Use VizPlugin directly instead.
@@ -539,4 +547,9 @@ class VizPluginAdapter : public Vizkit3DPlugin<T>
 };
 
 }
+
+#define VizkitPluginFactory_iid "rock.vizkit3d.VizkitPluginFactory"
+
+Q_DECLARE_INTERFACE(vizkit3d::VizkitPluginFactory, VizkitPluginFactory_iid)
+
 #endif
