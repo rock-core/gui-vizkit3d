@@ -2,6 +2,17 @@ rock_find_qt5(Core OpenGL Widgets UiPlugin REQUIRED)
 find_package(QtPropertyBrowser REQUIRED)
 find_package(Boost COMPONENTS Thread System REQUIRED)
 
+pkg_check_modules(OSGQT QUIET osgQt)
+pkg_check_modules(OPENSCENEGRAPH_OSGQT5 QUIET openscenegraph-osgQt5)
+
+if(${OPENSCENEGRAPH_OSGQT5_FOUND})
+  set(OSGQT_PKGCONFIG_NAME "openscenegraph-osgQt5")
+elseif(${OSGQT_FOUND})
+  set(OSGQT_PKGCONFIG_NAME "osgQt")
+else()
+  message(SEND_ERROR "Could not find osgQt or openscenegraph-osgQt5 with pkg-config")
+endif()
+
 rock_library(vizkit3d
 	SOURCES
 		QtThreadedWidget.cpp
@@ -44,7 +55,7 @@ rock_library(vizkit3d
 		Boost::thread
 	DEPS_PKGCONFIG
 		osgViz
-		osgQt
+		${OSGQT_PKGCONFIG_NAME}
 		ManipulationClickHandler
 )
 

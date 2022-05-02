@@ -6,6 +6,10 @@ rock_vizkit_plugin(vizkit3d-viz
     	GridVisualization.cpp
 	TextureBoxVisualization.cpp
 	ModelVisualization.cpp
+    HEADERS
+	GridVisualization.hpp
+	TextureBoxVisualization.hpp
+	ModelVisualization.hpp
     MOC
 	GridVisualization.hpp
 	TextureBoxVisualization.hpp
