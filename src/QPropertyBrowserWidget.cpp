@@ -93,6 +93,12 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
         if(prop.type() == QVariant::StringList)
         {
             QtVariantProperty* property = variantManager->addProperty(QtVariantPropertyManager::enumTypeId(),prop.name());
+            if(property == 0) 
+            {
+                std::cerr << "QVariant type " << metaObj->property(i).type() << " with name " << metaObj->property(i).name() 
+                    << " is not supported by the QtPropertyBrowser." << std::endl;
+                continue;                
+            }
             property->setAttribute("enumNames", var);
             properties.push_back(property);
             continue;
