@@ -10,7 +10,7 @@
     <depend package="osg" />
     <depend package="qt5" />
     <depend package="qt5-opengl" />
-    <depend package="osg_qt5" />
+    <depend package="gui/osg_qt5" />
     <depend package="boost" />
     <depend package="base/cmake" />
     <depend package="gui/osgviz" />
