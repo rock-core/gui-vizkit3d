@@ -486,10 +486,10 @@ class VizkitPluginFactory : public QObject
  *
  * This works if your shared library exports only one plugin. To export multiple
  * plugins, you need to create a subclass of vizkit3d::VizkitPluginFactory which
- * handles the plugins, and export it with
+ * handles the plugins, and have in the class definition in a header
  *
  * <code>
- * Q_EXPORT_PLUGIN2(FactoryClass, FactoryClass)
+ * Q_PLUGIN_METADATA(IID "rock.vizkit3d.VizkitPluginFactory")
  * </code>
  */
 #define VizkitQtPlugin(pluginName)\
