@@ -7,4 +7,5 @@ project(vizkit3d
 find_package(Rock)
 
 rock_init()
+rock_find_cmake(Boost REQUIRED COMPONENTS thread system)
 rock_standard_layout()
