@@ -1,6 +1,5 @@
 rock_find_qt5(Core OpenGL Widgets UiPlugin REQUIRED)
 find_package(QtPropertyBrowser REQUIRED)
-find_package(Boost COMPONENTS Thread System REQUIRED)
 
 pkg_check_modules(OSGQT QUIET osgQt)
 pkg_check_modules(OPENSCENEGRAPH_OSGQT5 QUIET openscenegraph-osgQt5)
@@ -52,7 +51,8 @@ rock_library(vizkit3d
 		Qt5::Widgets
 		Qt5::OpenGL
 		Qt5::UiPlugin
-		Boost::thread
+		${Boost_THREAD_LIBRARY}
+		${Boost_SYSTEM_LIBRARY}
 	DEPS_PKGCONFIG
 		osgViz
 		${OSGQT_PKGCONFIG_NAME}
