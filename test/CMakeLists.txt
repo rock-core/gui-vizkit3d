@@ -1,4 +1,4 @@
-rock_find_qt5()
+rock_find_qt5(Core OpenGL Widgets UiPlugin UiTools REQUIRED)
 
 rock_testsuite(testGUI suite.cpp testWidget.cpp
     DEPS vizkit3d
@@ -10,5 +10,11 @@ rock_testsuite(testCore suite.cpp testTransformerGraph.cpp
 
 # build test application
 # find_package(Qt5UiTools)
-rock_executable(testViewer testViewer.cpp DEPS vizkit3d)
-qt5_use_modules(testViewer Widgets OpenGL UiTools)
+rock_executable(testViewer testViewer.cpp
+            DEPS    vizkit3d
+            LIBS    Qt5::Core
+                    Qt5::Widgets
+                    Qt5::OpenGL
+                    Qt5::UiPlugin
+                    Qt5::UiTools)
+# qt5_use_modules(testViewer Widgets OpenGL UiTools)

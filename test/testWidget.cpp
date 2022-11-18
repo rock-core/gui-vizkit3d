@@ -20,7 +20,7 @@ BOOST_AUTO_TEST_CASE(changeCameraView_test)
         double r = i/1000.0;
         double s = r/10;
         widget->setCameraEye(cos(r)*s, sin(r)*s, 0);
-        usleep( 500 );
+        usleep( 50 );
     }
 
     for( int i=0; i<30000 && app.isRunning(); i++ )
@@ -28,8 +28,10 @@ BOOST_AUTO_TEST_CASE(changeCameraView_test)
         double r = i/1000.0;
         double s = r/10;
         widget->setCameraLookAt(cos(r)*s, sin(r)*s, 0);
-        usleep( 500 );
+        usleep( 50 );
     }
+    widget->close();
+    app.stop();
 }
 
 BOOST_AUTO_TEST_SUITE_END();
