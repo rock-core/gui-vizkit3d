@@ -225,16 +225,15 @@ Vizkit3DWidget::Vizkit3DWidget(QWidget* parent,const QString &world_name,bool au
     osgviz = osgviz::OsgViz::getInstance();
 
 
-    window = new osgViewer::CompositeViewer();
-    window_root = new osg::Group();
+    int windowid = osgviz->createWindow(osgviz::WindowConfig(), graphicsWindowQtgc);
+    osg::ref_ptr<osgviz::Window> osgvizWindow = osgviz->getWindowManager()->getWindowByID(windowid);
+    window = dynamic_cast<osgViewer::CompositeViewer*>(osgvizWindow.get());
+    window_root = osgvizWindow->getRootNode();
     window_root->setName("Window root");
     window_root->addChild(NULL);
     window->setName("rock-display");
-    // if no view config is given, take the default configs
-    // set the view with its own scene
-    view = new osgviz::SuperView(osgviz::ViewConfig(), graphicsWindowQtgc.get(), NULL);
-    window->osgViewer::CompositeViewer::addView((osgViewer::View*) view.get());
-
+    view = dynamic_cast<osgviz::SuperView*>(osgvizWindow->addView(osgviz::ViewConfig()));
+ 
     // set also window scene to the view
     // so all views in the window share the same window scene
     view->addChild(window_root);
