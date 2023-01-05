@@ -264,8 +264,6 @@ Vizkit3DWidget::Vizkit3DWidget(QWidget* parent,const QString &world_name,bool au
     propertyBrowserWidget->resize(200,600);
     
     propertyDocker = new QDockWidget("Properties");
-    //prop browser should be closed
-    propertyDocker->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     propertyDocker->setWidget(propertyBrowserWidget);
     addDockWidget(Qt::RightDockWidgetArea, propertyDocker);
     
