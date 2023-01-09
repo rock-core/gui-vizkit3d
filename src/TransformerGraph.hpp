@@ -207,6 +207,9 @@ namespace vizkit3d
          */
         static void detachNode(osg::Node &transformer,osg::Node &node);
 
+
+        static bool frameAnnotation;
+
     };
 
 }
