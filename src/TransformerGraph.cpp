@@ -349,6 +349,8 @@ class DescriptionVisitor: public ::osg::NodeVisitor
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 
+bool TransformerGraph::frameAnnotation = true;
+
 osg::Node *TransformerGraph::create(const std::string &name)
 {
     return createFrame(name,true,0.1);
@@ -597,6 +599,14 @@ bool TransformerGraph::setTransformation(osg::Node &transformer,const std::strin
         link->setName("link");
         switch_node->replaceChild(old_node,link);
         nodeLink = dynamic_cast<vizkit::NodeLink*>(link);
+
+        // if the transformations are added after the user
+        // desiable the transformation annotation
+        // the transformation should be turned off in the osg graph
+        if (frameAnnotation)
+            switch_node->setAllChildrenOn();
+        else
+            switch_node->setAllChildrenOff();
     }
 
     return true;
@@ -629,6 +639,7 @@ std::vector<std::string> TransformerGraph::getFrameNames(osg::Node &transformer)
 void TransformerGraph::showFrameAnnotation(osg::Node &transformer,bool value)
 {
     AnnotationSetter::set(transformer,value);
+    frameAnnotation = value;
 }
 
 bool TransformerGraph::areFrameAnnotationVisible(osg::Node &transformer)
