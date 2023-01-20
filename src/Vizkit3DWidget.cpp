@@ -73,6 +73,13 @@ QStringList Vizkit3DConfig::getVisualizationFrames() const
     return frames;
 }
 
+QStringList Vizkit3DConfig::getTransformerFrames() const
+{
+    QStringList frames = getVisualizationFrames();
+    frames.removeAll(getWidget()->getWorldName());
+    return frames;
+}
+
 void Vizkit3DConfig::setVisualizationFrame(const QStringList &frames)
 {
     return getWidget()->setVisualizationFrame(frames.front(),false);
@@ -108,6 +115,12 @@ void Vizkit3DConfig::setTransformerTextSize(float value)
     return getWidget()->setTransformerTextSize(value);
 }
 
+void Vizkit3DConfig::setRootFrame(const QStringList &frames) const
+{
+    getWidget()->setRootFrame(frames.front());
+}
+
+
 QColor Vizkit3DConfig::getBackgroundColor() const
 {
     return getWidget()->getBackgroundColor();
@@ -128,6 +141,7 @@ bool Vizkit3DConfig::isAxesLabels() const
     return getWidget()->isAxesLabels();
 }
 
+#include <osgText/Text>
 namespace
 {
     struct ManipulatorDefinition
@@ -147,6 +161,21 @@ namespace
         { "Trackball", TRACKBALL_MANIPULATOR, true },
         { "None", NO_MANIPULATOR, true },
         { 0, FIRST_PERSON_MANIPULATOR } // only the empty string is used as guard
+    };
+
+    struct AxisAlignmentDefinition
+    {
+        QString name;
+        osgText::Text::AxisAlignment id;
+        bool is_public;
+    };
+    AxisAlignmentDefinition KNOWN_AXIS_ALIGNMENTS[] = {
+        { "Default", osgText::Text::AxisAlignment::USER_DEFINED_ROTATION, true },
+        { "SCREEN", osgText::Text::AxisAlignment::SCREEN, true },
+        { "XY_PLANE", osgText::Text::AxisAlignment::XY_PLANE, true },
+        { "XZ_PLANE", osgText::Text::AxisAlignment::XZ_PLANE, true },
+        { "YZ_PLANE", osgText::Text::AxisAlignment::YZ_PLANE, true },
+        { 0, osgText::Text::AxisAlignment::USER_DEFINED_ROTATION } // only the empty string is used as guard
     };
 }
 
@@ -170,6 +199,18 @@ QStringList Vizkit3DConfig::getAvailableCameraManipulators() const
     // The first element of the list is interpreted as the currently selected
     // frame by the property browser
     names.push_front(current);
+    return names;
+}
+
+QStringList Vizkit3DConfig::getAvailableAxisAlignments() const
+{
+    QStringList names;
+    for (int i = 0; KNOWN_AXIS_ALIGNMENTS[i].name != 0; ++i)
+    {
+        if (KNOWN_AXIS_ALIGNMENTS[i].is_public)
+            names.append(KNOWN_AXIS_ALIGNMENTS[i].name);
+    }
+
     return names;
 }
 
@@ -201,6 +242,35 @@ void Vizkit3DConfig::setCameraManipulator(QStringList const& manipulator)
     CAMERA_MANIPULATORS id = manipulatorNameToID(manipulator.front());
     return getWidget()->setCameraManipulator(id);
 }
+
+QString Vizkit3DConfig::axisAlignmentIDToName(osgText::Text::AxisAlignment id)
+{
+    for (int i = 0; KNOWN_AXIS_ALIGNMENTS[i].name != 0; ++i)
+    {
+        if (id == KNOWN_AXIS_ALIGNMENTS[i].id)
+            return KNOWN_AXIS_ALIGNMENTS[i].name;
+    }
+    throw std::invalid_argument("axis alignment ID " + boost::lexical_cast<std::string>(id) + " has no declared name");
+}
+
+osgText::Text::AxisAlignment Vizkit3DConfig::axisAlignmentNameToID(QString const& name)
+{
+    for (int i = 0; KNOWN_AXIS_ALIGNMENTS[i].name != 0; ++i)
+    {
+        if (name == KNOWN_AXIS_ALIGNMENTS[i].name)
+            return KNOWN_AXIS_ALIGNMENTS[i].id;
+    }
+    throw std::invalid_argument("axis alignment name " + name.toStdString() + " does not exist");
+}
+
+void Vizkit3DConfig::setTextAxisAlignment(QStringList const& axisAlignment)
+{
+    osgText::Text::AxisAlignment id = axisAlignmentNameToID(axisAlignment.front());
+    return getWidget()->setTextAxisAlignment(id);
+}
+
+
+
 
 Vizkit3DWidget::Vizkit3DWidget(QWidget* parent,const QString &world_name,bool auto_update)
     : QMainWindow(parent)
@@ -924,6 +994,7 @@ void Vizkit3DWidget::setTransformation(const QString &source_frame,const QString
         registerClickHandler(target_frame.toStdString());
         
         emit propertyChanged("frame");
+        emit propertyChanged("transformerRootFrame");
         // first: VizPluginBase*
         // second: osg::ref_ptr<osg::Group>
         
@@ -989,6 +1060,11 @@ void Vizkit3DWidget::setTransformerTextSize(float size)
 {
     TransformerGraph::setTextSize(*getRootNode(),size);
     emit propertyChanged("transformerTextSize");
+}
+
+void Vizkit3DWidget::setTextAxisAlignment(osgText::Text::AxisAlignment alignment)
+{
+    TransformerGraph::setTextAxisAlignment(*getRootNode(), alignment);
 }
 
 void Vizkit3DWidget::setAxesLabels(bool value)
@@ -1106,7 +1182,7 @@ QStringList* Vizkit3DWidget::getAvailablePlugins()
                 for(;iter3 != lib_plugins->end();++iter3)
                     *plugins_str_list << QString(*iter3 + "@" + file_info.absoluteFilePath());
             }
-            catch(std::runtime_error e)
+            catch(std::runtime_error& e)
             {
                 std::cerr << "WARN: cannot load vizkit plugin library " << e.what() << std::endl;
             }

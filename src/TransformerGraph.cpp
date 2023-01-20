@@ -54,10 +54,12 @@ osg::PositionAttitudeTransform *createFrame(const std::string &name,bool root=fa
     osgText::Text *text= new osgText::Text;
     text->setText(name);
     text->setCharacterSize(textSize);
+
     if(root)
         text->setPosition(osg::Vec3d(textSize/2,-textSize*1.5,0));
     else
         text->setPosition(osg::Vec3d(textSize/2,textSize/2,0));
+
     text_geode->addDrawable(text);
     switch_node->addChild(text_geode,true);
 
@@ -267,6 +269,38 @@ class TextSizeSetter: public ::osg::NodeVisitor
         float size;
 };
 
+class TextAxisAlignmentSetter: public ::osg::NodeVisitor
+{
+    public:
+        static void set(::osg::Node &node, osgText::Text::AxisAlignment alignment)
+        {
+            TextAxisAlignmentSetter setter(alignment);
+            node.accept(setter);
+        }
+
+        TextAxisAlignmentSetter(osgText::Text::AxisAlignment alignment)
+            : ::osg::NodeVisitor(::osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN)
+            , alignment(alignment) {}
+
+        void apply(::osg::Node &node)
+        {
+            // Just stop if the node is not a PositionAttitudeTransform to prevent
+            // traversing the hole graph.
+            // The assumption here is that all custom nodes are always added
+            // to a group child node of the transformation nodes.
+            osg::PositionAttitudeTransform *trans = getTransform(&node, false);
+            if(!trans)
+                return;
+
+            osgText::Text* text = getFrameText(trans);
+            text->setAxisAlignment(alignment);
+
+            traverse(node);
+        }
+    private:
+        osgText::Text::AxisAlignment alignment;
+};
+
 class NodeRemover: public ::osg::NodeVisitor
 {
     public:
@@ -441,6 +475,11 @@ void TransformerGraph::setTextSize(osg::Node &transformer, float size)
     TextSizeSetter::set(transformer, size);
 }
 
+void TransformerGraph::setTextAxisAlignment(osg::Node &transformer, osgText::Text::AxisAlignment alignment)
+{
+    TextAxisAlignmentSetter::set(transformer, alignment);
+}
+
 float TransformerGraph::getTextSize(osg::Node &transformer)
 {
     osgText::Text *text= getFrameText(&transformer);
@@ -493,6 +532,14 @@ static void makeRoot(osg::Node& _transformer,
 {
     PositionAttitudeTransform* transformer = getTransform(&_transformer);
 
+    // Visit all child transforms and mark as outdated
+    // According to createFrame and addTRansform, the children are sorted like:
+    //   [user data group, axes, text, link (line between frames), switch for annotation, transform_to_root_frame_1, transform_to_root_frame_2, ...]
+    for(size_t i = 5; i<transformer->getNumChildren(); i++){
+        SetOpacity::setOpacity(*transformer->getChild(6), 0.25);
+    }
+
+
     osg::Vec3d trans = osg::Vec3d(0, 0, 0);
     osg::Quat  rot   = osg::Quat(0, 0, 0, 1);
 
@@ -513,6 +560,9 @@ static void makeRoot(osg::Node& _transformer,
         lastNode = currentNode;
         currentNode = parent;
     }
+
+    // Set unset opacity of all connected children of new root such they are fully visible
+    SetOpacity::setOpacity(*desiredRoot, 1);
 }
 
 void TransformerGraph::makeRoot(osg::Node& _transformer, std::string const& frame)

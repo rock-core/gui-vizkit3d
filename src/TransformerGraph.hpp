@@ -4,6 +4,7 @@
 
 #include <osg/Node>
 #include <osg/Geometry>
+#include <osgText/Text>
 
 #include <vector>
 #include <string>
@@ -45,6 +46,8 @@ namespace vizkit3d
          * Sets the size of the frame annotations
          */
         static void setTextSize(osg::Node &transformer, float size);
+
+        static void setTextAxisAlignment(osg::Node &transformer, osgText::Text::AxisAlignment alignment);
 
         /**
          * Returns the size of the frame annotations
@@ -215,3 +218,4 @@ namespace vizkit3d
 }
 
 #endif
+
