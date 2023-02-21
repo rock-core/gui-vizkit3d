@@ -30,6 +30,8 @@ rock_library(vizkit3d
 		QVizkitMainWindow.cpp
 		QPropertyBrowserWidget.cpp
     HEADERS
+		QPropertyBrowserWidget.hpp
+
 		TransformerGraph.hpp
 		GridNode.hpp
 		TextureBox.hpp

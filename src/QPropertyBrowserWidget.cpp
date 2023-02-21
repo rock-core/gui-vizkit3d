@@ -114,6 +114,15 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
         property->setValue(var);
         properties.push_back(property);
     }
+
+    QList<QByteArray> dynamicProperties = obj->dynamicPropertyNames();
+
+    for (auto dp : dynamicProperties){
+        QVariant val = obj->property(dp.toStdString().c_str());
+        QtVariantProperty* property =variantManager->addProperty(val.type(), QString(dp.toStdString().c_str()));
+        property->setValue(val);
+        properties.push_back(property);
+    }
   
     group = groupManager->addProperty(groupName);
   
@@ -131,7 +140,7 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
         propertyToObject[*it] = obj;
         (*groupMap)[(*it)->propertyName()] = *it;
     }
-    
+
     // add group to the tree
     objectToGroup[obj] = group;
     objectToProperties[obj] = groupMap;
@@ -166,6 +175,22 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
 void QPropertyBrowserWidget::propObjDestroyed(QObject *delObj) {
     //std::cout << "Object destroyed: " << delObj << std::endl;
     removeProperties(delObj);
+}
+
+void QPropertyBrowserWidget::enableProperty(QObject* obj){
+    // Get property
+    if(objectToGroup[obj])
+    {
+        objectToGroup[obj]->setEnabled(true);
+    }
+}
+
+void QPropertyBrowserWidget::disableProperty(QObject* obj){
+    // Get property
+    if(objectToGroup[obj])
+    {
+        objectToGroup[obj]->setEnabled(false);
+    }
 }
 
 /**

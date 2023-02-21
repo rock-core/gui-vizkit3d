@@ -19,6 +19,8 @@ public:
     void addProperties(QObject* obj,QObject* parent = NULL);
     void removeProperties(QObject* obj);
     void addGlobalProperties(QObject* obj, const QStringList &property_list);
+    void disableProperty(QObject* obj);
+    void enableProperty(QObject* obj);    
     
 protected slots:
     void propertyChangedInGUI(QtProperty *property, const QVariant &val);
