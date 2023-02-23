@@ -128,6 +128,10 @@ bool Vizkit3DConfig::isAxesLabels() const
     return getWidget()->isAxesLabels();
 }
 
+void Vizkit3DConfig::setTransformerRootFrame (const QStringList &frames) {
+    return getWidget()->setRootFrame(frames.front());
+}
+
 namespace
 {
     struct ManipulatorDefinition
@@ -924,6 +928,7 @@ void Vizkit3DWidget::setTransformation(const QString &source_frame,const QString
         registerClickHandler(target_frame.toStdString());
         
         emit propertyChanged("frame");
+        emit propertyChanged("transformerroot");
         // first: VizPluginBase*
         // second: osg::ref_ptr<osg::Group>
         

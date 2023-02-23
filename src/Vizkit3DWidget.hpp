@@ -152,6 +152,7 @@ namespace vizkit3d
             Q_PROPERTY( bool axes_labels READ isAxesLabels WRITE setAxesLabels)
             Q_PROPERTY( QColor background READ getBackgroundColor WRITE setBackgroundColor)
             Q_PROPERTY( QStringList frame READ getVisualizationFrames WRITE setVisualizationFrame)
+            Q_PROPERTY( QStringList transformerroot READ getVisualizationFrames WRITE setTransformerRootFrame)
             Q_PROPERTY( bool environment READ isEnvironmentPluginEnabled WRITE setEnvironmentPluginEnabled)
             Q_PROPERTY( bool transformer READ isTransformer WRITE setTransformer)
             Q_ENUMS( CAMERA_MANIPULATORS )
@@ -185,6 +186,8 @@ namespace vizkit3d
 
             QColor getBackgroundColor()const;
             void setBackgroundColor(QColor color);
+
+            void setTransformerRootFrame (const QStringList &frames);
 
             /** Converts a manipulator ID to its name */
             static QString manipulatorIDToName(CAMERA_MANIPULATORS id);
