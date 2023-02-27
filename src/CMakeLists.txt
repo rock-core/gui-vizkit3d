@@ -25,7 +25,7 @@ rock_library(vizkit3d
 		CoordinateFrame.cpp
 		DefaultManipulator.cpp
 		EnableGLDebugOperation.cpp
-		Vizkit3DPlugin.cpp 
+		Vizkit3DPlugin.cpp
 		Vizkit3DWidget.cpp
 		QVizkitMainWindow.cpp
 		QPropertyBrowserWidget.cpp
@@ -47,6 +47,7 @@ rock_library(vizkit3d
 		CoordinateFrame.hpp
 		EnvPluginBase.hpp
 		DefaultManipulator.hpp
+
 	LIBS
 		QtPropertyBrowser
 		Qt5::Core
@@ -76,7 +77,7 @@ rock_library(vizkitmainwindowloader
         vizkit3d
     NOINSTALL # installs in a non-standard location
 )
-    
+
 install(TARGETS vizkitwidgetloader #vizkitmainwindowloader
     LIBRARY DESTINATION lib/qt/designer
     ARCHIVE DESTINATION lib/qt/designer)
