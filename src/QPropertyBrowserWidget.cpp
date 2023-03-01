@@ -70,9 +70,19 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
     
     // set default plugin name, used if plugin name property is missing 
     QString groupName = obj->objectName();
-    
+
     // genarate group entry and all variant properties
     QList<QtVariantProperty*> properties;
+
+    //retrieve and add dynamic properties       
+    QList<QByteArray> dynamicProperties = obj->dynamicPropertyNames();
+    for (auto dp : dynamicProperties){
+        QVariant val = obj->property(dp.toStdString().c_str());
+        QtVariantProperty* property =variantManager->addProperty(val.type(), QString(dp.toStdString().c_str()));
+        property->setValue(val);
+        properties.push_back(property);
+    }
+    
     for(int i = 1 ; i < metaObj->propertyCount(); i++)
     {
         QMetaProperty prop = metaObj->property(i);
@@ -114,9 +124,8 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
         property->setValue(var);
         properties.push_back(property);
     }
-  
+
     group = groupManager->addProperty(groupName);
-  
     // add variant properties to the group
     QHash<QString, QtProperty*>* groupMap = new QHash<QString, QtProperty*>();
     for(QList<QtVariantProperty*>::const_iterator it = properties.begin(); it != properties.end(); it++)
@@ -131,7 +140,7 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
         propertyToObject[*it] = obj;
         (*groupMap)[(*it)->propertyName()] = *it;
     }
-    
+
     // add group to the tree
     objectToGroup[obj] = group;
     objectToProperties[obj] = groupMap;
@@ -166,6 +175,22 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
 void QPropertyBrowserWidget::propObjDestroyed(QObject *delObj) {
     //std::cout << "Object destroyed: " << delObj << std::endl;
     removeProperties(delObj);
+}
+
+void QPropertyBrowserWidget::enableProperty(QObject* obj){
+    // Get property
+    if(objectToGroup[obj])
+    {
+        objectToGroup[obj]->setEnabled(true);
+    }
+}
+
+void QPropertyBrowserWidget::disableProperty(QObject* obj){
+    // Get property
+    if(objectToGroup[obj])
+    {
+        objectToGroup[obj]->setEnabled(false);
+    }
 }
 
 /**
