@@ -47,8 +47,16 @@ rock_library(vizkit3d
 		CoordinateFrame.hpp
 		EnvPluginBase.hpp
 		DefaultManipulator.hpp
-	LIBS
+	DEPS_TARGET
+# QtPropertyBrowser properly sets up its target, fails to setup the plain
+# cmake variables(thus cannot be used with DEPS_CMAKE) and does not have a
+# pkg-config file(cannot be used with DEPS_PKGCONFIG).
 		QtPropertyBrowser
+	LIBS
+# Qt has proper targets so potentially could be used with DEPS_TARGET, but
+# it also provides proper pkg-config files, that are prefered there. Here,
+# we have the qt dependencies hardcoded into the .pc.in and use the cmake
+# targets for the cmake side.
 		Qt5::Core
 		Qt5::Widgets
 		Qt5::OpenGL
