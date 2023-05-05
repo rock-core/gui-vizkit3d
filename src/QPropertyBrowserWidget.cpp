@@ -6,7 +6,7 @@
 namespace vizkit3d
 {
 
-QPropertyBrowserWidget::QPropertyBrowserWidget(QWidget* parent) 
+QPropertyBrowserWidget::QPropertyBrowserWidget(QWidget* parent)
                       : QtTreePropertyBrowser(parent),
                         variantManager(0),
                         factory(0),
@@ -16,7 +16,7 @@ QPropertyBrowserWidget::QPropertyBrowserWidget(QWidget* parent)
     variantManager = new QtVariantPropertyManager(this);
     groupManager = new QtGroupPropertyManager(this);
     this->setFactoryForManager(variantManager, factory);
-    
+
     this->connect(variantManager, SIGNAL(valueChanged(QtProperty*,QVariant)), this, SLOT(propertyChangedInGUI(QtProperty*,QVariant)));
 }
 
@@ -27,7 +27,7 @@ void QPropertyBrowserWidget::addGlobalProperties(QObject* obj, const QStringList
 {
     const QMetaObject* metaObj = obj->metaObject();
     QHash<QString, QtProperty*>* groupMap = new QHash<QString, QtProperty*>();
-    
+
     for(int i = 1 ; i < metaObj->propertyCount(); i++)
     {
         if(property_list.contains(QString::fromAscii(metaObj->property(i).name())))
@@ -35,7 +35,7 @@ void QPropertyBrowserWidget::addGlobalProperties(QObject* obj, const QStringList
             QtVariantProperty* property = variantManager->addProperty(metaObj->property(i).type(), metaObj->property(i).name());
             if(property == 0)
             {
-                std::cerr << "QVariant type " << metaObj->property(i).type() << " with name " << metaObj->property(i).name() 
+                std::cerr << "QVariant type " << metaObj->property(i).type() << " with name " << metaObj->property(i).name()
                         << " is not supported by the QtPropertyBrowser." << std::endl;
                 continue;
             }
@@ -46,7 +46,7 @@ void QPropertyBrowserWidget::addGlobalProperties(QObject* obj, const QStringList
         }
     }
     objectToProperties[obj] = groupMap;
-    
+
     if (!this->connect(obj, SIGNAL(propertyChanged(QString)), this, SLOT(propertyChangedInObject(QString))))
     {
         std::cerr << "The QObject has no SIGNAL 'propertyChanged(QString)', the property browser widget won't get updated "
@@ -65,28 +65,38 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
     QtProperty *parent_group = NULL;
     if(parent)
         parent_group = objectToGroup[parent];
-    
-    // set default plugin name, used if plugin name property is missing 
+
+    // set default plugin name, used if plugin name property is missing
     QString groupName = obj->objectName();
-    
+
     // genarate group entry and all variant properties
     QList<QtVariantProperty*> properties;
+
+    //retrieve and add dynamic properties
+    QList<QByteArray> dynamicProperties = obj->dynamicPropertyNames();
+    for (auto dp : dynamicProperties){
+        QVariant val = obj->property(dp.data());
+        QtVariantProperty* property =variantManager->addProperty(val.type(), QString(dp.data()));
+        property->setValue(val);
+        properties.push_back(property);
+    }
+
     for(int i = 1 ; i < metaObj->propertyCount(); i++)
     {
         QMetaProperty prop = metaObj->property(i);
         if(!prop.isValid())
             continue;
-        
+
         QVariant var = obj->property(prop.name());
         if(!var.isValid())
             continue;
-        
+
         if(strcmp(prop.name(),"vizkit3d_plugin_name") == 0)
         {
             groupName = var.toString();
             continue;
-        }        
-        
+        }
+
         // emulate string list by using enum factory
         if(prop.type() == QVariant::StringList)
         {
@@ -95,20 +105,20 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
             properties.push_back(property);
             continue;
         }
-        
+
         QtVariantProperty* property = variantManager->addProperty(prop.type(), prop.name());
         if(property == 0)
         {
-            std::cerr << "QVariant type " << metaObj->property(i).type() << " with name " << metaObj->property(i).name() 
+            std::cerr << "QVariant type " << metaObj->property(i).type() << " with name " << metaObj->property(i).name()
                 << " is not supported by the QtPropertyBrowser." << std::endl;
             continue;
         }
         property->setValue(var);
         properties.push_back(property);
     }
-  
+
     group = groupManager->addProperty(groupName);
-  
+
     // add variant properties to the group
     QHash<QString, QtProperty*>* groupMap = new QHash<QString, QtProperty*>();
     for(QList<QtVariantProperty*>::const_iterator it = properties.begin(); it != properties.end(); it++)
@@ -123,7 +133,7 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
         propertyToObject[*it] = obj;
         (*groupMap)[(*it)->propertyName()] = *it;
     }
-    
+
     // add group to the tree
     objectToGroup[obj] = group;
     objectToProperties[obj] = groupMap;
@@ -133,19 +143,19 @@ void QPropertyBrowserWidget::addProperties(QObject* obj,QObject* parent)
         // add property to top level if there is no parent group
         QtBrowserItem *item = this->addProperty(group);
         setExpanded(item,false);
-    } 
-    else 
+    }
+    else
     {
         // otherwise add it to the existing parent group
         parent_group->addSubProperty(group);
-        
+
         QList<QtBrowserItem *> newGrpItems = this->items(group);
         QList<QtBrowserItem *>::iterator itemsIt;
         for(itemsIt=newGrpItems.begin();itemsIt!=newGrpItems.end(); itemsIt++) {
             this->setExpanded(*itemsIt, false);
         }
     }
-      
+
     // connect plugin signal, to notice if a property has changed
     if (!this->connect(obj, SIGNAL(propertyChanged(QString)), SLOT(propertyChangedInObject(QString))))
     {
@@ -167,7 +177,7 @@ void QPropertyBrowserWidget::removeProperties(QObject* obj)
 {
     // disconnect signal
     disconnect(obj, 0, this, 0);
-    
+
     // remove properties
     if(objectToGroup[obj])
     {
@@ -190,6 +200,22 @@ void QPropertyBrowserWidget::removeProperties(QObject* obj)
         QHash<QString, QtProperty*>* groupMap = objectToProperties[obj];
         objectToProperties.remove(obj);
         delete groupMap;
+    }
+}
+
+void QPropertyBrowserWidget::enableProperty(QObject* obj){
+    // Get property
+    if(objectToGroup[obj])
+    {
+        objectToGroup[obj]->setEnabled(true);
+    }
+}
+
+void QPropertyBrowserWidget::disableProperty(QObject* obj){
+    // Get property
+    if(objectToGroup[obj])
+    {
+        objectToGroup[obj]->setEnabled(false);
     }
 }
 
@@ -216,7 +242,7 @@ void QPropertyBrowserWidget::propertyChangedInGUI(QtProperty* property, const QV
     }
     else
         i.value()->setProperty(property->propertyName().toStdString().c_str(), val);
-  
+
 }
 
 /**
@@ -269,7 +295,7 @@ void QPropertyBrowserWidget::propertyChangedInObject()
     {
         const QMetaObject* metaObj = obj->metaObject();
         QHash<QString, QtProperty*>* groupMap = objectToProperties[obj];
-        
+
         for(int i = 1 ; i < metaObj->propertyCount(); i++)
         {
             QString property_name(metaObj->property(i).name());
