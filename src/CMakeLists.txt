@@ -16,9 +16,10 @@ rock_library(vizkit3d
         CoordinateFrame.cpp
         DefaultManipulator.cpp
         EnableGLDebugOperation.cpp
-        ${PROPERTY_BROWSER_RESOURCES} 
+        QPropertyBrowserWidget.cpp
+        ${PROPERTY_BROWSER_RESOURCES}
     MOC
-        Vizkit3DPlugin.cpp 
+        Vizkit3DPlugin.cpp
         Vizkit3DWidget.cpp
         QVizkitMainWindow.cpp
         qtpropertybrowser/qteditorfactory.cpp
@@ -47,6 +48,13 @@ rock_library(vizkit3d
         CoordinateFrame.hpp
         EnvPluginBase.hpp
         DefaultManipulator.hpp
+        QPropertyBrowserWidget.hpp
+        qtpropertybrowser/qttreepropertybrowser.h
+        qtpropertybrowser/qtpropertybrowser.h
+        qtpropertybrowser/qtvariantproperty.h
+        qtpropertybrowser/qteditorfactory.h
+        qtpropertybrowser/qtpropertymanager.h
+        qtpropertybrowser/qtpropertybrowserutils.h
         ${HEADERS_EXTRA}
     LIBS ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY}
     DEPS_CMAKE OpenGL
