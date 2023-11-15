@@ -308,6 +308,21 @@ class VizPluginBase : public QObject
         QString vizkit3d_plugin_name;
         VizPluginRubyAdapterCollection adapterCollection;
 
+        /** helper function to allow to keep visualization at the position where the data was updated
+         *  plugins using this, need to call updateVizPose() after their data was updated
+         *  the frame that is used to update the position when updateManualVizPose() will be the one that is set
+         *  when calling this function
+         */
+        void setManualVizPoseUpdateEnabled(const bool &newvalue);
+
+        /** use the transformer pose of the visualization frame that was set when setManualVizPoseUpdateEnabled(true) was called
+         * to update the position of the visualization, plugins that set setManualVizPoseUpdateEnabled(true) should
+         * call this function in their updateDataIntern() vinction
+         */
+        void updateManualVizPose();
+
+        void resetManualVizPose();
+
 	/** Returns an invalid QVariant 
 	 * used to invalidate properties
 	 */ 
@@ -338,6 +353,8 @@ class VizPluginBase : public QObject
         std::shared_ptr<ClickHandler> click_handler;
         unsigned int max_old_data;
         QString current_frame;
+        std::string manualVizFrame;
+
 };
 
 template <typename T> class Vizkit3DPlugin;
