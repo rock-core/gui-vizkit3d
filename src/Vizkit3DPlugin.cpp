@@ -7,6 +7,8 @@
 
 #include "Vizkit3DPlugin.hpp"
 #include "Vizkit3DWidget.hpp"
+#include "TransformerGraph.hpp"
+
 
 namespace vizkit3d{
     class ClickHandler : public osgviz::Clickable
@@ -350,6 +352,7 @@ void VizPluginBase::setVisualizationFrameFromList(const QStringList &frames)
         return; 
     getWidget()->setPluginDataFrameIntern(frames.front(),this);
     current_frame = frames.front();
+    resetManualVizPose();
 }
 
 void VizPluginBase::setVisualizationFrame(const QString &frame)
@@ -359,6 +362,7 @@ void VizPluginBase::setVisualizationFrame(const QString &frame)
     getWidget()->setPluginDataFrameIntern(frame,this);
     current_frame = frame;
     emit propertyChanged("frame");
+    resetManualVizPose();
 }
 
 bool VizPluginBase::getEvaluatesClicks() const{
@@ -369,3 +373,31 @@ void VizPluginBase::setEvaluatesClicks (const bool &value){
     click_handler->enable(value);
 }
 
+void VizPluginBase::setManualVizPoseUpdateEnabled(const bool &newvalue) {
+    if (newvalue == true) {
+        manualVizFrame = getVisualizationFrame().toStdString();
+        setVisualizationFrame("world_osg");
+        updateManualVizPose();
+    } else {
+        setVisualizationFrame(QString(manualVizFrame.c_str()));
+        resetManualVizPose();
+    }
+}
+
+void VizPluginBase::updateManualVizPose() {
+    // save position of this update
+    osg::Vec3d translation;
+    osg::Quat orientation;
+
+    if (TransformerGraph::getTransformation(*(getWidget()->getRootNode()), "world_osg", manualVizFrame, orientation, translation)) {
+        rootNode->setPosition(translation);
+        rootNode->setAttitude(orientation);
+    } else {
+        printf("could not get transform world_osg to %s\n", manualVizFrame.c_str());
+    }
+}
+
+void VizPluginBase::resetManualVizPose() {
+    rootNode->setPosition(osg::Vec3d());
+    rootNode->setAttitude(osg::Quat());
+}
