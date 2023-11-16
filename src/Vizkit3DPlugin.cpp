@@ -61,17 +61,19 @@ class VizPluginBase::CallbackAdapter : public osg::NodeCallback
 
 VizPluginBase::VizPluginBase(QObject *parent)
     : QObject(parent), oldNodes(NULL), isAttached(false), dirty( false ),  plugin_enabled(true),
-    keep_old_data(false),max_old_data(100)
+    keep_old_data(false),max_old_data(100),minrange(0),maxrange(1000)
 {
     rootNode = new osgviz::Object();
     click_handler = std::shared_ptr<ClickHandler>(new ClickHandler(*this));
     rootNode->addClickableCallback(click_handler);
     nodeCallback = new CallbackAdapter(this);
     rootNode->setUpdateCallback(nodeCallback);
+    lodNode = new osg::LOD();
+    rootNode->addChild(lodNode);
     vizNode = new osg::PositionAttitudeTransform();
-    rootNode->addChild(vizNode);
+    lodNode->addChild(vizNode, minrange, maxrange);
     oldNodes = new osg::Group();
-    rootNode->addChild(oldNodes);
+    lodNode->addChild(oldNodes, minrange, maxrange);
 }
 
 VizPluginBase::~VizPluginBase()
@@ -97,9 +99,42 @@ double VizPluginBase::getScale() const
     return (scale.x()+scale.y()+scale.y())/3;
 }
 
+
+double VizPluginBase::getMinVizRange() const
+{
+    return lodNode->getMinRange(0);
+}
+
+void VizPluginBase::setMinVizRange(double distance) {
+    minrange = distance;
+    // vizNode
+    lodNode->setRange(0, minrange, maxrange);
+    // oldNodes
+    lodNode->setRange(1, minrange, maxrange);
+}
+
+double VizPluginBase::getMaxVizRange() const
+{
+    return lodNode->getMaxRange(0);
+}
+
+void VizPluginBase::setMaxVizRange(double distance)
+{
+    maxrange = distance;
+    // vizNode
+    lodNode->setRange(0, minrange, maxrange);
+    // oldNodes
+    lodNode->setRange(1, minrange, maxrange);
+}
+
 osg::ref_ptr<osg::Group> VizPluginBase::getRootNode() const 
 {
     return rootNode;
+}
+
+osg::ref_ptr<osg::LOD> VizPluginBase::getLODNode() const
+{
+    return lodNode;
 }
 
 void VizPluginBase::click(float x,float y, int buttonMask, int modifierMask)
