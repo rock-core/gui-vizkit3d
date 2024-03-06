@@ -29,7 +29,7 @@ rock_library(vizkit3d
 		Vizkit3DWidget.cpp
 		QVizkitMainWindow.cpp
 		QPropertyBrowserWidget.cpp
-    HEADERS
+	HEADERS
 		QPropertyBrowserWidget.hpp
 
 		TransformerGraph.hpp
@@ -47,6 +47,11 @@ rock_library(vizkit3d
 		CoordinateFrame.hpp
 		EnvPluginBase.hpp
 		DefaultManipulator.hpp
+	MOC
+		QPropertyBrowserWidget.hpp
+		Vizkit3DPlugin.hpp
+		Vizkit3DWidget.hpp
+		QVizkitMainWindow.hpp
 	DEPS_TARGET
 # QtPropertyBrowser properly sets up its target, fails to setup the plain
 # cmake variables(thus cannot be used with DEPS_CMAKE) and does not have a
@@ -74,6 +79,8 @@ rock_library(vizkitwidgetloader
     	QVizkitWidgetLoader.cpp
     DEPS
     	vizkit3d
+    MOC
+        QVizkitWidgetLoader.hpp
     NOINSTALL # installs in a non-standard location
 )
 
@@ -82,6 +89,8 @@ rock_library(vizkitmainwindowloader
         QVizkitMainWindowLoader.cpp
     DEPS
         vizkit3d
+    MOC
+        QVizkitMainWindowLoader.hpp
     NOINSTALL # installs in a non-standard location
 )
     
