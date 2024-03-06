@@ -4,9 +4,17 @@
 	Visualisation plugins for specific data items are within the respective packages.
     </description>
     <author>Jakob Schwendner/jakob.schwendner@dfki.de</author>
+    <maintainer>Steffen Planthaber/steffen.planthaber@dfki.de</maintainer>
     <copyright>
 	DFKI/robotik@dfki.de
     </copyright>
+    <keywords>
+     <keyword>utilities</keyword>
+     <keyword>ui</keyword>
+     <keyword>visualization</keyword>
+     <keyword>vizkit3d</keyword>
+   </keywords>
+   <stage>-1</stage>
     <depend package="osg" />
     <depend package="qt4" />
     <depend package="qt4-opengl" />
