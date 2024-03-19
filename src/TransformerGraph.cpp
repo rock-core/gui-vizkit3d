@@ -36,7 +36,7 @@ osg::PositionAttitudeTransform *getTransform(osg::Node *node,bool raise=true)
     return pos;
 }
 
-osg::PositionAttitudeTransform *createFrame(const std::string &name,bool root=false,float textSize=0.1)
+osg::PositionAttitudeTransform *createFrame(const std::string &name,bool root=false,float textSize=20)
 {
 //     osg::PositionAttitudeTransform* node = new osg::PositionAttitudeTransform();
     osgviz::Object* node = new osgviz::Object();
@@ -53,11 +53,21 @@ osg::PositionAttitudeTransform *createFrame(const std::string &name,bool root=fa
     osg::Geode *text_geode = new osg::Geode;
     osgText::Text *text= new osgText::Text;
     text->setText(name);
-    text->setCharacterSize(textSize);
-    if(root)
-        text->setPosition(osg::Vec3d(textSize/2,-textSize*1.5,0));
-    else
-        text->setPosition(osg::Vec3d(textSize/2,textSize/2,0));
+
+    text->setCharacterSize(textSize);    
+    osg::StateSet *set = text_geode->getOrCreateStateSet();
+    set->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF); // Disable depth test to avoid sort problems and Lighting
+    set->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+    osgText::Font* font = osgText::Font::getDefaultFont();
+    font->setMinFilterHint(osg::Texture::NEAREST); // aliasing when zoom out, this doesnt look so ugly because text is small
+    font->setMagFilterHint(osg::Texture::NEAREST); // aliasing when zoom in
+    text->setFont(font);    
+    text->setAxisAlignment(osgText::Text::SCREEN);
+    text->setCharacterSizeMode(osgText::Text::SCREEN_COORDS);
+    text->setDrawMode(osgText::Text::TEXT | osgText::Text::ALIGNMENT);
+    text->setAlignment(osgText::Text::CENTER_TOP);
+    text->setBackdropType(osgText::Text::OUTLINE);
+    text->setBackdropColor(osg::Vec4(0, 0, 0, 1.0f));
     text_geode->addDrawable(text);
     switch_node->addChild(text_geode,true);
 
@@ -259,7 +269,6 @@ class TextSizeSetter: public ::osg::NodeVisitor
             
             osgText::Text* text = getFrameText(trans);
             text->setCharacterSize(size);
-            text->setPosition(osg::Vec3d(size / 2, size / 2, size / 2));
 
             traverse(node);
         }
@@ -353,7 +362,7 @@ bool TransformerGraph::frameAnnotation = true;
 
 osg::Node *TransformerGraph::create(const std::string &name)
 {
-    return createFrame(name,true,0.1);
+    return createFrame(name,true);
 }
 
 TransformerGraph::GraphDescription TransformerGraph::getGraphDescription(osg::Node& transformer)
