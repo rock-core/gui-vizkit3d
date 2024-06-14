@@ -6,6 +6,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QRegExp>
+#include <QFileDialog>
 #include <algorithm>
 
 #include "Vizkit3DBase.hpp"
@@ -22,6 +23,7 @@
 
 #include <osg/PositionAttitudeTransform>
 #include <osgDB/ReadFile>
+#include <osgDB/WriteFile>
 #include <osgQt/GraphicsWindowQt>
 #include <osgViewer/ViewerEventHandlers>
 #include <osg/CullFace>
@@ -273,6 +275,26 @@ Vizkit3DWidget::Vizkit3DWidget(QWidget* parent,const QString &world_name,bool au
     setCentralWidget(widget);
 
 
+    //Create Layout
+    QWidget* rightPaneWidget = new QWidget(parent);
+    QVBoxLayout* rightPaneLayout = new QVBoxLayout();
+    // create export button
+    QPushButton *exportButton = new QPushButton( parent );
+        rightPaneWidget->setLayout(rightPaneLayout);
+
+    exportButton->setText("Export Scene");
+    QVBoxLayout* toolsLayout = new QVBoxLayout();
+    toolsLayout->addWidget(exportButton);
+    QWidget* toolsWidget = new QWidget(parent);
+    toolsWidget->setLayout(toolsLayout);
+    toolsWidget->setObjectName("ToolsWidget");
+    toolsWidget->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Minimum ) );
+
+    QDockWidget* toolsDocker = new QDockWidget("Tools");
+    toolsDocker->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetFeature::DockWidgetClosable);
+    toolsDocker->setWidget(toolsWidget);
+    addDockWidget(Qt::RightDockWidgetArea, toolsDocker);
+
     // create propertyBrowserWidget
     propertyBrowserWidget = new QPropertyBrowserWidget( parent );
     propertyBrowserWidget->setObjectName("PropertyBrowser");
@@ -310,6 +332,7 @@ Vizkit3DWidget::Vizkit3DWidget(QWidget* parent,const QString &world_name,bool au
     connect(this, SIGNAL(addPlugins(QObject*,QObject*)), this, SLOT(addPluginIntern(QObject*,QObject*)));
     connect(this, SIGNAL(removePlugins(QObject*)), this, SLOT(removePluginIntern(QObject*)));
     connect( &_timer, SIGNAL(timeout()), this, SLOT(update()) );
+    connect(exportButton, SIGNAL(clicked()), this, SLOT(exportScene()));
 
     current_frame = QString(root->getName().c_str());
 
@@ -1310,6 +1333,26 @@ void Vizkit3DWidget::setCameraManipulator(CAMERA_MANIPULATORS manipulatorType, b
     }
 }
 
+
+void Vizkit3DWidget::exportScene() {
+    QDir directory;
+
+    QFileDialog dialog;
+    QString filename;
+
+    dialog.setDirectory( directory.currentPath() );
+    dialog.setFileMode(QFileDialog::AnyFile);
+    dialog.setNameFilter("OSG Scene files (*.osg *.osgb)");
+    dialog.setDefaultSuffix("osgb");
+    dialog.setWindowTitle("Export OSG scene");
+    if (dialog.exec()) {
+        QStringList filenames = dialog.selectedFiles();
+        filename = filenames.at(0);
+        osgDB::writeNodeFile(*root, filename.toStdString());
+    }
+}
+
+
 void Vizkit3DWidget::ObjectMovedHandler::operator()(const osgviz::Object* obj,
                                                         const osg::Matrix& motion)
 {
@@ -1433,7 +1476,4 @@ void Vizkit3DWidget::setEnabledManipulators(const bool value)
 {
     clickHandler->setEnabled(value);
 }
-
-
-
 
