@@ -47,7 +47,7 @@ rock_library(vizkit3d
 		CoordinateFrame.hpp
 		EnvPluginBase.hpp
 		DefaultManipulator.hpp
-	MOC
+	MOC5
 		QPropertyBrowserWidget.hpp
 		Vizkit3DPlugin.hpp
 		Vizkit3DWidget.hpp
@@ -79,7 +79,7 @@ rock_library(vizkitwidgetloader
     	QVizkitWidgetLoader.cpp
     DEPS
     	vizkit3d
-    MOC
+    MOC5
         QVizkitWidgetLoader.hpp
     NOINSTALL # installs in a non-standard location
 )
@@ -89,7 +89,7 @@ rock_library(vizkitmainwindowloader
         QVizkitMainWindowLoader.cpp
     DEPS
         vizkit3d
-    MOC
+    MOC5
         QVizkitMainWindowLoader.hpp
     NOINSTALL # installs in a non-standard location
 )
