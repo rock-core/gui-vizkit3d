@@ -118,7 +118,15 @@ install(TARGETS vizkitwidgetloader #vizkitmainwindowloader
 endif()
 
 if (ROCK_QT_VERSION_5)
-find_package(QtPropertyBrowser REQUIRED)
+    find_package(QtPropertyBrowser)
+    find_package(QtPropertyBrowser-qt5)
+    if(${QtPropertyBrowser_FOUND})
+        set(QTPROPERTYBROWSER_NAME QtPropertyBrowser)
+    elseif(${QtPropertyBrowser-qt5_FOUND})
+        set(QTPROPERTYBROWSER_NAME QtPropertyBrowser-qt5)
+    else()
+        message(SEND_ERROR "Could not find QtPropertyBrowser or QtPropertyBrowser-qt5")
+    endif()
 
 pkg_check_modules(OSGQT QUIET osgQt)
 pkg_check_modules(OPENSCENEGRAPH_OSGQT5 QUIET openscenegraph-osgQt5)
@@ -143,7 +151,7 @@ rock_library(vizkit3d-qt5
 # QtPropertyBrowser properly sets up its target, fails to setup the plain
 # cmake variables(thus cannot be used with DEPS_CMAKE) and does not have a
 # pkg-config file(cannot be used with DEPS_PKGCONFIG).
-        QtPropertyBrowser
+        ${QTPROPERTYBROWSER_NAME}
     LIBS
 # Qt has proper targets so potentially could be used with DEPS_TARGET, but
 # it also provides proper pkg-config files, that are prefered there. Here,
