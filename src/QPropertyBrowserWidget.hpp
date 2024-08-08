@@ -4,15 +4,9 @@
 //for QT_VERSION
 #include <QObject>
 
-#if QT_VERSION < 0x050000
-#include "qtpropertybrowser/qttreepropertybrowser.h"
-#include "qtpropertybrowser/qtvariantproperty.h"
-#include "qtpropertybrowser/qtpropertymanager.h"
-#else
 #include <qttreepropertybrowser.h>
 #include <qtvariantproperty.h>
 #include <qtpropertymanager.h>
-#endif
 
 #include <QWidget>
 #include <QHash>

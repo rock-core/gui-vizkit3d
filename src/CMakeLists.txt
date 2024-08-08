@@ -18,7 +18,6 @@ set(VIZKIT3D_SOURCES
         Vizkit3DWidget.cpp
         QVizkitMainWindow.cpp
         QPropertyBrowserWidget.cpp
-        ${PROPERTY_BROWSER_RESOURCES}
 )
 
 set(VIZKIT3D_MOC
@@ -49,39 +48,46 @@ set(VIZKIT3D_HEADERS
 
 if (ROCK_QT_VERSION_4)
 include(RockRuby)
+    find_package(QtPropertyBrowser-qt4 QUIET)
 
-QT4_ADD_RESOURCES(PROPERTY_BROWSER_RESOURCES qtpropertybrowser/qtpropertybrowser.qrc)
+    if(QtPropertyBrowser-qt4_FOUND)
+        message(STATUS "Using external QtPropertyBrowser-qt4")
+        set(PROPERTY_BROWSER_TARGET QtPropertyBrowser-qt4)
+    else()
+        message(STATUS "Using internal qtpropertybrowser")
+        QT4_ADD_RESOURCES(PROPERTY_BROWSER_RESOURCES qtpropertybrowser/qtpropertybrowser.qrc)
 
-set(PROPERTY_BROWSER_SOURCES
-        qtpropertybrowser/qteditorfactory.cpp
-        qtpropertybrowser/qtvariantproperty.cpp
-        qtpropertybrowser/qtpropertymanager.cpp
-        qtpropertybrowser/qtbuttonpropertybrowser.cpp
-        qtpropertybrowser/qtpropertybrowser.cpp
-        qtpropertybrowser/qtpropertybrowserutils.cpp
-        qtpropertybrowser/qttreepropertybrowser.cpp
-        qtpropertybrowser/qtgroupboxpropertybrowser.cpp
-)
+        set(PROPERTY_BROWSER_SOURCES
+                qtpropertybrowser/qteditorfactory.cpp
+                qtpropertybrowser/qtvariantproperty.cpp
+                qtpropertybrowser/qtpropertymanager.cpp
+                qtpropertybrowser/qtbuttonpropertybrowser.cpp
+                qtpropertybrowser/qtpropertybrowser.cpp
+                qtpropertybrowser/qtpropertybrowserutils.cpp
+                qtpropertybrowser/qttreepropertybrowser.cpp
+                qtpropertybrowser/qtgroupboxpropertybrowser.cpp
+        )
 
-set(PROPERTY_BROWSER_MOC
-        qtpropertybrowser/qteditorfactory.h
-        qtpropertybrowser/qtvariantproperty.h
-        qtpropertybrowser/qtpropertymanager.h
-        qtpropertybrowser/qtbuttonpropertybrowser.h
-        qtpropertybrowser/qtpropertybrowser.h
-        qtpropertybrowser/qtpropertybrowserutils.h
-        qtpropertybrowser/qttreepropertybrowser.h
-        qtpropertybrowser/qtgroupboxpropertybrowser.h
-)
+        set(PROPERTY_BROWSER_MOC
+                qtpropertybrowser/qteditorfactory.h
+                qtpropertybrowser/qtvariantproperty.h
+                qtpropertybrowser/qtpropertymanager.h
+                qtpropertybrowser/qtbuttonpropertybrowser.h
+                qtpropertybrowser/qtpropertybrowser.h
+                qtpropertybrowser/qtpropertybrowserutils.h
+                qtpropertybrowser/qttreepropertybrowser.h
+                qtpropertybrowser/qtgroupboxpropertybrowser.h
+        )
 
-set(PROPERTY_BROWSER_HEADERS
-        qtpropertybrowser/qttreepropertybrowser.h
-        qtpropertybrowser/qtpropertybrowser.h
-        qtpropertybrowser/qtvariantproperty.h
-        qtpropertybrowser/qteditorfactory.h
-        qtpropertybrowser/qtpropertymanager.h
-        qtpropertybrowser/qtpropertybrowserutils.h
-)
+        set(PROPERTY_BROWSER_HEADERS
+                qtpropertybrowser/qttreepropertybrowser.h
+                qtpropertybrowser/qtpropertybrowser.h
+                qtpropertybrowser/qtvariantproperty.h
+                qtpropertybrowser/qteditorfactory.h
+                qtpropertybrowser/qtpropertymanager.h
+                qtpropertybrowser/qtpropertybrowserutils.h
+        )
+    endif()
 
 rock_library(vizkit3d
     SOURCES
@@ -98,8 +104,13 @@ rock_library(vizkit3d
         ${HEADERS_EXTRA}
     LIBS ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY} Qt4::QtOpenGL
     DEPS_CMAKE OpenGL
+    DEPS_TARGET ${PROPERTY_BROWSER_TARGET}
     DEPS_PKGCONFIG openscenegraph openscenegraph-osgQt osgViz
                    PrimitivesFactory ManipulationClickHandler ${DEPS_EXTRA})
+
+    if(NOT QtPropertyBrowser-qt4_FOUND)
+        target_include_directories(vizkit3d PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/qtpropertybrowser)
+    endif()
 
 rock_library(vizkitwidgetloader
         QVizkitWidgetLoader.cpp
@@ -118,11 +129,13 @@ install(TARGETS vizkitwidgetloader #vizkitmainwindowloader
 endif()
 
 if (ROCK_QT_VERSION_5)
-    find_package(QtPropertyBrowser)
-    find_package(QtPropertyBrowser-qt5)
-    if(${QtPropertyBrowser_FOUND})
+    find_package(QtPropertyBrowser QUIET)
+    find_package(QtPropertyBrowser-qt5 QUIET)
+    if(QtPropertyBrowser_FOUND)
+        message(STATUS "Using abhijitkundu QtPropertyBrowser")
         set(QTPROPERTYBROWSER_NAME QtPropertyBrowser)
-    elseif(${QtPropertyBrowser-qt5_FOUND})
+    elseif(QtPropertyBrowser-qt5_FOUND)
+        message(STATUS "Using rock QtPropertyBrowser-qt5")
         set(QTPROPERTYBROWSER_NAME QtPropertyBrowser-qt5)
     else()
         message(SEND_ERROR "Could not find QtPropertyBrowser or QtPropertyBrowser-qt5")
