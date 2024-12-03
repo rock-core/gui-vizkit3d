@@ -22,11 +22,11 @@
     <!-- qt5 version dependencies -->
     <depend package="qt5" optional="1" />
     <depend package="qt5-opengl" optional="1" />
-    <depend package="gui/qtpropertybrowser" optional="1" />
     <!-- common dependencies -->
     <depend package="boost" />
     <depend package="base/cmake" />
     <depend package="gui/osgviz" />
     <depend package="gui/osg_qt4" /> <!-- also contains the qt5 version -->
+    <depend package="gui/qtpropertybrowser" />
     <!--    <depend package="qt-designer" /> !-->
 </package>
