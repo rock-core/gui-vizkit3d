@@ -518,10 +518,13 @@ class VizkitPluginFactory : public QObject
 
 
 #if QT_VERSION < 0x050000
+//do NOT add Q_OBJECT to the definition below. it adds virtual functions that
+//are supposed to be defined in the accompanying moc files, but those are not
+//generated because qt4 moc does not look into macros.
 #define VizkitQtPluginCLASSDEFS
 #define VizkitQtPluginEXTRADEFS(pluginName) Q_EXPORT_PLUGIN2(QtPlugin##pluginName, QtPlugin##pluginName)
 #else
-//Note: cannot have Q_OBJECT or any qt signal/slots in the VizkitQtPlugin Macro for qt4
+//Note: cannot have Q_OBJECT or any qt signal/slots in the VizkitQtPlugin Macro for qt4(above)
 #define VizkitQtPluginCLASSDEFS \
             Q_OBJECT \
             Q_PLUGIN_METADATA(IID "rock.vizkit3d.VizkitPluginFactory")
@@ -610,29 +613,11 @@ class VizkitPluginFactory : public QObject
  * Q_EXPORT_PLUGIN2(FactoryClass, FactoryClass)
  * </code>
  */
-//TODO check if we instead can just do VizkitQtPluginHeaderDecls(pluginName) and VizkitQtPluginImpl(pluginName)
 //since this is qt4, this never was parsed by the moc(the qt4 one does not resolve macros), so it should work in
 //either header or source file.
-//do NOT add Q_OBJECT to the definition below. it adds virtual functions that
-//are supposed to be defined in the accompanying moc files, but those are not
-//generated because moc does not look into macros.
 #define VizkitQtPlugin(pluginName)\
-    class QtPlugin##pluginName : public vizkit3d::VizkitPluginFactory {\
-        public:\
-        virtual QStringList* getAvailablePlugins() const\
-        {\
-            QStringList* result = new QStringList; \
-            result->push_back(#pluginName); \
-            return result;\
-        } \
-        virtual QObject* createPlugin(QString const& name)\
-        {\
-            if (name == #pluginName) \
-                return new pluginName;\
-            else return 0;\
-        };\
-    };\
-    Q_EXPORT_PLUGIN2(QtPlugin##pluginName, QtPlugin##pluginName)
+    VizkitQtPluginHeaderDecls(pluginName)\
+    VizkitQtPluginImpl(pluginName)
 #else
 #define VizkitQtPlugin(pluginName) \
     static_assert(false, "The VizkitQtPlugin macro is deprecated and " \
