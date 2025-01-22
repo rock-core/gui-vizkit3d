@@ -613,9 +613,11 @@ class VizkitPluginFactory : public QObject
 //TODO check if we instead can just do VizkitQtPluginHeaderDecls(pluginName) and VizkitQtPluginImpl(pluginName)
 //since this is qt4, this never was parsed by the moc(the qt4 one does not resolve macros), so it should work in
 //either header or source file.
+//do NOT add Q_OBJECT to the definition below. it adds virtual functions that
+//are supposed to be defined in the accompanying moc files, but those are not
+//generated because moc does not look into macros.
 #define VizkitQtPlugin(pluginName)\
     class QtPlugin##pluginName : public vizkit3d::VizkitPluginFactory {\
-        Q_OBJECT \
         public:\
         virtual QStringList* getAvailablePlugins() const\
         {\
