@@ -1144,8 +1144,14 @@ QString Vizkit3DWidget::findLibPath(QString lib_name)
     QStringList::iterator iter = list->begin();
     for(;iter != list->end();++iter)
     {
+
         QStringList plugin = iter->split("@");
-        QRegExp rx(".*lib"+lib_name+"-viz\\..{2,5}$");
+        #if QT_VERSION < 0x050000
+            QRegExp rx(".*lib"+lib_name+"-viz\\..{2,5}$");
+        #else
+            QRegExp rx(".*lib"+lib_name+"-viz-qt5\\..{2,5}$");
+        #endif
+
         if(0 <= rx.indexIn(plugin.at(1)))
             return plugin.at(1);
     }
