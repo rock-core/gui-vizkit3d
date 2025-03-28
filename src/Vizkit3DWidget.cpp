@@ -1442,6 +1442,10 @@ void Vizkit3DWidget::selectFrame(const QString& frame, const bool suppressSignal
     }
 }
 
+void Vizkit3DWidget::deselectFrame() {
+    clickHandler->resetClickedObject();
+}
+
 void Vizkit3DWidget::clear()
 {
     //remove plugins, is while loop because removing invalidates iterators
@@ -1457,6 +1461,7 @@ void Vizkit3DWidget::clear()
         //removeFrame internally skips the world frame
         TransformerGraph::removeFrame(*getRootNode(), frames[i]);
     }
+    deselectFrame();
 }
 
 void Vizkit3DWidget::setWorldName(const QString& name)

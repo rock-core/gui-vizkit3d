@@ -304,6 +304,8 @@ namespace vizkit3d
              * @param suppressSignal If true the frameSelected signal will not be
              *                       emitted.*/
             void selectFrame(const QString& frame, const bool suppressSignal);
+            /**resets the clickhandler pointer (in case the window content changed) */
+            void deselectFrame();
 
             void setCameraLookAt(double x, double y, double z);
             void setCameraEye(double x, double y, double z);
