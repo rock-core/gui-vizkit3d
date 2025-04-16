@@ -156,6 +156,8 @@ class VizPluginBase : public QObject
         osg::ref_ptr<osg::Group> getRootNode() const;
         osg::ref_ptr<osg::LOD> getLODNode() const;
 
+        osg::Camera* getCamera() const;
+
         /**
          * @return a vector of QDockWidgets provided by this class.
          */

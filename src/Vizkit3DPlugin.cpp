@@ -137,6 +137,13 @@ osg::ref_ptr<osg::LOD> VizPluginBase::getLODNode() const
     return lodNode;
 }
 
+osg::Camera* VizPluginBase::getCamera() const
+{
+    Vizkit3DWidget* widget = getWidget();
+    osg::Camera* cam = widget->getCamera();
+    return cam;
+}
+
 void VizPluginBase::click(float x,float y, int buttonMask, int modifierMask)
 {
     QWidget *osg_widget = dynamic_cast<QWidget*>(parent()); // widget displaying the osg scene.

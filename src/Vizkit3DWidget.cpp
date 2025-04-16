@@ -1307,6 +1307,10 @@ void Vizkit3DWidget::setCameraManipulator(osg::ref_ptr<osgGA::CameraManipulator>
     view->home();
 }
 
+osg::Camera* Vizkit3DWidget::getCamera() {
+    return view->getCamera();
+}
+
 void Vizkit3DWidget::setCameraManipulator(QString manipulator, bool resetToDefaultHome)
 {
     return setCameraManipulator(Vizkit3DConfig::manipulatorNameToID(manipulator), resetToDefaultHome);

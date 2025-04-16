@@ -253,6 +253,13 @@ namespace vizkit3d
              */
             void setCameraManipulator(osg::ref_ptr<osgGA::CameraManipulator> manipulator, bool resetToDefaultHome = false);
 
+            /**
+             * @brief Get the Camera object
+             * 
+             * @return osg::Camera* 
+             */
+            osg::Camera* getCamera();
+
         public slots:
             void update();
             void addPlugin(QObject* plugin, QObject* parent = NULL);
