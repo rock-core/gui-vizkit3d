@@ -242,6 +242,11 @@ Vizkit3DWidget::Vizkit3DWidget(QWidget* parent,const QString &world_name,bool au
     graphicsWindowQt = createGraphicsWindow(0,0,800,600);
     graphicsWindowQtgc = dynamic_cast<osg::GraphicsContext*>(graphicsWindowQt.get());
 
+    // enable automatic match of shader paramaters
+    // https://osg-users.openscenegraph.narkive.com/8nXnCbaY/using-modern-shaders-with-osg-setting-vertex-attribute-layout
+    graphicsWindowQtgc->getState()->setUseModelViewAndProjectionUniforms(true);
+    graphicsWindowQtgc->getState()->setUseVertexAttributeAliasing(true);
+
 
     osgviz = osgviz::OsgViz::getInstance();
 
