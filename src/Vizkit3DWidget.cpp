@@ -697,8 +697,10 @@ void Vizkit3DWidget::collapsePropertyBrowser()
     propertyBrowserWidget->close();
 }
 
-
-
+void Vizkit3DWidget::showPropertyBrowser() {
+    addDockWidget(Qt::RightDockWidgetArea, propertyDocker);
+    propertyBrowserWidget->show();
+}
 
 void Vizkit3DWidget::getCameraView(QVector3D& lookAtPos, QVector3D& eyePos, QVector3D& upVector)
 {

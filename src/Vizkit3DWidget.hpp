@@ -323,6 +323,7 @@ namespace vizkit3d
             void setBackgroundColor(QColor color);
 
             void collapsePropertyBrowser();
+            void showPropertyBrowser();
             QWidget* getPropertyWidget()const;
 
             bool isTransformer() const;
