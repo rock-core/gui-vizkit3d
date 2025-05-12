@@ -448,12 +448,15 @@ osgQt::GraphicsWindowQt* Vizkit3DWidget::createGraphicsWindow( int x, int y, int
 void Vizkit3DWidget::update()
 {
     QWidget::update();
-    osgviz->update();
+
 #if QT_VERSION >= 0x050000
     if(isVisible()) {
         window->frame();
     }
+#else
+    osgviz->update(); // osg update called trough window->frame();
 #endif
+
 }
 
 QSize Vizkit3DWidget::sizeHint() const
