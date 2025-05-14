@@ -322,8 +322,10 @@ namespace vizkit3d
             QColor getBackgroundColor()const;
             void setBackgroundColor(QColor color);
 
-            void collapsePropertyBrowser();
+            void collapsePropertyBrowser(const bool& remove = true);
+            /** only works if collapse was called without remove*/
             void showPropertyBrowser();
+
             QWidget* getPropertyWidget()const;
 
             bool isTransformer() const;

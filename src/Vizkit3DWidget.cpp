@@ -694,14 +694,18 @@ void Vizkit3DWidget::setCameraUp(double x, double y, double z)
     changeCameraView(0, 0, &up);
 }
 
-void Vizkit3DWidget::collapsePropertyBrowser()
+void Vizkit3DWidget::collapsePropertyBrowser(const bool& remove)
 {
-    removeDockWidget(propertyDocker);
+    if (remove)
+    {
+        removeDockWidget(propertyDocker);
+    }
     propertyBrowserWidget->close();
 }
 
-void Vizkit3DWidget::showPropertyBrowser() {
-    addDockWidget(Qt::RightDockWidgetArea, propertyDocker);
+void Vizkit3DWidget::showPropertyBrowser()
+{
+    // addDockWidget(Qt::RightDockWidgetArea, propertyDocker);
     propertyBrowserWidget->show();
 }
 
