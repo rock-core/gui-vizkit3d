@@ -140,8 +140,12 @@ osg::ref_ptr<osg::LOD> VizPluginBase::getLODNode() const
 osg::Camera* VizPluginBase::getCamera() const
 {
     Vizkit3DWidget* widget = getWidget();
-    osg::Camera* cam = widget->getCamera();
-    return cam;
+    if (widget)
+    {
+        return widget->getCamera();
+    }
+    return nullptr;
+
 }
 
 void VizPluginBase::click(float x,float y, int buttonMask, int modifierMask)
