@@ -1501,7 +1501,11 @@ void Vizkit3DWidget::setEnabledManipulators(const bool value)
 }
 
 void Vizkit3DWidget::setStatisticsKey(const int& key) {
-    view->getStatsHandler()->setKeyEventTogglesOnScreenStats(key);
+    #if QT_VERSION < 0x050000
+        window->getSuperView()->getStatsHandler()->setKeyEventTogglesOnScreenStats(key);
+    #else
+        view->getStatsHandler()->setKeyEventTogglesOnScreenStats(key);
+    #endif
 }
 
 void Vizkit3DWidget::showEvent(QShowEvent *ev)
