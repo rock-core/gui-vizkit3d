@@ -264,7 +264,7 @@ Vizkit3DWidget::Vizkit3DWidget(QWidget* parent,const QString &world_name,bool au
     window_root->setName("Window root");
     window_root->addChild(NULL);
     window->setName("rock-display");
-    view = dynamic_cast<osgviz::SuperView*>(osgvizWindow->addView(osgviz::ViewConfig()));
+    view = osgvizWindow->getSuperView();
  
     // set also window scene to the view
     // so all views in the window share the same window scene
