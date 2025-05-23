@@ -1500,6 +1500,10 @@ void Vizkit3DWidget::setEnabledManipulators(const bool value)
     clickHandler->setEnabled(value);
 }
 
+void Vizkit3DWidget::setStatisticsKey(const int& key) {
+    view->getStatsHandler()->setKeyEventTogglesOnScreenStats(key);
+}
+
 void Vizkit3DWidget::showEvent(QShowEvent *ev)
 {
     QMainWindow::showEvent(ev);

@@ -415,6 +415,9 @@ namespace vizkit3d
              * when a frame is clicked. Default: false*/
             void setEnabledManipulators(const bool value);
 
+            /** set the key to display statistics on screen (default 's') */
+            void setStatisticsKey(const int& key);
+
         signals:
             void addPlugins(QObject* plugin,QObject* parent);
             void removePlugins(QObject* plugin);
