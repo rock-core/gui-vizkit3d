@@ -2,6 +2,7 @@
 #define __VIZKIT_QVIZKITWIDGET__
 
 #include "Vizkit3DPlugin.hpp"
+#include "Vizkit3DPluginDefaultSettings.hpp"
 
 #if QT_VERSION < 0x050000
 #include <QtDesigner/QDesignerExportWidget>
@@ -259,6 +260,18 @@ namespace vizkit3d
              * @return osg::Camera* 
              */
             osg::Camera* getCamera();
+
+            /**
+             * @brief add default overrides to a Vizkit3DPlugin which are applied on loading the plugin, in case other defaults are needed than 
+             * the plugins implementation defaults
+             * 
+             * @param overrides your application can set up a shared_ptr>vizkit3d::Vizkit3DPluginDefaultSettings<Your Plugin>>
+             * and use the addConfig function of that class to let the settings be invoked after loading the plugin here
+             *  
+             */
+            void addPluginDefaultConfigOverrides(const std::shared_ptr<Vizkit3DPluginDefaultSettingsBase> overrides);
+
+            void removePluginDefaultConfigOverrides();
 
         public slots:
             void update();
@@ -576,6 +589,8 @@ namespace vizkit3d
 
             QPropertyBrowserWidget* propertyBrowserWidget;
             QDockWidget* propertyDocker;
+
+            std::vector<std::shared_ptr<Vizkit3DPluginDefaultSettingsBase>> pluginDefaultSettingOverrides;
 
     };
 }
