@@ -231,6 +231,9 @@ namespace vizkit3d
             ~Vizkit3DWidget();
 
             osg::Group* getRootNode() const;
+
+            osg::Group* getFrameRootGroup(const std::string& framename) const;
+
             /** Sets the camera to track this node's reference position
              *
              * @arg tracked_object_name the name of the object being tracked,

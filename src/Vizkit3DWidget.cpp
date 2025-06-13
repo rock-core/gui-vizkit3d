@@ -937,6 +937,10 @@ QString Vizkit3DWidget::getRootVisualizationFrame() const
     return QString::fromStdString(getRootNode()->getName());
 }
 
+osg::Group* Vizkit3DWidget::getFrameRootGroup(const std::string& framename) const {
+    return TransformerGraph::getFrameGroup(*getRootNode(),framename);
+}
+
 void Vizkit3DWidget::setVisualizationFrame(const QString& frame)
 {
     if (current_frame == frame)
