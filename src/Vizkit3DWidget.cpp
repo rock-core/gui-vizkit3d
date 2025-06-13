@@ -821,6 +821,10 @@ void Vizkit3DWidget::addPluginIntern(QObject* plugin,QObject *parent)
         viz_plugin->setParent(this);
         viz_plugin->setVisualizationFrame(getRootNode()->getName().c_str());
 
+        for (auto& defaultsettings : pluginDefaultSettingOverrides) {
+            defaultsettings->apply(viz_plugin);
+        }
+
         registerDataHandler(viz_plugin);
         setPluginEnabled(viz_plugin, viz_plugin->isPluginEnabled());
         addProperties(viz_plugin,parent);
@@ -1318,6 +1322,14 @@ void Vizkit3DWidget::setCameraManipulator(osg::ref_ptr<osgGA::CameraManipulator>
 
 osg::Camera* Vizkit3DWidget::getCamera() {
     return view->getCamera();
+}
+
+void Vizkit3DWidget::addPluginDefaultConfigOverrides(std::shared_ptr<Vizkit3DPluginDefaultSettingsBase> overrides) {
+    pluginDefaultSettingOverrides.push_back(overrides);
+}
+
+void Vizkit3DWidget::removePluginDefaultConfigOverrides() {
+    pluginDefaultSettingOverrides.clear();
 }
 
 void Vizkit3DWidget::setCameraManipulator(QString manipulator, bool resetToDefaultHome)

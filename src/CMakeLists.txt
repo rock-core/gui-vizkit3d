@@ -37,6 +37,7 @@ set(VIZKIT3D_HEADERS
         QtThreadedWidget.hpp
         Vizkit3DBase.hpp
         Vizkit3DPlugin.hpp
+        Vizkit3DPluginDefaultSettings.hpp
         Vizkit3DWidget.hpp
         QVizkitMainWindow.hpp
         ColorConversionHelper.hpp
