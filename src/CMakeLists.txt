@@ -47,8 +47,11 @@ set(VIZKIT3D_HEADERS
         QPropertyBrowserWidget.hpp
 )
 
+include(RockQt)
+
 if (ROCK_QT_VERSION_4)
-include(RockRuby)
+    include(RockRuby)
+
     find_package(QtPropertyBrowser-qt4 QUIET)
 
     if(QtPropertyBrowser-qt4_FOUND)
@@ -89,58 +92,9 @@ include(RockRuby)
                 qtpropertybrowser/qtpropertybrowserutils.h
         )
     endif()
-
-rock_library(vizkit3d
-    SOURCES
-        ${VIZKIT3D_SOURCES}
-        ${PROPERTY_BROWSER_SOURCES}
-        ${PROPERTY_BROWSER_RESOURCES}
-    MOC
-        ${VIZKIT3D_MOC}
-        ${PROPERTY_BROWSER_MOC}
-        ${MOC_EXTRA}
-    HEADERS
-        ${VIZKIT3D_HEADERS}
-        ${PROPERTY_BROWSER_HEADERS}
-        ${HEADERS_EXTRA}
-    LIBS ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY} Qt4::QtOpenGL
-    DEPS_CMAKE OpenGL
-    DEPS_TARGET ${PROPERTY_BROWSER_TARGET}
-    DEPS_PKGCONFIG openscenegraph openscenegraph-osgQt osgViz
-                   PrimitivesFactory ManipulationClickHandler ${DEPS_EXTRA})
-
-    if(NOT QtPropertyBrowser-qt4_FOUND)
-        target_include_directories(vizkit3d PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/qtpropertybrowser)
-    endif()
-
-rock_library(vizkitwidgetloader
-        QVizkitWidgetLoader.cpp
-    MOC QVizkitWidgetLoader.hpp
-    DEPS vizkit3d
-    NOINSTALL) # installs in a non-standard location
-#rock_library(vizkitmainwindowloader
-#    MOC QVizkitMainWindowLoader.cpp
-#    DEPS vizkit3d
-#    NOINSTALL) # installs in a non-standard location
-
-install(TARGETS vizkitwidgetloader #vizkitmainwindowloader
-    LIBRARY DESTINATION lib/qt/designer
-    ARCHIVE DESTINATION lib/qt/designer)
-
 endif()
 
-if (ROCK_QT_VERSION_5)
-    find_package(QtPropertyBrowser QUIET)
-    find_package(QtPropertyBrowser-qt5 QUIET)
-    if(QtPropertyBrowser_FOUND)
-        message(STATUS "Using abhijitkundu QtPropertyBrowser")
-        set(QTPROPERTYBROWSER_NAME QtPropertyBrowser)
-    elseif(QtPropertyBrowser-qt5_FOUND)
-        message(STATUS "Using rock QtPropertyBrowser-qt5")
-        set(QTPROPERTYBROWSER_NAME QtPropertyBrowser-qt5)
-    else()
-        message(SEND_ERROR "Could not find QtPropertyBrowser or QtPropertyBrowser-qt5")
-    endif()
+if(ROCK_QT_VERSION_5)
 
 pkg_check_modules(OSGQT QUIET osgQt)
 pkg_check_modules(OPENSCENEGRAPH_OSGQT5 QUIET openscenegraph-osgQt5)
@@ -153,59 +107,106 @@ else()
   message(SEND_ERROR "Could not find osgQt or openscenegraph-osgQt5 with pkg-config")
 endif()
 
-rock_library(vizkit3d-qt5
+    find_package(QtPropertyBrowser QUIET)
+    find_package(QtPropertyBrowser-qt5 QUIET)
+    if(QtPropertyBrowser_FOUND)
+        message(STATUS "Using abhijitkundu QtPropertyBrowser")
+        set(QTPROPERTYBROWSER_NAME QtPropertyBrowser)
+    elseif(QtPropertyBrowser-qt5_FOUND)
+        message(STATUS "Using rock QtPropertyBrowser-qt5")
+        set(QTPROPERTYBROWSER_NAME QtPropertyBrowser-qt5)
+    else()
+        message(SEND_ERROR "Could not find QtPropertyBrowser or QtPropertyBrowser-qt5")
+    endif()
+
+endif()
+
+
+rock_qt_library(
+    TARGETPREFIX vizkit3d
+    TARGET_QT4 vizkit3d              # do not suffix
     SOURCES
         ${VIZKIT3D_SOURCES}
-    MOC5
+    SOURCES_QT4
+        ${PROPERTY_BROWSER_SOURCES}
+        ${PROPERTY_BROWSER_RESOURCES}
+    MOC
         ${VIZKIT3D_MOC}
+    MOC_QT4
+        ${PROPERTY_BROWSER_MOC}
     HEADERS
-        QPropertyBrowserWidget.hpp
         ${VIZKIT3D_HEADERS}
-    DEPS_TARGET
-# QtPropertyBrowser properly sets up its target, fails to setup the plain
-# cmake variables(thus cannot be used with DEPS_CMAKE) and does not have a
-# pkg-config file(cannot be used with DEPS_PKGCONFIG).
-        ${QTPROPERTYBROWSER_NAME}
-    LIBS
+    HEADERS_QT4
+        ${PROPERTY_BROWSER_HEADERS}
+    LIBS ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY}
 # Qt has proper targets so potentially could be used with DEPS_TARGET, but
 # it also provides proper pkg-config files, that are prefered there. Here,
 # we have the qt dependencies hardcoded into the .pc.in and use the cmake
 # targets for the cmake side.
-        Qt5::Core
-        Qt5::Widgets
-        Qt5::OpenGL
-        Qt5::UiPlugin
-        ${Boost_THREAD_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
-    DEPS_PKGCONFIG
-        osgViz
+    LIBS_QT4 Qt4::QtOpenGL
+    LIBS_QT5 Qt5::Core Qt5::Widgets Qt5::OpenGL Qt5::UiPlugin
+    DEPS_CMAKE OpenGL
+    DEPS_TARGET_QT4 ${PROPERTY_BROWSER_TARGET}
+# QtPropertyBrowser properly sets up its target, fails to setup the plain
+# cmake variables(thus cannot be used with DEPS_CMAKE) and does not have a
+# pkg-config file(cannot be used with DEPS_PKGCONFIG).
+    DEPS_TARGET_QT5 ${QTPROPERTYBROWSER_NAME}
+    DEPS_PKGCONFIG osgViz ManipulationClickHandler
+    DEPS_PKGCONFIG_QT4 openscenegraph openscenegraph-osgQt
+                   PrimitivesFactory
+    DEPS_PKGCONFIG_QT5
         ${OSGQT_PKGCONFIG_NAME}
-        ManipulationClickHandler
-)
+    )
 
-rock_library(vizkitwidgetloader-qt5
+if (ROCK_QT_VERSION_4)
+    if(NOT QtPropertyBrowser-qt4_FOUND)
+        target_include_directories(vizkit3d PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/qtpropertybrowser)
+    endif()
+endif()
+
+rock_qt_library(
+    TARGETPREFIX vizkitwidgetloader
+    QT4_SUFFIX ""
     SOURCES
         QVizkitWidgetLoader.cpp
-    MOC5
+    MOC
         QVizkitWidgetLoader.hpp
-    DEPS
-        vizkit3d-qt5
+    DEPS_QT
+        vizkit3d
     NOINSTALL # installs in a non-standard location
 )
 
-rock_library(vizkitmainwindowloader-qt5
+rock_qt_library(
+    TARGETPREFIX vizkitmainwindowloader
+    QT4_SUFFIX ""
     SOURCES
         QVizkitMainWindowLoader.cpp
-    DEPS
-        vizkit3d-qt5
+    DEPS_QT
+        vizkit3d
     NOINSTALL # installs in a non-standard location
 )
 
+if(TARGET vizkitwidgetloader)
+    install(TARGETS vizkitwidgetloader
+        LIBRARY DESTINATION lib/qt/designer
+        ARCHIVE DESTINATION lib/qt/designer)
+endif()
+if(TARGET vizkitmainwindowloader)
+    install(TARGETS vizkitmainwindowloader
+        LIBRARY DESTINATION lib/qt/designer
+        ARCHIVE DESTINATION lib/qt/designer)
+endif()
 #normally, these would go into lib/qt5/plugins/designer, but
 #in rock, we put them in lib/qt/designer as well, since we already
 #have that in QT_PLUGIN_PATH
-install(TARGETS vizkitwidgetloader-qt5 vizkitmainwindowloader-qt5
-    LIBRARY DESTINATION lib/qt/designer
-    ARCHIVE DESTINATION lib/qt/designer)
-
+if(TARGET vizkitwidgetloader-qt5)
+    install(TARGETS vizkitwidgetloader-qt5
+        LIBRARY DESTINATION lib/qt/designer
+        ARCHIVE DESTINATION lib/qt/designer)
 endif()
+if(TARGET vizkitmainwindowloader-qt5)
+    install(TARGETS vizkitmainwindowloader-qt5
+        LIBRARY DESTINATION lib/qt/designer
+        ARCHIVE DESTINATION lib/qt/designer)
+endif()
+

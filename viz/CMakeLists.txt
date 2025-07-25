@@ -22,21 +22,11 @@ set(VIZKIT3D_VIZ_HEADERS
     ModelVisualization.hpp
     )
 
-if (ROCK_QT_VERSION_4)
-rock_vizkit_plugin(vizkit3d-viz
-    ${VIZKIT3D_VIZ_SOURCES}
-    MOC ${VIZKIT3D_VIZ_MOC}
-    DEPS vizkit3d
-    HEADERS ${VIZKIT3D_VIZ_HEADERS}
-)
-endif()
-
-if (ROCK_QT_VERSION_5)
-rock_vizkit_plugin_qt5(vizkit3d-viz-qt5
+rock_qt_vizkit_plugin(
+    TARGETPREFIX vizkit3d-viz
+    QT4_SUFFIX ""
     SOURCES ${VIZKIT3D_VIZ_SOURCES}
-    MOC5    ${VIZKIT3D_VIZ_MOC}
+    MOC ${VIZKIT3D_VIZ_MOC}
+    DEPS_QT vizkit3d
     HEADERS ${VIZKIT3D_VIZ_HEADERS}
-    DEPS
-        vizkit3d-qt5
 )
-endif()
