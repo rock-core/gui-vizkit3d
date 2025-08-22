@@ -18,9 +18,9 @@ namespace vizkit3d
         Q_PROPERTY( double dy READ getGridDy WRITE setGridDy)
         Q_PROPERTY( QColor color READ getGridColor WRITE setGridColor)
 
-        // invalidate parent properties
-        Q_PROPERTY(QVariant KeepOldData READ QVariant)
-        Q_PROPERTY(QVariant MaxOldData READ QVariant)
+        // invalidate parent properties by setting them to an invalid QVariant
+        Q_PROPERTY(QVariant KeepOldData READ _invalidate)
+        Q_PROPERTY(QVariant MaxOldData READ _invalidate)
 
         public:
             GridVisualization(QObject *parent = NULL);

@@ -30,6 +30,10 @@ BOOST_AUTO_TEST_CASE(changeCameraView_test)
         widget->setCameraLookAt(cos(r)*s, sin(r)*s, 0);
         usleep( 500 );
     }
+#if QT_VERSION >= 0x050000
+    widget->close();
+    app.stop();
+#endif
 }
 
 BOOST_AUTO_TEST_SUITE_END();

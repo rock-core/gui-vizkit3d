@@ -1,9 +1,12 @@
 #ifndef QPROPERTYBROWSERWIDGET_HPP
 #define QPROPERTYBROWSERWIDGET_HPP
 
-#include "qtpropertybrowser/qttreepropertybrowser.h"
-#include "qtpropertybrowser/qtvariantproperty.h"
-#include "qtpropertybrowser/qtpropertymanager.h"
+//for QT_VERSION
+#include <QObject>
+
+#include <qttreepropertybrowser.h>
+#include <qtvariantproperty.h>
+#include <qtpropertymanager.h>
 
 #include <QWidget>
 #include <QHash>

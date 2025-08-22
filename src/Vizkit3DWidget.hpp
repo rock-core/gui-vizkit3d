@@ -2,8 +2,13 @@
 #define __VIZKIT_QVIZKITWIDGET__
 
 #include "Vizkit3DPlugin.hpp"
+#include "Vizkit3DPluginDefaultSettings.hpp"
 
+#if QT_VERSION < 0x050000
 #include <QtDesigner/QDesignerExportWidget>
+#else
+#include <QtUiPlugin/QDesignerExportWidget>
+#endif
 #include <QVector3D>
 #include <QTimer>
 #include <QMainWindow>
@@ -226,6 +231,9 @@ namespace vizkit3d
             ~Vizkit3DWidget();
 
             osg::Group* getRootNode() const;
+
+            osg::Group* getFrameRootGroup(const std::string& framename) const;
+
             /** Sets the camera to track this node's reference position
              *
              * @arg tracked_object_name the name of the object being tracked,
@@ -248,6 +256,25 @@ namespace vizkit3d
              * the widget.  Use only if you know what you are doing
              */
             void setCameraManipulator(osg::ref_ptr<osgGA::CameraManipulator> manipulator, bool resetToDefaultHome = false);
+
+            /**
+             * @brief Get the Camera object
+             * 
+             * @return osg::Camera* 
+             */
+            osg::Camera* getCamera();
+
+            /**
+             * @brief add default overrides to a Vizkit3DPlugin which are applied on loading the plugin, in case other defaults are needed than 
+             * the plugins implementation defaults
+             * 
+             * @param overrides your application can set up a shared_ptr>vizkit3d::Vizkit3DPluginDefaultSettings<Your Plugin>>
+             * and use the addConfig function of that class to let the settings be invoked after loading the plugin here
+             *  
+             */
+            void addPluginDefaultConfigOverrides(const std::shared_ptr<Vizkit3DPluginDefaultSettingsBase> overrides);
+
+            void removePluginDefaultConfigOverrides();
 
         public slots:
             void update();
@@ -300,6 +327,8 @@ namespace vizkit3d
              * @param suppressSignal If true the frameSelected signal will not be
              *                       emitted.*/
             void selectFrame(const QString& frame, const bool suppressSignal);
+            /**resets the clickhandler pointer (in case the window content changed) */
+            void deselectFrame();
 
             void setCameraLookAt(double x, double y, double z);
             void setCameraEye(double x, double y, double z);
@@ -309,7 +338,10 @@ namespace vizkit3d
             QColor getBackgroundColor()const;
             void setBackgroundColor(QColor color);
 
-            void collapsePropertyBrowser();
+            void collapsePropertyBrowser(const bool& remove = true);
+            /** only works if collapse was called without remove*/
+            void showPropertyBrowser();
+
             QWidget* getPropertyWidget()const;
 
             bool isTransformer() const;
@@ -399,6 +431,9 @@ namespace vizkit3d
              * when a frame is clicked. Default: false*/
             void setEnabledManipulators(const bool value);
 
+            /** set the key to display statistics on screen (default 's') */
+            void setStatisticsKey(const int& key);
+
         signals:
             void addPlugins(QObject* plugin,QObject* parent);
             void removePlugins(QObject* plugin);
@@ -421,6 +456,10 @@ namespace vizkit3d
             /** This signal is emitted when the user selects a frame in the
              *  3d view.*/
             void frameSelected(const QString frame);
+
+        protected:
+	    void hideEvent(QHideEvent *ev);
+	    void showEvent(QShowEvent *ev);
 
         private slots:
             void setPluginDataFrameIntern(const QString &frame, QObject *plugin);
@@ -453,8 +492,14 @@ namespace vizkit3d
 
 
             osgviz::OsgViz* osgviz;
+#if QT_VERSION < 0x050000
             osgviz::Window* window;
-
+            osgViewer::View *view;
+#else
+            osgViewer::CompositeViewer* window;
+            osg::ref_ptr<osgviz::SuperView> view;
+            osg::ref_ptr<osg::Group> window_root;
+#endif
 
         private:
             //holds the scene
@@ -471,8 +516,12 @@ namespace vizkit3d
              */
             struct VizPluginInfo {
                 osg::ref_ptr<osg::Group> osg_group_ptr;
+#if QT_VERSION < 0x050000
                 QWeakPointer<VizPluginBase> weak_ptr;
-
+#else
+                VizPluginBase* weak_ptr;
+#endif
+                
                 VizPluginInfo(VizPluginBase* plugin_ptr_, osg::ref_ptr<osg::Group> osg_group_ptr_)
                   : osg_group_ptr(osg_group_ptr_),
                     weak_ptr(plugin_ptr_)
@@ -483,6 +532,8 @@ namespace vizkit3d
             PluginMap plugins;
 
             QTimer _timer;
+	    /** Holds the timer state while the window is hidden */
+	    bool timerRunning;
 
             /** The current visualization frame as set by setVisualizationFrame */
             QString current_frame;
@@ -541,6 +592,8 @@ namespace vizkit3d
 
             QPropertyBrowserWidget* propertyBrowserWidget;
             QDockWidget* propertyDocker;
+
+            std::vector<std::shared_ptr<Vizkit3DPluginDefaultSettingsBase>> pluginDefaultSettingOverrides;
 
     };
 }

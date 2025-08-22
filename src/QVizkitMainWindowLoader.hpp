@@ -2,7 +2,11 @@
 #define QVIZKITMAINWINDOWLOADER_HPP
 
 #include "QVizkitMainWindow.hpp"
+#if QT_VERSION < 0x050000
 #include <QtDesigner/QDesignerCustomWidgetInterface>
+#else
+#include <QtUiPlugin/QDesignerCustomWidgetInterface>
+#endif
 
 /**
  * This class is used to create an instance of QVizkitWidget in ruby.
@@ -11,6 +15,9 @@ class QVizkitMainWindowLoader : public QObject, public QDesignerCustomWidgetInte
 {
      Q_OBJECT
      Q_INTERFACES(QDesignerCustomWidgetInterface)
+#if QT_VERSION >= 0x050000
+     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QDesignerCustomWidgetInterface")
+#endif
 
  public:
      QVizkitMainWindowLoader(QObject *parent = 0);

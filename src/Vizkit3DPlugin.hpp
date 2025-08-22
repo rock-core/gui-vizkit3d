@@ -13,6 +13,10 @@
 #include <vector>
 #include <functional>
 
+#if QT_VERSION >= 0x050000
+class QDockWidget;
+#endif
+
 namespace osgviz 
 {
     class Object;
@@ -151,6 +155,8 @@ class VizPluginBase : public QObject
         osg::ref_ptr<osg::Group> getVizNode() const;
         osg::ref_ptr<osg::Group> getRootNode() const;
         osg::ref_ptr<osg::LOD> getLODNode() const;
+
+        osg::Camera* getCamera() const;
 
         /**
          * @return a vector of QDockWidgets provided by this class.
@@ -344,10 +350,10 @@ class VizPluginBase : public QObject
 
         void resetManualVizPose();
 
-	/** Returns an invalid QVariant 
-	 * used to invalidate properties
-	 */ 
-	QVariant _invalidate()const;
+        /** Returns an invalid QVariant
+         * used to invalidate properties
+         */
+        QVariant _invalidate() const;
 
     private:
 	std::vector<std::function<void(float, float, float)>> pickCallbacks;
@@ -513,9 +519,88 @@ class VizkitPluginFactory : public QObject
     VizPluginRubyAdapterCommon(pluginName, dataType, methodName, methodName)
 
 
+#if QT_VERSION < 0x050000
+//do NOT add Q_OBJECT to the definition below. it adds virtual functions that
+//are supposed to be defined in the accompanying moc files, but those are not
+//generated because qt4 moc does not look into macros.
+#define VizkitQtPluginCLASSDEFS
+#define VizkitQtPluginEXTRADEFS(pluginName) Q_EXPORT_PLUGIN2(QtPlugin##pluginName, QtPlugin##pluginName)
+#else
+//Note: cannot have Q_OBJECT or any qt signal/slots in the VizkitQtPlugin Macro for qt4(above)
+#define VizkitQtPluginCLASSDEFS \
+            Q_OBJECT \
+            Q_PLUGIN_METADATA(IID "rock.vizkit3d.VizkitPluginFactory")
+#define VizkitQtPluginEXTRADEFS(pluginName)
+#endif
+
 /**
- * Macro that exports a Vizkit3D plugin so that it can be dynamically loaded by vizkit3d
- * 
+ * Macros that export a Vizkit3D plugin so that it can be dynamically loaded by vizkit3d
+ *
+ * Example:
+ *
+ * Header:
+ * <code>
+ *     class WaypointVisualization : public vizkit3d::Vizkit3DPlugin {..};
+ *     VizkitQtPluginHeaderDecls(WaypointVisualization)
+ * </code>
+ *
+ * Source:
+ * <code>
+ *     VizkitQtPluginImpl(WaypointVisualization)
+ * </code>
+ *
+ * This works if your shared library exports only one plugin. To export multiple
+ * plugins, you need to create a subclass of vizkit3d::VizkitPluginFactory which
+ * handles the plugins.
+ * For Qt4, you have to export it with
+ * <code>
+ * Q_EXPORT_PLUGIN2(FactoryClass, FactoryClass)
+ * </code>
+ * For Qt5, you have to add to the class definition in a header
+ * <code>
+ * Q_PLUGIN_METADATA(IID "rock.vizkit3d.VizkitPluginFactory")
+ * </code>
+ *
+ * @internal
+ * This is split in two macros because the qt5 moc only looks at headers, and
+ * the Q_PLUGIN_METADATA classes must be moced, while the qt4 Q_EXPORT_PLUGIN2 macro
+ * can only be used once (with the same parameters?) per library, precluding
+ * its use in a header.
+ *
+ * Also of note, the Qt4 side cannot have signals or slots because qt4 moc does not
+ * expand macros.
+ * @endinternal
+ */
+#define VizkitQtPluginHeaderDecls(pluginName)\
+    class QtPlugin##pluginName : public vizkit3d::VizkitPluginFactory {\
+        VizkitQtPluginCLASSDEFS \
+    public:\
+        virtual QStringList* getAvailablePlugins() const; \
+        virtual QObject* createPlugin(QString const& name);\
+    };
+
+/** @copydoc VizkitQtPluginHeaderDecls */
+#define VizkitQtPluginImpl(pluginName)\
+    QStringList* QtPlugin##pluginName::getAvailablePlugins() const\
+    {\
+        QStringList* result = new QStringList; \
+        result->push_back(#pluginName); \
+        return result;\
+    } \
+    QObject* QtPlugin##pluginName::createPlugin(QString const& name)\
+    {\
+        if (name == #pluginName) \
+            return new pluginName;\
+        else return 0;\
+    }\
+    VizkitQtPluginEXTRADEFS(pluginName)
+
+#if QT_VERSION < 0x050000
+/**
+ * @deprecated Macro that exports a Vizkit3D plugin so that it can be dynamically loaded by vizkit3d
+ *
+ * Replace with VizkitQtPluginHeaderDecls(pluginName) and VizkitQtPluginImpl(pluginName)
+ *
  * Example:
  *
  * <code>
@@ -525,29 +610,23 @@ class VizkitPluginFactory : public QObject
  *
  * This works if your shared library exports only one plugin. To export multiple
  * plugins, you need to create a subclass of vizkit3d::VizkitPluginFactory which
- * handles the plugins, and export it with
- *
+ * handles the plugins:
  * <code>
  * Q_EXPORT_PLUGIN2(FactoryClass, FactoryClass)
  * </code>
  */
+//since this is qt4, this never was parsed by the moc(the qt4 one does not resolve macros), so it should work in
+//either header or source file.
 #define VizkitQtPlugin(pluginName)\
-    class QtPlugin##pluginName : public vizkit3d::VizkitPluginFactory {\
-        public:\
-        virtual QStringList* getAvailablePlugins() const\
-        {\
-            QStringList* result = new QStringList; \
-            result->push_back(#pluginName); \
-            return result;\
-        } \
-        virtual QObject* createPlugin(QString const& name)\
-        {\
-            if (name == #pluginName) \
-                return new pluginName;\
-            else return 0;\
-        };\
-    };\
-    Q_EXPORT_PLUGIN2(QtPlugin##pluginName, QtPlugin##pluginName)
+    VizkitQtPluginHeaderDecls(pluginName)\
+    VizkitQtPluginImpl(pluginName)
+#else
+#define VizkitQtPlugin(pluginName) \
+    static_assert(false, "The VizkitQtPlugin macro is deprecated and " \
+        "does not exist for qt5 use. Use " \
+        "VizkitQtPluginHeaderDecls(" #pluginName ") and " \
+        "VizkitQtPluginImpl(" #pluginName ") instead" )
+#endif
 
 /** @deprecated adapter item for legacy visualizations. Do not derive from this
  * class for new designs. Use VizPlugin directly instead.
@@ -585,4 +664,11 @@ class VizPluginAdapter : public Vizkit3DPlugin<T>
 };
 
 }
+
+#if QT_VERSION >= 0x050000
+#define VizkitPluginFactory_iid "rock.vizkit3d.VizkitPluginFactory"
+
+Q_DECLARE_INTERFACE(vizkit3d::VizkitPluginFactory, VizkitPluginFactory_iid)
+#endif
+
 #endif

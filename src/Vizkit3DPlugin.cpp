@@ -137,6 +137,17 @@ osg::ref_ptr<osg::LOD> VizPluginBase::getLODNode() const
     return lodNode;
 }
 
+osg::Camera* VizPluginBase::getCamera() const
+{
+    Vizkit3DWidget* widget = getWidget();
+    if (widget)
+    {
+        return widget->getCamera();
+    }
+    return nullptr;
+
+}
+
 void VizPluginBase::click(float x,float y, int buttonMask, int modifierMask)
 {
     QWidget *osg_widget = dynamic_cast<QWidget*>(parent()); // widget displaying the osg scene.
@@ -353,6 +364,11 @@ void VizPluginBase::setVisualizationFrameFromList(const QStringList &frames)
     getWidget()->setPluginDataFrameIntern(frames.front(),this);
     current_frame = frames.front();
     resetManualVizPose();
+}
+
+QVariant VizPluginBase::_invalidate()const
+{
+    return QVariant();
 }
 
 void VizPluginBase::setVisualizationFrame(const QString &frame)

@@ -8,7 +8,11 @@
 
 
 #include <QMainWindow>
+#if QT_VERSION < 0x050000
 #include <QtDesigner/QDesignerExportWidget>
+#else
+#include <QtUiPlugin/QDesignerExportWidget>
+#endif
 
 namespace vizkit3d {
 

@@ -18,9 +18,9 @@ namespace vizkit3d
         Q_PROPERTY( double sy READ getTexBoxSy WRITE setTexBoxSy)
         Q_PROPERTY( QString filename READ getTexBoxFilename WRITE setTexBoxFilename)
 
-        // invalidate parent properties
-        Q_PROPERTY(QVariant KeepOldData READ QVariant)
-        Q_PROPERTY(QVariant MaxOldData READ QVariant)
+        // invalidate parent properties by setting them to an invalid QVariant
+        Q_PROPERTY(QVariant KeepOldData READ _invalidate)
+        Q_PROPERTY(QVariant MaxOldData READ _invalidate)
 
         public:
             TextureBoxVisualization(QObject *parent = NULL);

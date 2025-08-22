@@ -1,7 +1,11 @@
 #ifndef QVIZKITWIDGETLOADER_HPP
 #define QVIZKITWIDGETLOADER_HPP
 
+#if QT_VERSION < 0x050000
 #include <QtDesigner/QDesignerCustomWidgetInterface>
+#else
+#include <QtUiPlugin/QDesignerCustomWidgetInterface>
+#endif
 /**
  * This class is used to create an instance of QVizkitWidget in ruby.
  */
@@ -9,6 +13,9 @@ class QVizkitWidgetLoader : public QObject, public QDesignerCustomWidgetInterfac
 {
      Q_OBJECT
      Q_INTERFACES(QDesignerCustomWidgetInterface)
+#if QT_VERSION >= 0x050000
+     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QDesignerCustomWidgetInterface")
+#endif
 
  public:
      QVizkitWidgetLoader(QObject *parent = 0);
