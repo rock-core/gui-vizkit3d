@@ -1200,7 +1200,7 @@ QStringList* Vizkit3DWidget::getAvailablePlugins()
 #endif
 
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    QString path_string = env.value("VIZKIT_PLUGIN_RUBY_PATH","/usr/local/lib:/usr/lib");
+    QString path_string = env.value("VIZKIT3D_PLUGIN_PATH","/usr/local/lib:/usr/lib");
     QStringList paths = path_string.split(":");
     QStringList::iterator iter = paths.begin();
     for(;iter != paths.end();++iter)
@@ -1257,7 +1257,7 @@ QObject* Vizkit3DWidget::createPlugin(QString lib_name, QString plugin_name)
 
     if(path.isEmpty())
     {
-        std::cerr << "cannot find lib" + lib_name.toStdString()+"-viz in VIZKIT_PLUGIN_RUBY_PATH." << std::endl;
+        std::cerr << "cannot find lib" + lib_name.toStdString()+"-viz in VIZKIT3D_PLUGIN_PATH." << std::endl;
         return NULL;
     }
 
