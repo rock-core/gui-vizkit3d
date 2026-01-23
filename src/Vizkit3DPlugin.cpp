@@ -168,14 +168,14 @@ void VizPluginBase::click(float x,float y, int buttonMask, int modifierMask)
             for(auto w : container->children()) {
                 if (dynamic_cast<osgQt::GLWidget *>(w)) {
                     QWidget *osg_widget = dynamic_cast<osgQt::GLWidget *>(w);
-                    QPoint container_coords = osg_widget->mapTo(container, QPoint(x, y));
+                    QPoint container_coords = osg_widget->mapTo(container, QPoint(x, osg_widget->height() - y));
                     emit clicked(container_coords.x(), container_coords.y());
                     emit clicked(container_coords.x(), container_coords.y(), buttonMask, modifierMask);
                     return;
                 }
             }
-            emit clicked(x, y);
-            emit clicked(x, y, buttonMask, modifierMask);
+            emit clicked(x, container->height() - y);
+            emit clicked(x, container->height() - y, buttonMask, modifierMask);
             return;
         }
         else
