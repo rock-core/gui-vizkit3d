@@ -243,7 +243,7 @@ void QPropertyBrowserWidget::disableProperty(QObject* obj){
 /**
  * Slot, to handle updates from the GUI
  */
-void QPropertyBrowserWidget::propertyChangedInGUI(QtProperty* property, const QVariant& val)
+void QPropertyBrowserWidget::propertyChangedInGUI(QtProperty* property, QVariant val)
 {
     QHash<QtProperty*, QObject*>::const_iterator i = propertyToObject.find(property);
     if (i == propertyToObject.end())
@@ -259,11 +259,20 @@ void QPropertyBrowserWidget::propertyChangedInGUI(QtProperty* property, const QV
         {
           list << names.at(val.toInt());
         }
-        i.value()->setProperty(property->propertyName().toStdString().c_str(), QVariant(list));
+        val = QVariant(list);
     }
-    else
-        i.value()->setProperty(property->propertyName().toStdString().c_str(), val);
 
+    try {
+        i.value()->setProperty(property->propertyName().toStdString().c_str(), val);
+        property->setToolTip(QString());
+    } catch(std::exception const &e) {
+        //we don't know when the editing is complete; a visual hint that something is wrong would be nice, maybe we can set an icon?
+        property->setToolTip(tr("Exception during setting property: %1: %2")
+                             .arg(typeid(e).name())
+                             .arg(QString::fromStdString(e.what())));
+        std::cerr << "Exception during setting property: " << typeid(e).name() << ": "
+                  << e.what() << std::endl;
+    }
 }
 
 /**
