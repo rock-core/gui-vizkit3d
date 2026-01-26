@@ -4,6 +4,7 @@
 #include <memory>
 #include <osgViz/Object.h>
 #include <osgViz/interfaces/Clickable.h>
+#include <osgQt/GraphicsWindowQt>
 
 #include "Vizkit3DPlugin.hpp"
 #include "Vizkit3DWidget.hpp"
@@ -150,25 +151,32 @@ osg::Camera* VizPluginBase::getCamera() const
 
 void VizPluginBase::click(float x,float y, int buttonMask, int modifierMask)
 {
-    QWidget *osg_widget = dynamic_cast<QWidget*>(parent()); // widget displaying the osg scene.
+    QWidget *parent_widget = dynamic_cast<QWidget*>(parent()); // parent object of the plugin, usually the Vizkit3DWidget
     
-    if(!osg_widget)
+    if(!parent_widget)
         return;
     
-    QWidget *container = osg_widget; // will point to Vizkit3DWidget if there is one. contains property browser and osg widget.
+    QWidget *container = parent_widget; // will point to Vizkit3DWidget if there is one. contains property browser and osg widget.
 
     // Find the container widget in the plugin's parents.
     while(container)
     {
-        if(container->objectName().toStdString().compare("vizkit3d::Vizkit3DWidget") == 0)
+        if(dynamic_cast<vizkit3d::Vizkit3DWidget*>(container))
         {
             // Container found.
-            //std::cout << "grandparent: " << container->objectName().toStdString() << std::endl;
-            QPoint container_coords = osg_widget->mapTo(container, QPoint(x,y));
-            //std::cout << "grandparent coords: (" << container_coords.x() << "," << container_coords.y() << ")" << std::endl;
-            emit clicked(container_coords.x(), container_coords.y());
-            emit clicked(container_coords.x(), container_coords.y(), buttonMask, modifierMask);
-            break;
+            //find the osgQt::GLWidget in the containers children
+            for(auto w : container->children()) {
+                if (dynamic_cast<osgQt::GLWidget *>(w)) {
+                    QWidget *osg_widget = dynamic_cast<osgQt::GLWidget *>(w);
+                    QPoint container_coords = osg_widget->mapTo(container, QPoint(x, osg_widget->height() - y));
+                    emit clicked(container_coords.x(), container_coords.y());
+                    emit clicked(container_coords.x(), container_coords.y(), buttonMask, modifierMask);
+                    return;
+                }
+            }
+            emit clicked(x, container->height() - y);
+            emit clicked(x, container->height() - y, buttonMask, modifierMask);
+            return;
         }
         else
         {
