@@ -449,13 +449,13 @@ void Vizkit3DWidget::update()
 {
     QWidget::update();
 
-#if QT_VERSION >= 0x050000
     if(isVisible()) {
+#if QT_VERSION >= 0x050000
         window->frame();
-    }
 #else
-    osgviz->update(); // osg update called trough window->frame();
+        osgviz->update(); // osg update called trough window->frame();
 #endif
+    }
 
 }
 
