@@ -317,7 +317,12 @@ Vizkit3DWidget::Vizkit3DWidget(QWidget* parent,const QString &world_name,bool au
     //camera->setViewport( new ::osg::Viewport(0, 0, traits->width, traits->height) );
     //camera->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(traits->width)/static_cast<double>(traits->height), 1.0f, 10000.0f );
     camera->setCullMask(~INVISIBLE_NODE_MASK);
-    camera->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
+    // let osg fit near/far to the scene bounds each frame, otherwise the far plane stays at the
+    // osgViewer default of 10000 and clips the scene when zooming far out
+    camera->setComputeNearFarMode(osg::CullSettings::COMPUTE_NEAR_FAR_USING_BOUNDING_VOLUMES);
+    // don't cull drawables that project smaller than ~2 pixels: point clouds have small
+    // per-drawable bounds and would vanish one by one when zooming far out
+    camera->setCullingMode(camera->getCullingMode() & ~osg::CullSettings::SMALL_FEATURE_CULLING);
 
     // turn off the back culling
     cullFace = new osg::CullFace();

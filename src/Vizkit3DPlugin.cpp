@@ -2,6 +2,7 @@
 #include <typeinfo>
 #include <cxxabi.h>
 #include <memory>
+#include <limits>
 #include <osgViz/Object.h>
 #include <osgViz/interfaces/Clickable.h>
 
@@ -61,7 +62,7 @@ class VizPluginBase::CallbackAdapter : public osg::NodeCallback
 
 VizPluginBase::VizPluginBase(QObject *parent)
     : QObject(parent), oldNodes(NULL), isAttached(false), dirty( false ),  plugin_enabled(true),
-    keep_old_data(false),max_old_data(100),minrange(0),maxrange(1000)
+    keep_old_data(false),max_old_data(100),minrange(0),maxrange(std::numeric_limits<float>::max())
 {
     rootNode = new osgviz::Object();
     click_handler = std::shared_ptr<ClickHandler>(new ClickHandler(*this));
