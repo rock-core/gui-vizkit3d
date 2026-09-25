@@ -26,7 +26,7 @@ public:
     void enableProperty(QObject* obj);
     
 protected slots:
-    void propertyChangedInGUI(QtProperty *property, const QVariant &val);
+    void propertyChangedInGUI(QtProperty *property, QVariant val);
     void propertyChangedInObject(QString property_name);
     void propertyChangedInObject();
     void propObjDestroyed(QObject*);
