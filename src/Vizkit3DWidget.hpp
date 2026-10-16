@@ -144,6 +144,11 @@ namespace vizkit3d
          * setVisualizationFrame and setTrackedNode
          */
         NODE_TRACKER_MANIPULATOR,
+        /** Similar to TERRAIN_MANIPULATOR, but uses a wider ray cast to auto
+         *  set the z height of the rotation point (better for point clouds)
+         */
+        POINT_CLOUD_MANIPULATOR,
+
         /** No manipulator */
         NO_MANIPULATOR
     };

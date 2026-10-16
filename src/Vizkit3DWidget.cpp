@@ -34,6 +34,7 @@
 
 #include <osgViz/modules/ManipulationClickHandler/ManipulationClickHandler.h>
 #include <vizkit3d/DefaultManipulator.hpp>
+#include <osgViz/windows/CameraManipulator/PointCloudManipulator.hpp>
 #include <osgGA/FirstPersonManipulator>
 #include <osgGA/FlightManipulator>
 #include <osgGA/OrbitManipulator>
@@ -166,6 +167,7 @@ namespace
         { "Orbit", ORBIT_MANIPULATOR, true },
         { "Terrain", TERRAIN_MANIPULATOR, true },
         { "Trackball", TRACKBALL_MANIPULATOR, true },
+        { "pointcloud", POINT_CLOUD_MANIPULATOR, true },
         { "None", NO_MANIPULATOR, true },
         { 0, FIRST_PERSON_MANIPULATOR } // only the empty string is used as guard
     };
@@ -1371,6 +1373,9 @@ void Vizkit3DWidget::setCameraManipulator(CAMERA_MANIPULATORS manipulatorType, b
             break;
         case MULTI_TOUCH_TRACKBALL_MANIPULATOR:
             newManipulator = new osgGA::MultiTouchTrackballManipulator;
+            break;
+        case POINT_CLOUD_MANIPULATOR:
+            newManipulator = new osgviz::PointCloudManipulator;
             break;
         case NODE_TRACKER_MANIPULATOR:
             throw std::invalid_argument("cannot set the manipulaor to NODE_TRACKER_MANIPULATOR using setCameraManipulator, use setTrackedNode instead");
