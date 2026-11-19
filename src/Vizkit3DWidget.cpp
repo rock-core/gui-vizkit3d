@@ -267,12 +267,18 @@ Vizkit3DWidget::Vizkit3DWidget(QWidget* parent,const QString &world_name,bool au
     window_root->addChild(NULL);
     window->setName("rock-display");
     view = osgvizWindow->getSuperView();
- 
-    // set also window scene to the view
-    // so all views in the window share the same window scene
-    view->addChild(window_root);
 
-    window_root->addChild(osgviz->getRootNode());
+    // all views in the window share the window scene, which holds the osgviz scene. osgviz attaches both
+    // already (Window::addView(), OsgViz::createWindow()): attaching them here again had every frame draw
+    // the whole scene four times - four times the work, and translucent geometry (gaussian splats, the
+    // selection sphere) blended four times, so it came out more opaque than it is.
+    osg::Group* viewScene = view->getSceneData() ? view->getSceneData()->asGroup() : NULL;
+    if (viewScene && !viewScene->containsNode(window_root.get())) {
+        view->addChild(window_root);
+    }
+    if (!window_root->containsNode(osgviz->getRootNode().get())) {
+        window_root->addChild(osgviz->getRootNode());
+    }
 #endif
 
     // set threading model
