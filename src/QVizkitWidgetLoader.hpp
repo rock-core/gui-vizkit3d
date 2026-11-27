@@ -1,6 +1,7 @@
 #ifndef QVIZKITWIDGETLOADER_HPP
 #define QVIZKITWIDGETLOADER_HPP
 
+#include <QtGlobal>
 #if QT_VERSION < 0x050000
 #include <QtDesigner/QDesignerCustomWidgetInterface>
 #else

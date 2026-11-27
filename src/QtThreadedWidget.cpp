@@ -1,7 +1,7 @@
 #include "QtThreadedWidget.hpp"
 #include <QWidget>
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
     
 QtThreadedWidgetBase::QtThreadedWidgetBase()
     : argc(0), argv(NULL), running(false),restart(true),destroy(false),widget(NULL)

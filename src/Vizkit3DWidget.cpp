@@ -227,9 +227,8 @@ void Vizkit3DConfig::setCameraManipulator(QStringList const& manipulator)
 
 Vizkit3DWidget::Vizkit3DWidget(QWidget* parent,const QString &world_name,bool auto_update)
     : QMainWindow(parent)
-    , env_plugin(NULL), clickHandler(new osgviz::ManipulationClickHandler),
-      movedHandler(*this), movingHandler(*this), selectedHandler(*this),
-      timerRunning(auto_update)
+    , env_plugin(NULL), timerRunning(auto_update), clickHandler(new osgviz::ManipulationClickHandler)
+    , movedHandler(*this), movingHandler(*this), selectedHandler(*this)
 {
     setEnabledManipulators(false);
     clickHandler->objectMoved.connect(movedHandler);
@@ -1237,7 +1236,7 @@ QStringList* Vizkit3DWidget::getAvailablePlugins()
                 for(;iter3 != lib_plugins->end();++iter3)
                     *plugins_str_list << QString(*iter3 + "@" + file_info.absoluteFilePath());
             }
-            catch(std::runtime_error e)
+            catch(std::runtime_error const& e)
             {
                 std::cerr << "WARN: cannot load vizkit plugin library " << e.what() << std::endl;
             }

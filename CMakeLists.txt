@@ -7,6 +7,8 @@ project(vizkit3d
 find_package(Rock)
 rock_init()
 rock_feature(NOCURDIR)
+# use the GLVND libraries for OpenGL (CMake's default since 3.11, policy CMP0072)
+set(OpenGL_GL_PREFERENCE GLVND)
 
 rock_find_cmake(Boost REQUIRED COMPONENTS thread)
 rock_standard_layout()
