@@ -552,36 +552,14 @@ bool TransformerGraph::setTransformation(osg::Node &transformer,const std::strin
     }
     else if (target->getParent(0) != source)
     {
-        if (target == &transformer || (source->getParent(0) == &transformer && target->getParent(0) != &transformer))
+        if (target == &transformer)
         {
             invertOSGTransform(trans, quat, source, target, source_frame, target_frame);
         }
 
-        if (target->getParent(0) != &transformer)
-        {
-            std::set<osg::Node*> ancestors;
-            osg::ref_ptr<osg::Node> sourceAncestor = source;
-            while (sourceAncestor != &transformer)
-            {
-                ancestors.insert(sourceAncestor);
-                if (sourceAncestor->getParent(0) == target)
-                {
-                    target->removeChild(sourceAncestor);
-                    getTransform(&transformer)->addChild(sourceAncestor);
-                    ancestors.clear();
-                    break;
-                }
-                else
-                    sourceAncestor = sourceAncestor->getParent(0);
-            }
-
-            ::makeRoot(transformer, getTransform(target), ancestors);
-
-        }
-
-	osg::ref_ptr<osg::Node> node = target; //insures that node is not deleted
-        removeFrame(transformer,target_frame);
-        source->addChild(node);
+        osg::ref_ptr<osg::Node> node = target; //insures that node is not deleted
+        target->getParent(0)->removeChild(target);
+        source->addChild(target);
     }
 
     target->setAttitude(quat);
