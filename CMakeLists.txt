@@ -8,5 +8,5 @@ find_package(Rock)
 rock_init()
 rock_feature(NOCURDIR)
 
-rock_find_cmake(Boost REQUIRED COMPONENTS thread system)
+rock_find_cmake(Boost REQUIRED COMPONENTS thread)
 rock_standard_layout()

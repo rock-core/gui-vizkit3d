@@ -138,7 +138,7 @@ rock_qt_library(
         ${VIZKIT3D_HEADERS}
     HEADERS_QT4
         ${PROPERTY_BROWSER_HEADERS}
-    LIBS ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY}
+    LIBS ${Boost_THREAD_LIBRARY}
 # Qt has proper targets so potentially could be used with DEPS_TARGET, but
 # it also provides proper pkg-config files, that are prefered there. Here,
 # we have the qt dependencies hardcoded into the .pc.in and use the cmake

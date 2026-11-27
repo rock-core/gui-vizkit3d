@@ -4,21 +4,21 @@ rock_find_qt5(OPTIONAL Core OpenGL Widgets UiPlugin UiTools)
 if (ROCK_QT_VERSION_4)
 rock_testsuite(testGUI suite.cpp testWidget.cpp
     DEPS vizkit3d
-    LIBS ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+    LIBS ${Boost_THREAD_LIBRARY})
 
 rock_testsuite(testCore suite.cpp testTransformerGraph.cpp
     DEPS vizkit3d
-    LIBS ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+    LIBS ${Boost_THREAD_LIBRARY})
 endif()
 
 if (ROCK_QT_VERSION_5)
 rock_testsuite(testGUI-qt5 suite.cpp testWidget.cpp
     DEPS vizkit3d-qt5
-    LIBS ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+    LIBS ${Boost_THREAD_LIBRARY})
 
 rock_testsuite(testCore-qt5 suite.cpp testTransformerGraph.cpp
     DEPS vizkit3d-qt5
-    LIBS ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+    LIBS ${Boost_THREAD_LIBRARY})
 
 # build test application
 # find_package(Qt5UiTools)
