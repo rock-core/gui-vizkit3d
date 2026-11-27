@@ -21,7 +21,7 @@ class QDESIGNER_WIDGET_EXPORT QVizkitMainWindow : public QMainWindow
     Q_OBJECT
         
     public:
-        QVizkitMainWindow(QWidget * parent = 0, Qt::WindowFlags flags = 0);
+        QVizkitMainWindow(QWidget * parent = 0, Qt::WindowFlags flags = {});
         Vizkit3DWidget* getVizkitWidget();
         
     public slots:
